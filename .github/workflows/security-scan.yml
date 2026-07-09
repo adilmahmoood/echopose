@@ -55,7 +55,7 @@ jobs:
 
     - name: Upload Bandit results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: bandit-results.sarif
@@ -79,7 +79,7 @@ jobs:
 
     - name: Upload Semgrep results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: semgrep.sarif
@@ -135,7 +135,7 @@ jobs:
 
     - name: Upload Snyk results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: snyk-results.sarif
@@ -195,7 +195,7 @@ jobs:
 
     - name: Upload Trivy results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
@@ -213,7 +213,7 @@ jobs:
 
     - name: Upload Grype results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: ${{ steps.grype-scan.outputs.sarif }}
@@ -231,7 +231,7 @@ jobs:
 
     - name: Upload Docker Scout results
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: scout-results.sarif
@@ -266,7 +266,7 @@ jobs:
 
     - name: Upload Checkov results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: checkov-results.sarif
@@ -294,7 +294,7 @@ jobs:
 
     - name: Upload KICS results to GitHub Security
       continue-on-error: true
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: kics-results/results.sarif
