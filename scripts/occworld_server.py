@@ -33,13 +33,13 @@ import signal
 import socket
 import sys
 
-# Phase 3 — RuViewOccDataset available for callers that want to build
+# Phase 3 — EchoPoseOccDataset available for callers that want to build
 # training tensors directly from WorldGraph snapshots (see occworld_retrain.py).
 try:
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     if _script_dir not in sys.path:
         sys.path.insert(0, _script_dir)
-    from ruview_occ_dataset import RuViewOccDataset, snapshot_to_voxels, record_snapshot  # noqa: F401
+    from echopose_occ_dataset import EchoPoseOccDataset, snapshot_to_voxels, record_snapshot  # noqa: F401
     _DATASET_AVAILABLE = True
 except ImportError:
     _DATASET_AVAILABLE = False

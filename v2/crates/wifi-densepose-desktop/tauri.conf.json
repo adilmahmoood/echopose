@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "RuView Desktop",
+  "productName": "EchoPose Desktop",
   "version": "0.4.4",
-  "identifier": "net.ruv.ruview",
+  "identifier": "net.ruv.echopose",
   "build": {
     "frontendDist": "ui/dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "RuView Desktop",
+        "title": "EchoPose Desktop",
         "width": 1200,
         "height": 800,
         "minWidth": 900,

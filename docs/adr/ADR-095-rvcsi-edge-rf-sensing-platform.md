@@ -6,7 +6,7 @@
 | **Date** | 2026-05-12 |
 | **Deciders** | ruv |
 | **Codename** | **rvCSI** — RuVector Channel State Information runtime |
-| **Relates to** | ADR-012 (ESP32 CSI mesh), ADR-013 (feature-level sensing on commodity gear), ADR-014 (SOTA signal processing), ADR-016 (RuVector integration), ADR-024 (AETHER contrastive embeddings), ADR-031 (RuView sensing-first RF mode), ADR-040 (WASM programmable sensing), ADR-049 (cross-platform WiFi interface detection) |
+| **Relates to** | ADR-012 (ESP32 CSI mesh), ADR-013 (feature-level sensing on commodity gear), ADR-014 (SOTA signal processing), ADR-016 (RuVector integration), ADR-024 (AETHER contrastive embeddings), ADR-031 (EchoPose sensing-first RF mode), ADR-040 (WASM programmable sensing), ADR-049 (cross-platform WiFi interface detection) |
 | **PRD** | [rvCSI Platform PRD](../prd/rvcsi-platform-prd.md) |
 | **Domain model** | [rvCSI Domain Model](../ddd/rvcsi-domain-model.md) |
 
@@ -16,7 +16,7 @@
 
 WiFi Channel State Information (CSI) is a powerful camera-free sensing primitive — but in practice it is hard to operationalize. Most CSI pipelines today are Linux shell scripts, patched firmware, kernel modules, Python notebooks, PCAP dumps, and ad-hoc signal processing. Packet formats are inconsistent across chips; drivers are unstable; malformed packets are common; and device-specific assumptions leak everywhere. CSI works in the lab and falls over in the field.
 
-RuView already contains substantial CSI infrastructure (`wifi-densepose-signal`, `wifi-densepose-ruvector`, the ESP32 mesh of ADR-012, the RuView multistatic work of ADR-031). What is missing is a **stable, hardware-abstracted runtime layer** that:
+EchoPose already contains substantial CSI infrastructure (`wifi-densepose-signal`, `wifi-densepose-ruvector`, the ESP32 mesh of ADR-012, the EchoPose multistatic work of ADR-031). What is missing is a **stable, hardware-abstracted runtime layer** that:
 
 - ingests CSI from many sources behind one interface,
 - validates every packet before it can touch application code,
@@ -145,7 +145,7 @@ Event Extractor ─────────────┤  Event context       
 TS SDK · CLI · MCP · RuVector └─ Memory + Agent contexts ──────┘
 ```
 
-**Crates (within RuView's `v2/crates/`, or a standalone `rvcsi/crates/`):**
+**Crates (within EchoPose's `v2/crates/`, or a standalone `rvcsi/crates/`):**
 `rvcsi-core` · `rvcsi-adapter-file` · `rvcsi-adapter-nexmon` · `rvcsi-adapter-esp32` · `rvcsi-dsp` · `rvcsi-events` · `rvcsi-ruvector` · `rvcsi-daemon` · `rvcsi-node` · `rvcsi-mcp` — plus TypeScript packages `sdk`, `cli`, `dashboard`, and `native/nexmon-shim-c`.
 
 See the [PRD §9](../prd/rvcsi-platform-prd.md#9-system-architecture) for the full component table and reference layout, and the [domain model](../ddd/rvcsi-domain-model.md) for bounded contexts, aggregates, invariants, and domain services.
@@ -159,7 +159,7 @@ See the [PRD §9](../prd/rvcsi-platform-prd.md#9-system-architecture) for the fu
 - CSI becomes reusable infrastructure: npm-installable, reproducible, typed, safe-parsed, embeddable, WebSocket-streamable, WASM-portable, MCP-exposed, agent-integrable.
 - One application codebase works across Nexmon, ESP32, Intel, and Atheros sources.
 - Bad packets cannot crash the daemon; unattended operation becomes realistic.
-- RuView/RuVector/Cognitum/agents gain a validated live source of RF observations.
+- EchoPose/RuVector/Cognitum/agents gain a validated live source of RF observations.
 - Honest product framing ("structural sensing") avoids over-claiming.
 
 **Negative / costs**
@@ -191,7 +191,7 @@ See the [PRD §9](../prd/rvcsi-platform-prd.md#9-system-architecture) for the fu
 ## 6. Implementation phases (proposed)
 
 1. **v0** — `rvcsi-core` + file/replay/ESP32 adapters + validation + `rvcsi-dsp` (presence/motion) + `rvcsi-node` SDK + `rvcsi-cli` + WebSocket output + `rvcsi-ruvector` export + basic calibration + health checks. Targets all eight PRD success criteria.
-2. **v1** — multi-node sync, RF room signatures, breathing-rate where signal permits, temporal embeddings, drift detection, room-topology graph, `rvcsi-mcp` tool server, replayable benchmark datasets, RuView sensor fusion, Cognitum deployment profile.
+2. **v1** — multi-node sync, RF room signatures, breathing-rate where signal permits, temporal embeddings, drift detection, room-topology graph, `rvcsi-mcp` tool server, replayable benchmark datasets, EchoPose sensor fusion, Cognitum deployment profile.
 3. **v2** — hardware-agnostic RF sensor fabric, multi-room RF memory, streaming anomaly detection, RF-SLAM research mode, on-device embedding model, federated room-signature learning, signed sensor-evidence records, proof-gated event publication, dynamic cut-based coherence over RF graphs, agent-driven calibration and self-repair.
 
 ---
@@ -205,6 +205,6 @@ See the [PRD §9](../prd/rvcsi-platform-prd.md#9-system-architecture) for the fu
 - ADR-014 — SOTA Signal Processing
 - ADR-016 — RuVector Integration
 - ADR-024 — Project AETHER: Contrastive CSI Embeddings
-- ADR-031 — RuView Sensing-First RF Mode
+- ADR-031 — EchoPose Sensing-First RF Mode
 - ADR-040 — WASM Programmable Sensing
 - ADR-049 — Cross-Platform WiFi Interface Detection

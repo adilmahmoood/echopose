@@ -6,7 +6,7 @@
 
 | Script | Thread | Verdict |
 |---|---|---|
-| `r13_bp_physics_floor.py` | R13 | **Don't ship contactless BP from CSI as a primary RuView feature.** Four physics floors make it provably worse than a $20 arm cuff. |
+| `r13_bp_physics_floor.py` | R13 | **Don't ship contactless BP from CSI as a primary EchoPose feature.** Four physics floors make it provably worse than a $20 arm cuff. |
 
 ## The four floors (R13)
 

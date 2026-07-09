@@ -205,7 +205,7 @@ Together these deliver the 93× placement lift and 9.36× intruder-detection lif
 
 ## Closing observation
 
-The loop produced **the architectural foundation** for an entire generation of RuView features:
+The loop produced **the architectural foundation** for an entire generation of EchoPose features:
 
 - **Physics floors are quantified** (R1, R6, R6.1, R13) — no more guessing
 - **Placement is solved** (R6.2 family + ADR-113) — every cog has a deterministic placement recipe

@@ -112,7 +112,7 @@ One more defect found during the run:
 
 Evidence grade for the WiFlow-STD accuracy claims after measurement (a):
 **MEASURED-EQUIVALENT (96.1–96.6% PCK@20 reproduced by retraining; shipped
-checkpoint REFUTED; dataset/code require repairs)**. RuView docs may cite
+checkpoint REFUTED; dataset/code require repairs)**. EchoPose docs may cite
 "~96% PCK@20 (our reproduction)" — still **not comparable** to our 17-keypoint
 ESP32 numbers (different hardware, 5 subjects, in-domain random split,
 15 keypoints).

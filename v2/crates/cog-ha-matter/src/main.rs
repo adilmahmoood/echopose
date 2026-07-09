@@ -134,7 +134,7 @@ async fn main() -> ExitCode {
     let _ = &state_tx;
 
     // P4: mDNS responder. HA's auto-discovery picks the cog up on
-    // `_ruview-ha._tcp` so users don't need to type broker host/port.
+    // `_echopose-ha._tcp` so users don't need to type broker host/port.
     let _mdns_handle = if args.no_mdns {
         None
     } else {

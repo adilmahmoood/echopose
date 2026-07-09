@@ -1,4 +1,4 @@
-//! Criterion benchmark for the RuView streaming-engine hot path.
+//! Criterion benchmark for the EchoPose streaming-engine hot path.
 //!
 //! The live system runs at 20 Hz → a **50 ms** wall-clock budget per cycle.
 //! This measures one full [`StreamingEngine::process_cycle`] (fuse + quality

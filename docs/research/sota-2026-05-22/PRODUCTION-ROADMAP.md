@@ -59,7 +59,7 @@ wifi-densepose plan-antennas \
 
 ## Tier 2 — Ship in next 6 months (Q3-Q4 2026)
 
-### 2.1 — `ruview-fed` crate (within-installation federation)
+### 2.1 — `echopose-fed` crate (within-installation federation)
 
 **Source**: ADR-105 + ADR-106
 **Owner**: federation specialist (new role)
@@ -72,7 +72,7 @@ wifi-densepose plan-antennas \
 **Source**: R14 / R15 / ADR-106
 **Owner**: vital-signs cog maintainer
 **LOC**: ~120 (PrimitiveTag enum, on-device-only enforcement at API surface, per-cog config schema)
-**Dependencies**: 2.1 `ruview-fed`
+**Dependencies**: 2.1 `echopose-fed`
 **Priority**: **HIGH** — privacy-compliant medical-grade vitals; required for R16 healthcare deployment
 
 ### 2.3 — Bench validation suite for placement matrix
@@ -83,10 +83,10 @@ wifi-densepose plan-antennas \
 **Dependencies**: 1.1 CLI tool
 **Priority**: **MEDIUM** — turns ADR-113's synthetic numbers into validated numbers
 
-### 2.4 — MCP tool `ruview_placement_recommend`
+### 2.4 — MCP tool `echopose_placement_recommend`
 
 **Source**: ADR-104 + ADR-113
-**Owner**: ruview-mcp maintainer
+**Owner**: echopose-mcp maintainer
 **LOC**: ~60
 **Dependencies**: 1.1 CLI tool
 **Priority**: **MEDIUM** — enables AI-agent-driven deployment
@@ -98,7 +98,7 @@ wifi-densepose plan-antennas \
 **Source**: ADR-107
 **Owner**: federation + crypto specialist
 **LOC**: +530 (Bonawitz secure aggregation, threshold Shamir, PKI client, per-installation rotation key)
-**Dependencies**: 2.1 `ruview-fed`
+**Dependencies**: 2.1 `echopose-fed`
 **Priority**: **MEDIUM** — enables R16-R17-R18 cross-installation cogs
 
 ### 3.2 — PQC migration Phase 1 (ADR-108 + ADR-109)
@@ -224,7 +224,7 @@ wifi-densepose plan-antennas \
                          v
 1.3 cog-person-count v0.0.3 ---+
                                v
-2.1 ruview-fed crate --------+
+2.1 echopose-fed crate --------+
                              v
 2.2 cog-vital-signs DP -----+
                             v

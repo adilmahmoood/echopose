@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-signal` (`ruvsense/multiband.rs`, `ruvsense/multistatic.rs`); `wifi-densepose-ruvector` (`viewpoint/geometry.rs`, `viewpoint/coherence.rs`, `viewpoint/attention.rs`, `viewpoint/fusion.rs`) |
-| **Relates to** | ADR-008 (CSI Frame Primitives), ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-031 (RuView Sensing-First RF Mode), ADR-110 (ESP32-C6 Firmware Extension / 802.15.4 sync), ADR-136 (RuView Rust Streaming Engine — frame contracts), ADR-137 (Fusion Engine Quality Scoring — evidence references and contradiction flags) |
+| **Relates to** | ADR-008 (CSI Frame Primitives), ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-031 (EchoPose Sensing-First RF Mode), ADR-110 (ESP32-C6 Firmware Extension / 802.15.4 sync), ADR-136 (EchoPose Rust Streaming Engine — frame contracts), ADR-137 (Fusion Engine Quality Scoring — evidence references and contradiction flags) |
 
 ---
 
@@ -488,9 +488,9 @@ Rejected. The existing `MultistaticConfig.guard_interval_us` (5 ms spread) is a 
 | ADR-008 (CSI Frame Primitives) | **Substrate**: `CsiFrame`/`CanonicalCsiFrame` are the per-band frame types `LinkGroup` aggregates |
 | ADR-029 (RuvSense Multistatic) | **Extended**: `LinkGroup::consensus_frame()` feeds the existing `MultistaticFuser`; the coordinator supplies the attention weights `fuse()` previously derived internally |
 | ADR-030 (Persistent Field Model) | **Gated**: environment/model updates are exactly what `MonitorOnly` withholds when clock quality degrades |
-| ADR-031 (RuView Sensing-First RF Mode) | **Extended**: this ADR builds directly on `viewpoint/geometry.rs`, `coherence.rs`, `attention.rs`, `fusion.rs` introduced by ADR-031 |
+| ADR-031 (EchoPose Sensing-First RF Mode) | **Extended**: this ADR builds directly on `viewpoint/geometry.rs`, `coherence.rs`, `attention.rs`, `fusion.rs` introduced by ADR-031 |
 | ADR-110 (ESP32-C6 Firmware Extension) | **Substrate**: `SyncPacket` (magic `0xC511A110`) and its `local_minus_epoch_us`/`mesh_aligned_us_for_sequence` are the source of `ClockQualityScore`; the ±100 µs target defines the 200 µs gate floor |
-| ADR-136 (RuView Rust Streaming Engine) | **Contract**: `FrameMeta` carries `mesh_aligned_us` + `clock_quality`; the coordinator reads these rather than raw packets |
+| ADR-136 (EchoPose Rust Streaming Engine) | **Contract**: `FrameMeta` carries `mesh_aligned_us` + `clock_quality`; the coordinator reads these rather than raw packets |
 | ADR-137 (Fusion Engine Quality Scoring) | **Downstream consumer**: `DirectionalEvidence.contradictions` (`ContradictionFlag`) is the agreed hand-off; ADR-137 attaches model/privacy version to complete the provenance tuple |
 
 ---

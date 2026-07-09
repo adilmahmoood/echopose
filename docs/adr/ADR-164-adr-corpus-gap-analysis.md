@@ -7,7 +7,7 @@
 
 ## Context
 
-The corpus has grown to **162 ADR entries across 156 distinct files** (ADR-001 through ADR-171; the 5 duplicate-number collisions / 6 displaced files originally noted here were RESOLVED by renumbering the displaced files to ADR-166…171 — see Gap Register G1). It now spans nine subsystems — signal/DSP, NN/training, ESP32 firmware, RuvSense multistatic, RuView desktop, Cognitum cogs, HOMECORE (HA reimplementation), BFLD privacy, and the streaming engine — written over roughly a year by many agent-driven sessions.
+The corpus has grown to **162 ADR entries across 156 distinct files** (ADR-001 through ADR-171; the 5 duplicate-number collisions / 6 displaced files originally noted here were RESOLVED by renumbering the displaced files to ADR-166…171 — see Gap Register G1). It now spans nine subsystems — signal/DSP, NN/training, ESP32 firmware, RuvSense multistatic, EchoPose desktop, Cognitum cogs, HOMECORE (HA reimplementation), BFLD privacy, and the streaming engine — written over roughly a year by many agent-driven sessions.
 
 Two forces motivate a corpus-wide gap analysis *now*:
 
@@ -96,7 +96,7 @@ The four CRITICAL items are the corpus's load-bearing AI-slop admissions — eac
 - **HIGH — `wifi-densepose-engine`** composes ADR-135..146 onto the live 20 Hz path but **no ADR governs the integrator contract** (ordering, back-pressure, "one pipeline cycle" boundary).
 - **MEDIUM — `wasm-edge`** (~70 skills) governed only by remediation ADRs 160/163 — no creation/taxonomy/ABI ADR. **`occworld-candle`** is a Rust-native backend swap ADR-147 explicitly deferred. **`pointcloud`** has only a viewer-deploy ADR (094), no data-format contract.
 - **MEDIUM — workspace topology:** ~38 crates exist; the CLAUDE.md 15-crate table and 12-step publishing order are stale, and no ADR governs crate-graph/publish boundaries at this scale.
-- Verified-governed (scoped out): worldmodel→147, worldgraph→139, cog-*→101/103/116, ruview-swarm→148, nvsim→089/092, bfld→118-123/141, calibration→151, homecore-hap→125, geo→044, desktop→052/054.
+- Verified-governed (scoped out): worldmodel→147, worldgraph→139, cog-*→101/103/116, echopose-swarm→148, nvsim→089/092, bfld→118-123/141, calibration→151, homecore-hap→125, geo→044, desktop→052/054.
 
 ## Open / Gated Backlog (genuinely unresolved, honestly labeled)
 

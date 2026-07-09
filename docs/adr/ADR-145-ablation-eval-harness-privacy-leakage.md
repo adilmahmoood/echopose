@@ -5,8 +5,8 @@
 | **Status** | Accepted — partial (built + tested building block; integration glue pending — see Implementation Status, commit `0f336b7d3`) |
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
-| **Codebase target** | `wifi-densepose-train` (`src/eval.rs`, `src/metrics.rs`, `src/ruview_metrics.rs`, `src/proof.rs`); `wifi-densepose-signal` (`src/bin/*_proof_runner.rs`); `wifi-densepose-cli` |
-| **Relates to** | ADR-011 (Deterministic Proof Harness), ADR-014 (SOTA Signal Processing), ADR-027 (Cross-Environment Domain Generalization / MERIDIAN), ADR-031 (RuView Sensing-First RF Mode), ADR-120 (BFLD Privacy Class & Hash Rotation), ADR-136 (RuView Rust Streaming Engine), ADR-141 (BFLD Privacy Control Plane), ADR-144 (UWB Range-Constraint Fusion) |
+| **Codebase target** | `wifi-densepose-train` (`src/eval.rs`, `src/metrics.rs`, `src/echopose_metrics.rs`, `src/proof.rs`); `wifi-densepose-signal` (`src/bin/*_proof_runner.rs`); `wifi-densepose-cli` |
+| **Relates to** | ADR-011 (Deterministic Proof Harness), ADR-014 (SOTA Signal Processing), ADR-027 (Cross-Environment Domain Generalization / MERIDIAN), ADR-031 (EchoPose Sensing-First RF Mode), ADR-120 (BFLD Privacy Class & Hash Rotation), ADR-136 (EchoPose Rust Streaming Engine), ADR-141 (BFLD Privacy Control Plane), ADR-144 (UWB Range-Constraint Fusion) |
 
 ---
 
@@ -16,7 +16,7 @@
 
 The repository has two independent, well-formed evaluation surfaces that have never been wired together into a single ablation matrix:
 
-1. **`wifi-densepose-train/src/ruview_metrics.rs`** implements the ADR-031 three-metric acceptance test — `evaluate_joint_error()` (PCK@0.2 / OKS / torso jitter / p95 error), `evaluate_tracking()` (MOTA / ID-switches / fragmentation), `evaluate_vital_signs()` (breathing/heartbeat BPM error and SNR) — and rolls them into `RuViewAcceptanceResult` with a `RuViewTier` (`Fail` / `Bronze` / `Silver` / `Gold`) via `determine_tier()`. The threshold structs (`JointErrorThresholds`, `TrackingThresholds`, `VitalSignThresholds`) carry the `Default` impls that encode the deployment gates.
+1. **`wifi-densepose-train/src/echopose_metrics.rs`** implements the ADR-031 three-metric acceptance test — `evaluate_joint_error()` (PCK@0.2 / OKS / torso jitter / p95 error), `evaluate_tracking()` (MOTA / ID-switches / fragmentation), `evaluate_vital_signs()` (breathing/heartbeat BPM error and SNR) — and rolls them into `EchoPoseAcceptanceResult` with a `EchoPoseTier` (`Fail` / `Bronze` / `Silver` / `Gold`) via `determine_tier()`. The threshold structs (`JointErrorThresholds`, `TrackingThresholds`, `VitalSignThresholds`) carry the `Default` impls that encode the deployment gates.
 
 2. **`wifi-densepose-train/src/eval.rs`** implements the ADR-027 MERIDIAN cross-environment evaluator — `CrossDomainEvaluator::evaluate()` returns `CrossDomainMetrics { in_domain_mpjpe, cross_domain_mpjpe, few_shot_mpjpe, cross_hardware_mpjpe, domain_gap_ratio, adaptation_speedup }`. Domain `0` is in-domain; non-zero domain IDs are cross-domain. It reports a single scalar `domain_gap_ratio = cross / in_domain`.
 
@@ -24,7 +24,7 @@ These two surfaces share **no common driver**. There is:
 
 - **No feature-ablation concept anywhere.** A workspace-wide search for `ablation` / `Ablation` across `v2/crates` returns zero matches. There is no struct that says "run the acceptance test with CIR disabled" or "with Doppler enabled," and no way to attribute a tier change to a specific feature branch (CSI-only vs CSI+CIR vs +Doppler).
 - **No privacy-leakage metric in the eval path.** Privacy is enforced *structurally* in `wifi-densepose-bfld` — `signature_hasher.rs` implements the ADR-120 BLAKE3-keyed per-site, daily-rotated `rf_signature_hash` (invariant I3), and `embedding.rs` keeps `IdentityEmbedding` in-RAM-only (invariant I1/I2). But there is no *measured* leakage scalar: nothing runs a membership-inference attack against the hash-rotation pipeline and reports a number in `[0, 1]`. The acceptance test cannot fail a model for leaking identity.
-- **No latency profile in the acceptance result.** `RuViewAcceptanceResult` reports accuracy and tracking but carries no `p50`/`p95`/`p99` inference-latency fields. The ADR-031 mode says nothing about timing budgets (a grep of `ADR-031` for `latency`/`p95` returns nothing), so a model that passes Gold at 800 ms/frame is indistinguishable from one at 40 ms/frame.
+- **No latency profile in the acceptance result.** `EchoPoseAcceptanceResult` reports accuracy and tracking but carries no `p50`/`p95`/`p99` inference-latency fields. The ADR-031 mode says nothing about timing budgets (a grep of `ADR-031` for `latency`/`p95` returns nothing), so a model that passes Gold at 800 ms/frame is indistinguishable from one at 40 ms/frame.
 - **No per-variant determinism binding.** The proof harness exists and is mature: `wifi-densepose-train/src/proof.rs` runs `N_PROOF_STEPS = 50` under `PROOF_SEED = 42` / `MODEL_SEED = 0` and SHA-256-hashes the model weights (`hash_model_weights()`), comparing against `expected_proof.sha256`. The signal side mirrors this — `src/bin/calibration_proof_runner.rs` (ADR-135) and `src/bin/cir_proof_runner.rs` (ADR-134) hash deterministic synthetic outputs against `archive/v1/data/proof/expected_calibration_features.sha256` and `expected_cir_features.sha256`. But **no proof artifact pins an ablation report**: there is no `expected_ablation_*.sha256`, so re-running the matrix on a fixed seed could silently produce a different tier and CI would not notice.
 
 The cost of the gap is concrete. When ADR-134 (CIR) and ADR-135 (calibration) landed, the only way to know whether CIR *helped* presence/localization was to read the commit message — there was no harness that ran the acceptance test with and without CIR and emitted a side-by-side delta. As ADR-144 (UWB fusion) and the BFLD privacy modes (ADR-141) come online, the number of feature combinations grows combinatorially, and "does turning on feature X regress tier or leak identity?" becomes unanswerable without a deterministic ablation matrix.
@@ -33,7 +33,7 @@ The cost of the gap is concrete. When ADR-134 (CIR) and ADR-135 (calibration) la
 
 An **ablation** is one acceptance-test run over a fixed evaluation set with a named subset of signal features enabled. The matrix is the set of those runs plus the pairwise deltas between them. Each ablation produces:
 
-- A `RuViewAcceptanceResult` (the existing struct, unchanged) → tier, PCK, OKS, MOTA, breathing error.
+- A `EchoPoseAcceptanceResult` (the existing struct, unchanged) → tier, PCK, OKS, MOTA, breathing error.
 - New scalar metrics this ADR adds: presence accuracy, localization error, activity accuracy, FP/FN rates, latency p50/p95/p99, **privacy-leakage score** ∈ `[0, 1]`, and cross-room degradation.
 - A determinism record: the SHA-256 of the variant's witness-replay output, which must match the per-variant expected hash or CI fails.
 
@@ -41,7 +41,7 @@ An ablation is **not** a hyperparameter sweep or a training run. It evaluates a 
 
 ### 1.3 Hardware Constraints on the Feature Set
 
-The ablation feature combinations are bounded by what RuView hardware can actually produce, per the project hardware table and ADR-136's streaming engine:
+The ablation feature combinations are bounded by what EchoPose hardware can actually produce, per the project hardware table and ADR-136's streaming engine:
 
 | Tier | Feature | Source | Available today? |
 |------|---------|--------|------------------|
@@ -64,7 +64,7 @@ model.bin snapshot (fixed)
         │  for each AblationVariant (F-mask):
         │    feature-gate the signal stages (ADR-136 streaming engine)
         │      → eval.rs CrossDomainEvaluator  (cross-room degradation)
-        │      → ruview_metrics.rs acceptance   (tier, PCK/OKS/MOTA/vitals)
+        │      → echopose_metrics.rs acceptance   (tier, PCK/OKS/MOTA/vitals)
         │      → SpecMetrics                     (presence/loc/activity/FP-FN)
         │      → LatencyProfile (criterion p50/p95/p99)
         │      → PrivacyLeakage (MIA on ADR-120 hash-rotation pipeline)
@@ -73,7 +73,7 @@ model.bin snapshot (fixed)
   AblationReport  →  markdown auto-report + summary.json
 ```
 
-The harness sits *above* the streaming engine: it does not re-derive features, it toggles which ADR-136 stages are active and re-reads the existing `eval.rs` / `ruview_metrics.rs` outputs. Determinism is inherited from the proof harness substrate (ADR-011).
+The harness sits *above* the streaming engine: it does not re-derive features, it toggles which ADR-136 stages are active and re-reads the existing `eval.rs` / `echopose_metrics.rs` outputs. Determinism is inherited from the proof harness substrate (ADR-011).
 
 ---
 
@@ -132,7 +132,7 @@ The order in `MATRIX` is **load-bearing**: it is the iteration order used by the
 
 ### 2.2 Spec Metrics Bound to Existing Interfaces
 
-The new metrics are added as additive structs that *compose with*, not replace, `RuViewAcceptanceResult` and `CrossDomainMetrics`. We deliberately do not widen the existing public structs (they are consumed by checked-in tests and by the `summary()` formatters), per the rule "prefer editing an existing file but do not break a stable public API."
+The new metrics are added as additive structs that *compose with*, not replace, `EchoPoseAcceptanceResult` and `CrossDomainMetrics`. We deliberately do not widen the existing public structs (they are consumed by checked-in tests and by the `summary()` formatters), per the rule "prefer editing an existing file but do not break a stable public API."
 
 ```rust
 /// Detection-mode spec metrics that the ADR-031 acceptance test does not
@@ -225,7 +225,7 @@ Two estimators are reported; the harness uses the MIA estimator for the pass/fai
 
 **Determinism.** The shadow classifier is trained with a fixed seed derived from `PROOF_SEED = 42` and a fixed split, so the AUC is reproducible. The Fisher trace is computed on the fixed replay set. Both feed the per-variant proof hash (§2.6) at coarse quantization, following the cross-platform lesson documented in `calibration_proof_runner.rs` (lines 1–13): quantize to 1e-3 in natural order, no sort, no libm-sensitive comparison.
 
-### 2.4 `ruview-cli --ablation mode=auto`
+### 2.4 `echopose-cli --ablation mode=auto`
 
 A new CLI surface drives the matrix. It is added as a `Commands::Ablation(AblationArgs)` variant alongside the existing `Commands::Calibrate` / `Commands::Mat` / `Commands::Version` in `wifi-densepose-cli/src/lib.rs` (the same `clap` `Subcommand` enum that already hosts `Calibrate(calibrate::CalibrateArgs)`).
 
@@ -257,7 +257,7 @@ OPTIONS:
 1. Snapshot the model: load `--model`, freeze weights, record `SHA-256(model.bin)` as the model-version stamp.
 2. For each `AblationVariant::MATRIX` entry where `is_runnable()`:
    a. Set the streaming `StageMask`; replay the CSI under `PROOF_SEED=42` + fixed salt.
-   b. Compute `RuViewAcceptanceResult`, `SpecMetrics`, `LatencyProfile`, `PrivacyLeakage`, `CrossRoomDegradation`.
+   b. Compute `EchoPoseAcceptanceResult`, `SpecMetrics`, `LatencyProfile`, `PrivacyLeakage`, `CrossRoomDegradation`.
    c. Serialise the variant's canonical metric bytes (coarse-quantized, natural order) and SHA-256 it. Compare to `expected_ablation_<slug>.sha256`; fail CI on mismatch in `--check-hash` mode.
 3. For `PlusUwb`: emit `VariantOutcome::Skipped { reason: "ADR-144 UWB hardware not present" }`.
 4. Emit the markdown report and `summary.json`.
@@ -280,7 +280,7 @@ pub fn cross_room_degradation(
 ) -> CrossRoomDegradation;
 ```
 
-The per-joint heatmap is the 17-entry vector of `PCK_room_A[j] − PCK_room_B[j]`, indexed by COCO joint (the same 17-joint convention used in `ruview_metrics.rs::COCO_SIGMAS` and `metrics.rs::COCO_KP_SIGMAS`). The multi-room test set reuses the domain-label convention: room A is domain `0` (in-domain), room B is a non-zero domain ID. This is a pure consumer of `eval.rs` — no change to `CrossDomainEvaluator` or `CrossDomainMetrics`.
+The per-joint heatmap is the 17-entry vector of `PCK_room_A[j] − PCK_room_B[j]`, indexed by COCO joint (the same 17-joint convention used in `echopose_metrics.rs::COCO_SIGMAS` and `metrics.rs::COCO_KP_SIGMAS`). The multi-room test set reuses the domain-label convention: room A is domain `0` (in-domain), room B is a non-zero domain ID. This is a pure consumer of `eval.rs` — no change to `CrossDomainEvaluator` or `CrossDomainMetrics`.
 
 ### 2.6 Determinism Binding to the Proof Harness
 
@@ -341,7 +341,7 @@ The markdown report has one row per variant, columns: variant slug · tier · PC
 - **Privacy regression becomes a CI gate.** A model that leaks identity through pose trajectories — invisible to the structural ADR-120 tests — now fails `leakage_score ≤ 0.05`. This closes the residual-channel gap between *hash* privacy and *output* privacy.
 - **Latency budget is enforced.** `p95 ≤ 100 ms` makes the ADR-136 real-time claim falsifiable. A Gold-accuracy model that misses the streaming budget no longer passes silently.
 - **Deterministic and CI-friendly.** Reusing `PROOF_SEED=42` + fixed salt + witness replay + per-variant SHA-256 plugs directly into the ADR-011/ADR-028 witness chain. No new CI grammar; same `0/1/2` exit codes as `proof.rs`.
-- **Additive, non-breaking.** `RuViewAcceptanceResult`, `CrossDomainMetrics`, and the threshold `Default` impls are untouched. The harness composes them; existing tests keep passing.
+- **Additive, non-breaking.** `EchoPoseAcceptanceResult`, `CrossDomainMetrics`, and the threshold `Default` impls are untouched. The harness composes them; existing tests keep passing.
 - **UWB is forward-declared.** `PlusUwb` is in the matrix as `Skipped`, so when ADR-144 hardware lands the only change is flipping `is_runnable()` and generating its expected hash.
 
 ### 3.2 Negative
@@ -365,9 +365,9 @@ The markdown report has one row per variant, columns: variant slug · tier · PC
 
 ## 4. Alternatives Considered
 
-### 4.1 Widen `RuViewAcceptanceResult` Instead of Adding Sibling Structs
+### 4.1 Widen `EchoPoseAcceptanceResult` Instead of Adding Sibling Structs
 
-Rejected. `RuViewAcceptanceResult` and its `summary()` are consumed by checked-in tests in `ruview_metrics.rs` (e.g. `tier_determination_gold`) and likely by downstream callers. Adding `presence_accuracy`, `leakage_score`, etc. as fields would churn those tests and the `summary()` format string. The additive `SpecMetrics` / `LatencyProfile` / `PrivacyLeakage` siblings compose cleanly and leave the ADR-031 contract intact.
+Rejected. `EchoPoseAcceptanceResult` and its `summary()` are consumed by checked-in tests in `echopose_metrics.rs` (e.g. `tier_determination_gold`) and likely by downstream callers. Adding `presence_accuracy`, `leakage_score`, etc. as fields would churn those tests and the `summary()` format string. The additive `SpecMetrics` / `LatencyProfile` / `PrivacyLeakage` siblings compose cleanly and leave the ADR-031 contract intact.
 
 ### 4.2 A Hyperparameter Sweep Framework Instead of a Fixed Matrix
 
@@ -433,9 +433,9 @@ Per ADR-028, three rows are added to `docs/WITNESS-LOG-028.md`:
 | ADR-011 (Deterministic Proof Harness) | **Substrate**: per-variant SHA-256 + `PROOF_SEED=42` + `0/1/2` exit codes reuse the `proof.rs` discipline directly |
 | ADR-014 (SOTA Signal Processing) | **Source**: the Doppler/spectrogram feature gated by the `PlusDoppler` variant |
 | ADR-027 (MERIDIAN Cross-Environment) | **Extended (reporting)**: `cross_room_degradation()` consumes `eval.rs::CrossDomainEvaluator` and adds A/B deltas + per-joint heatmap; the evaluator itself is unchanged |
-| ADR-031 (RuView Sensing-First RF Mode) | **Extended**: the ablation harness drives the `ruview_metrics.rs` acceptance test (`RuViewTier`, `JointErrorThresholds`, …) per variant, adding presence/localization/activity/FP-FN/latency/privacy metrics it did not previously capture |
+| ADR-031 (EchoPose Sensing-First RF Mode) | **Extended**: the ablation harness drives the `echopose_metrics.rs` acceptance test (`EchoPoseTier`, `JointErrorThresholds`, …) per variant, adding presence/localization/activity/FP-FN/latency/privacy metrics it did not previously capture |
 | ADR-120 (BFLD Privacy Class & Hash Rotation) | **Measured**: the MIA probe attacks the `signature_hasher.rs` hash-rotation pipeline's residual output leakage; the structural invariants remain the primary guarantee |
-| ADR-136 (RuView Streaming Engine) | **Consumer/owner of features**: the harness toggles ADR-136 `StageMask`; the streaming engine remains the sole feature-extraction owner; the `p95 ≤ 100 ms` gate enforces ADR-136's real-time claim |
+| ADR-136 (EchoPose Streaming Engine) | **Consumer/owner of features**: the harness toggles ADR-136 `StageMask`; the streaming engine remains the sole feature-extraction owner; the `p95 ≤ 100 ms` gate enforces ADR-136's real-time claim |
 | ADR-141 (BFLD Privacy Control Plane) | **Provenance source/consumer**: the `privacy_mode` in `VariantProvenance` is an ADR-141 named mode; `summary.json` feeds the control plane |
 | ADR-144 (UWB Range-Constraint Fusion) | **Forward-declared**: `PlusUwb` is a defined-but-`Skipped` variant until ADR-144 ranging hardware lands |
 
@@ -445,7 +445,7 @@ Per ADR-028, three rows are added to `docs/WITNESS-LOG-028.md`:
 
 ### Production Code
 
-- `v2/crates/wifi-densepose-train/src/ruview_metrics.rs` — ADR-031 acceptance test; `RuViewAcceptanceResult`, `RuViewTier`, `JointErrorThresholds`, `determine_tier()` reused unchanged
+- `v2/crates/wifi-densepose-train/src/echopose_metrics.rs` — ADR-031 acceptance test; `EchoPoseAcceptanceResult`, `EchoPoseTier`, `JointErrorThresholds`, `determine_tier()` reused unchanged
 - `v2/crates/wifi-densepose-train/src/eval.rs` — `CrossDomainEvaluator`, `CrossDomainMetrics`; consumed by `cross_room_degradation()`
 - `v2/crates/wifi-densepose-train/src/metrics.rs` — `MetricsResult`, `COCO_KP_SIGMAS`; 17-joint convention for the per-joint heatmap
 - `v2/crates/wifi-densepose-train/src/proof.rs` — `run_proof`, `PROOF_SEED`, `hash_model_weights`, `0/1/2` exit-code convention reused as the harness substrate
@@ -465,7 +465,7 @@ Per ADR-028, three rows are added to `docs/WITNESS-LOG-028.md`:
 
 - Shokri, R. et al. (2017). "Membership Inference Attacks Against Machine Learning Models." *IEEE S&P*. — Shadow-classifier MIA methodology underlying the `mia_auc` estimator.
 - Carlini, N. et al. (2022). "Membership Inference Attacks From First Principles." *IEEE S&P*. — AUC-based leakage normalization and the "attacker AUC above 0.5" framing used for `leakage_score`.
-- COCO Keypoint Evaluation. — PCK / OKS definitions and the 17-joint sigmas mirrored from `ruview_metrics.rs` and `metrics.rs`.
+- COCO Keypoint Evaluation. — PCK / OKS definitions and the 17-joint sigmas mirrored from `echopose_metrics.rs` and `metrics.rs`.
 - Bernstein, J.-P. (BLAKE3 team) (2020). *BLAKE3 specification*. — Keyed-hash mode used by `signature_hasher.rs`, the ADR-120 pipeline under privacy test.
 
 
@@ -476,6 +476,6 @@ Per ADR-028, three rows are added to `docs/WITNESS-LOG-028.md`:
 
 **Built -- tested building block** (commit `0f336b7d3`, issue #849): the 6-variant `FeatureSet` matrix and `AblationMetrics` (FP/FN, latency p50/p95, membership-inference privacy leakage, cross-room degradation) with a deterministic markdown report and the `csi_cir_beats_csi_only` acceptance check. 5 tests.
 
-**Integration glue -- not yet on the live path:** the `ruview-cli --ablation mode=auto` subcommand that snapshots the model and runs the 6 variants under `PROOF_SEED=42` witness-bundle replay (also where ADR-136 AC6 lands); the `+UWB` variant once ADR-144 hardware exists.
+**Integration glue -- not yet on the live path:** the `echopose-cli --ablation mode=auto` subcommand that snapshots the model and runs the 6 variants under `PROOF_SEED=42` witness-bundle replay (also where ADR-136 AC6 lands); the `+UWB` variant once ADR-144 hardware exists.
 
 **Trust contribution:** makes every pipeline change *measurable* -- including how much a model leaks about its training data -- so improvements are proven, not asserted. The scorecard behind every other claim in the series.

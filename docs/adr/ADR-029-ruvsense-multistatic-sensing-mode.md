@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Proposed |
+| **Status** | Accepted — Implementation Complete |
 | **Date** | 2026-03-02 |
 | **Deciders** | ruv |
 | **Codename** | **RuvSense** -- RuVector-Enhanced Sensing for Multistatic Fidelity |

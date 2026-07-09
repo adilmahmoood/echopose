@@ -49,18 +49,18 @@ echo "[witness] running lib tests under --features mqtt"
     2>&1 | tee "../${BUNDLE_DIR}/test-results/lib-tests-mqtt-feature.log" ) || true
 
 # ── 4. Integration tests against mosquitto (optional, conditional) ───
-if [[ "${RUVIEW_RUN_INTEGRATION:-0}" == "1" ]]; then
+if [[ "${ECHOPOSE_RUN_INTEGRATION:-0}" == "1" ]]; then
   echo "[witness] running mosquitto integration tests"
   ( cd v2 && cargo test -p wifi-densepose-sensing-server --features mqtt --no-default-features \
       --test mqtt_integration --no-fail-fast -- --test-threads=1 \
       2>&1 | tee "../${BUNDLE_DIR}/test-results/integration-tests.log" ) || true
 else
-  echo "[witness] SKIP mosquitto integration (set RUVIEW_RUN_INTEGRATION=1 to include)"
+  echo "[witness] SKIP mosquitto integration (set ECHOPOSE_RUN_INTEGRATION=1 to include)"
   echo "Skipped — broker not configured for this run." > "${BUNDLE_DIR}/test-results/integration-tests.log"
 fi
 
 # ── 5. Criterion benchmarks (optional, slow) ─────────────────────────
-if [[ "${RUVIEW_RUN_BENCH:-0}" == "1" ]]; then
+if [[ "${ECHOPOSE_RUN_BENCH:-0}" == "1" ]]; then
   echo "[witness] running benchmarks (this takes ~3 min)"
   ( cd v2 && cargo bench -p wifi-densepose-sensing-server --features mqtt --bench mqtt_throughput \
       2>&1 | tee "../${BUNDLE_DIR}/bench-results/criterion-stdout.log" ) || true
@@ -68,14 +68,14 @@ if [[ "${RUVIEW_RUN_BENCH:-0}" == "1" ]]; then
     tar -czf "${BUNDLE_DIR}/bench-results/criterion-html.tar.gz" -C v2/target criterion 2>/dev/null || true
   fi
 else
-  echo "[witness] SKIP benchmarks (set RUVIEW_RUN_BENCH=1 to include — ~3 min)"
-  echo "Skipped — set RUVIEW_RUN_BENCH=1 to include." > "${BUNDLE_DIR}/bench-results/criterion-stdout.log"
+  echo "[witness] SKIP benchmarks (set ECHOPOSE_RUN_BENCH=1 to include — ~3 min)"
+  echo "Skipped — set ECHOPOSE_RUN_BENCH=1 to include." > "${BUNDLE_DIR}/bench-results/criterion-stdout.log"
 fi
 # Always include the benchmark reference doc with previously-captured numbers.
 cp docs/integrations/benchmarks.md "${BUNDLE_DIR}/bench-results/" 2>/dev/null || true
 
 # ── 5b. ESP32 ↔ MQTT validation report (optional, needs hardware) ────
-if [[ "${RUVIEW_RUN_ESP32:-0}" == "1" ]]; then
+if [[ "${ECHOPOSE_RUN_ESP32:-0}" == "1" ]]; then
   echo "[witness] running ESP32 validation (needs hardware on the configured port)"
   bash scripts/validate-esp32-mqtt.sh \
       --duration 60 \
@@ -83,11 +83,11 @@ if [[ "${RUVIEW_RUN_ESP32:-0}" == "1" ]]; then
       --report "${BUNDLE_DIR}/esp32-validation.md" \
       2>&1 | tee "${BUNDLE_DIR}/esp32-validation-stdout.log" || true
 else
-  echo "[witness] SKIP ESP32 validation (set RUVIEW_RUN_ESP32=1 with hardware attached)"
+  echo "[witness] SKIP ESP32 validation (set ECHOPOSE_RUN_ESP32=1 with hardware attached)"
   cat > "${BUNDLE_DIR}/esp32-validation.md" <<EOF
 ESP32 ↔ MQTT validation was not run for this witness bundle.
 
-To include it, set RUVIEW_RUN_ESP32=1 and re-run the witness generator
+To include it, set ECHOPOSE_RUN_ESP32=1 and re-run the witness generator
 with a provisioned ESP32-S3 on COM7 (Windows) or /dev/ttyUSB0 (Linux).
 The harness in \`scripts/validate-esp32-mqtt.sh\` will write a real
 validation report into this slot.
@@ -303,7 +303,7 @@ cargo test -p wifi-densepose-sensing-server --no-default-features --lib
 cargo test -p wifi-densepose-sensing-server --features mqtt --no-default-features --lib
 
 # Integration (needs Mosquitto on :11883):
-RUVIEW_RUN_INTEGRATION=1 cargo test -p wifi-densepose-sensing-server \\
+ECHOPOSE_RUN_INTEGRATION=1 cargo test -p wifi-densepose-sensing-server \\
     --features mqtt --no-default-features --test mqtt_integration -- --test-threads=1
 \`\`\`
 
@@ -314,8 +314,8 @@ RUVIEW_RUN_INTEGRATION=1 cargo test -p wifi-densepose-sensing-server \\
 - \`integration-docs/semantic-primitives-metrics.md\` — per-primitive F1
 - \`test-results/lib-tests.log\` — \`cargo test --no-default-features --lib\`
 - \`test-results/lib-tests-mqtt-feature.log\` — under \`--features mqtt\`
-- \`test-results/integration-tests.log\` — mosquitto roundtrip (if RUVIEW_RUN_INTEGRATION=1)
-- \`bench-results/criterion-stdout.log\` — bench numbers (if RUVIEW_RUN_BENCH=1)
+- \`test-results/integration-tests.log\` — mosquitto roundtrip (if ECHOPOSE_RUN_INTEGRATION=1)
+- \`bench-results/criterion-stdout.log\` — bench numbers (if ECHOPOSE_RUN_BENCH=1)
 - \`bench-results/criterion-html.tar.gz\` — HTML reports (if bench ran)
 - \`manifest/source-hashes.txt\` — SHA-256 of every ADR-115 file
 - \`manifest/git-head.txt\` + \`git-head-commit.txt\` — exact source commit

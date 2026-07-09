@@ -6,9 +6,9 @@
 | **Date** | 2026-06-14 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-UI** — first-class operator dashboard inside the Cognitum Appliance shell |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE state machine), [ADR-128](ADR-128-homecore-integration-plugin-system.md) (HOMECORE-PLUGINS), [ADR-129](ADR-129-homecore-automation-engine.md) (automation engine), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API), [ADR-132](ADR-132-homecore-recorder-history-semantic-search.md) (recorder/semantic search), [ADR-151](ADR-151-room-calibration-specialist-training.md) (room calibration HTTP API), [ADR-100](ADR-100-cog-packaging-specification.md) (Cog packaging), [ADR-116](ADR-116-cog-ha-matter-seed.md) (cog-ha-matter), [ADR-069](ADR-069-cognitum-seed-csi-pipeline.md) (SEED RVF ingest), [ADR-105](ADR-105-federated-csi-training.md) (federated CSI training) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE state machine), [ADR-128](ADR-128-homecore-integration-plugin-system.md) (HOMECORE-PLUGINS), [ADR-129](ADR-129-homecore-automation-engine.md) (automation engine), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API), [ADR-132](ADR-132-homecore-recorder-history-semantic-search.md) (recorder/semantic search), [ADR-151](ADR-151-room-calibration-specialist-training.md) (room calibration HTTP API), [ADR-100](ADR-100-cog-packaging-specification.md) (Cog packaging), [ADR-116](ADR-116-cog-ha-matter-seed.md) (cog-ha-matter), [ADR-069](ADR-069-cognitum-seed-csi-pipeline.md) (SEED RVF ingest), [ADR-105](ADR-105-federated-csi-training.md) (federated CSI training) |
 | **Tracking issue** | TBD |
-| **Parent** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (sub-ADR, HOMECORE-127…134 family) |
+| **Parent** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (sub-ADR, HOMECORE-127…134 family) |
 
 ---
 
@@ -21,7 +21,7 @@ HOMECORE (ADR-126 through ADR-134) is the native Rust + WASM + TypeScript port o
 This is the most important architectural constraint the UI must carry through every panel:
 
 - **Cognitum SEED** — a Pi Zero 2 W-based edge node. It has its own RVF vector store (8-dim, content-addressed, with kNN queries), Ed25519 witness chain, SHA-256 ingest audit trail, onboard environmental sensors (BME280 temperature/humidity/pressure, PIR motion, reed switch, ADS1115 4-channel ADC, vibration), 13 drift detectors, an MCP proxy (114 tools, JSON-RPC 2.0, default-deny policy), 98 HTTPS API endpoints, and epoch-based swarm sync for multi-SEED deployments. SEEDs sit close to the ESP32 sensing nodes and receive feature vectors from them at 1 Hz. Multiple SEEDs can form a peer mesh. **This is the sensing and memory tier.**
-- **Cognitum v0 Appliance** — a Pi 5 + Hailo-10H hub, running at `:9000`. It hosts the COG runtime (`/var/lib/cognitum/apps/`), the HOMECORE state machine and event bus, the calibration service, `ruview-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`, and acts as the fleet coordinator for multi-room correlation and federated training. The Appliance is where HOMECORE runs, and it is what the dashboard user is sitting in front of. **This is the computation and orchestration tier.**
+- **Cognitum v0 Appliance** — a Pi 5 + Hailo-10H hub, running at `:9000`. It hosts the COG runtime (`/var/lib/cognitum/apps/`), the HOMECORE state machine and event bus, the calibration service, `echopose-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`, and acts as the fleet coordinator for multi-room correlation and federated training. The Appliance is where HOMECORE runs, and it is what the dashboard user is sitting in front of. **This is the computation and orchestration tier.**
 
 SEEDs are **subordinate nodes that the Appliance supervises** — they are not peers. The UI navigation hierarchy must reflect this: the Appliance is the root, SEEDs are children, ESP32 nodes are leaves.
 
@@ -108,7 +108,7 @@ The implementor **must not introduce new colours, typefaces, or border radii.** 
 
 The always-visible overview panel. Modelled on the API Explorer's live metric cards. All values update in real-time.
 
-- **v0 Appliance health strip** — reuse the exact metric-card pattern from `seed.cognitum.one/status`: one card each for CPU %, RAM usage, Hailo-10H inference load (% utilisation), Hailo temperature, uptime, and the running services (`ruview-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`). Values in `--cyan`, labels in `--t2`. This strip is always at the top — it represents the machine the user is looking at.
+- **v0 Appliance health strip** — reuse the exact metric-card pattern from `seed.cognitum.one/status`: one card each for CPU %, RAM usage, Hailo-10H inference load (% utilisation), Hailo temperature, uptime, and the running services (`echopose-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`). Values in `--cyan`, labels in `--t2`. This strip is always at the top — it represents the machine the user is looking at.
 - **SEED Fleet overview** — a grid of SEED node cards (one per paired SEED) on the `var(--card)` surface with `var(--border)`. Each card shows: online/offline status pill (green/red), firmware version, epoch number, current vector count, last ingest timestamp, and witness-chain validity badge. A collapsed row shows the SEED's 5 onboard sensors in summary (PIR: yes/no, door: open/closed, temperature from BME280). Offline SEEDs render the entire card with a `--red-d` background tint. Clicking a SEED card navigates to the SEED Detail view (§4.2).
 - **ESP32 Node summary** — count of active ESP32 nodes per SEED, current frame rate (target: 100 Hz CSI + 1 Hz feature vectors), and a compact warning list for nodes with known issues (presence_score normalisation anomaly, stale firmware version).
 - **COG Runtime status row** — a horizontal strip of status pills for each installed COG on the v0 Appliance. Pill colours follow the existing badge convention: `--green-d`/`--green` for running, `--red-d`/`--red` for failed, `--t3`/`--t2` for stopped. COG name in `--mono`. Clicking a pill navigates to COG Management (§4.6).
@@ -178,7 +178,7 @@ The full baseline → enroll → train → verify pipeline runs via HTTP against
 
 - **Live event stream panel** — a virtualized scrolling list of `SystemEvent` variants (`StateChanged`, `EntityRegistered`, `ConfigReloaded`) and notable `DomainEvent`s from the homecore Tokio broadcast channel. Each row shows: event-type pill (coloured by variant), `entity_id` in `--mono`, old state → new state arrow, timestamp, and `context.user_id`. The stream is filterable by entity domain, event type, or source SEED/COG. The filter bar uses the same search-input style as the Cog Store's search field.
 - **Context causality breadcrumb** — expanding any event row shows the full Context chain (`context.id` → `parent_id` → `grandparent_id`) as a breadcrumb trail in `--mono`. This is how automation loops become visible without any separate debugging tool.
-- **Automation builder** ([ADR-129](ADR-129-homecore-automation-engine.md) scope) — a trigger → condition → action editor on the card surface. The most important RuView-specific trigger types to support are: `state_changed` on `RoomState` entities with a threshold expression (e.g. `anomaly.value > 0.8`), SEED reflex-rule firing events (`fragility_alarm`, `hd_anomaly_indicator`), and custom `domain_event` topics. Actions include calling services in the homecore service registry and firing domain events. The condition expression editor uses `--mono`.
+- **Automation builder** ([ADR-129](ADR-129-homecore-automation-engine.md) scope) — a trigger → condition → action editor on the card surface. The most important EchoPose-specific trigger types to support are: `state_changed` on `RoomState` entities with a threshold expression (e.g. `anomaly.value > 0.8`), SEED reflex-rule firing events (`fragility_alarm`, `hd_anomaly_indicator`), and custom `domain_event` topics. Actions include calling services in the homecore service registry and firing domain events. The condition expression editor uses `--mono`.
 
 ### 4.9 Witness / Audit Log
 
@@ -190,7 +190,7 @@ The full baseline → enroll → train → verify pipeline runs via HTTP against
 
 - **SEED fleet management** — add, remove, and reprovision SEEDs. Show the USB-only pairing requirement prominently (the pairing window only opens via `169.254.42.1`, not WiFi — a security invariant). Per-SEED: `device_id` in `--mono`, firmware version, bearer token status, and a "Rotate token" action (ghost) that walks the operator through the secure token rotation flow.
 - **ESP32 node provisioning** — per-node NVS config display (target IP, target port, node_id), last-seen firmware version, and a link to the provisioning script. The `node_id` → room/zone assignment is editable here and persists to the room calibration system's `room_id` mapping.
-- **MQTT / cog-ha-matter config** ([ADR-116](ADR-116-cog-ha-matter-seed.md)) — broker URL, credentials (masked), MQTT topic prefix, mDNS advertisement status (`_ruview-ha._tcp`), and a live connection indicator (green dot for connected, red for unreachable). The 21 HA-DISCO entities per node are listed here with their `via_device` assignments showing which SEED they belong to in HA's device registry.
+- **MQTT / cog-ha-matter config** ([ADR-116](ADR-116-cog-ha-matter-seed.md)) — broker URL, credentials (masked), MQTT topic prefix, mDNS advertisement status (`_echopose-ha._tcp`), and a live connection indicator (green dot for connected, red for unreachable). The 21 HA-DISCO entities per node are listed here with their `via_device` assignments showing which SEED they belong to in HA's device registry.
 - **Long-lived access tokens** — for homecore-api companion-app connections (HA 2025.1 wire-compat, [ADR-130](ADR-130-homecore-rest-websocket-api.md)). Token creation, last-used timestamp, and revocation. The HA companion-app pairing QR-code flow surfaces here.
 - **Federation config** — for multi-SEED deployments: ESP-NOW mesh sync status, cross-SEED epoch alignment values, and federated-learning round settings (coordinator SEED, round cadence, Krum aggregation parameters per [ADR-105](ADR-105-federated-csi-training.md)). The design invariant **"model deltas only, never raw CSI"** must be labelled explicitly in this panel.
 
@@ -274,7 +274,7 @@ The complete UI depends on backing services that mature on their own timelines. 
 
 - `https://seed.cognitum.one/store` — primary design reference for all visual conventions.
 - `https://seed.cognitum.one/status` — reference for live metric-card layout.
-- [ADR-126](ADR-126-ruview-native-ha-port-master.md) — HOMECORE master ADR.
+- [ADR-126](ADR-126-echopose-native-ha-port-master.md) — HOMECORE master ADR.
 - [ADR-127](ADR-127-homecore-state-machine-rust.md) — HOMECORE-CORE state machine and entity registry.
 - [ADR-128](ADR-128-homecore-integration-plugin-system.md) — HOMECORE-PLUGINS WASM COG substrate.
 - [ADR-129](ADR-129-homecore-automation-engine.md) — HOMECORE automation engine.
@@ -369,7 +369,7 @@ The gateway holds a **SEED registry** (`device_id` → base URL + bearer token +
 
 ### 11.5 Appliance metrics collector (§4.1)
 
-`GET /api/homecore/appliance`, implemented in the gateway: CPU/RAM/uptime from `/proc`; Hailo load + temperature from the Hailo runtime/sysfs (or `ruvector-hailo-worker` stats); service health by probing `ruview-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`; event-bus rate from the `homecore` broadcast channel + its lag counter (already exposed for §4.1/§4.4).
+`GET /api/homecore/appliance`, implemented in the gateway: CPU/RAM/uptime from `/proc`; Hailo load + temperature from the Hailo runtime/sysfs (or `ruvector-hailo-worker` stats); service health by probing `echopose-mcp-brain:9876`, `cognitum-rvf-agent:9004`, `ruvector-hailo-worker:50051`; event-bus rate from the `homecore` broadcast channel + its lag counter (already exposed for §4.1/§4.4).
 
 ### 11.6 COG supervisor (§4.6)
 
@@ -381,7 +381,7 @@ The gateway holds a **SEED registry** (`device_id` → base URL + bearer token +
 
 ### 11.8 Event history + automation CRUD (§4.8)
 
-`homecore-api` adds `GET /api/events?since=…` backed by `homecore-recorder` ([ADR-132](ADR-132-homecore-recorder-history-semantic-search.md)) for history (live updates continue over the existing WS). The automation builder persists through `GET/POST/DELETE /api/homecore/automations`, a thin HTTP wrapper over the `homecore-automation` engine's register/list/remove ([ADR-129](ADR-129-homecore-automation-engine.md)). RuView-specific triggers (RoomState thresholds, SEED reflex events) map onto the engine's trigger types.
+`homecore-api` adds `GET /api/events?since=…` backed by `homecore-recorder` ([ADR-132](ADR-132-homecore-recorder-history-semantic-search.md)) for history (live updates continue over the existing WS). The automation builder persists through `GET/POST/DELETE /api/homecore/automations`, a thin HTTP wrapper over the `homecore-automation` engine's register/list/remove ([ADR-129](ADR-129-homecore-automation-engine.md)). EchoPose-specific triggers (RoomState thresholds, SEED reflex events) map onto the engine's trigger types.
 
 ### 11.9 Entity provenance convention (§4.4/§6)
 

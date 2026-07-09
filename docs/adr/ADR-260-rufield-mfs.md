@@ -6,11 +6,11 @@ Date: 2026 06 14
 
 Deciders: rUv
 
-Tags: sensing, rf, csi, cir, bfld, radar, ultrasonic, infrared, quantum sensing, privacy, provenance, ruvector, ruview
+Tags: sensing, rf, csi, cir, bfld, radar, ultrasonic, infrared, quantum sensing, privacy, provenance, ruvector, echopose
 
 ## 1. Context
 
-RuView proved that commodity wireless signals can be used as a practical sensing substrate. The next opportunity is larger: define a common specification for multimodal ambient sensing across RF, ultrasonic, subsonic, infrared, radar, and future quantum sensors.
+EchoPose proved that commodity wireless signals can be used as a practical sensing substrate. The next opportunity is larger: define a common specification for multimodal ambient sensing across RF, ultrasonic, subsonic, infrared, radar, and future quantum sensors.
 
 Existing standards are valuable but fragmented.
 
@@ -80,7 +80,7 @@ Each has different sampling, calibration, confidence, privacy, and provenance se
 6. Define fusion rules for multimodal inference.
 7. Provide a Rust reference implementation.
 8. Provide benchmark tasks for camera free room intelligence.
-9. Make RuView one adapter inside a larger open sensing architecture.
+9. Make EchoPose one adapter inside a larger open sensing architecture.
 
 ## 6. Non Goals
 
@@ -226,7 +226,7 @@ Camera free room intelligence: person enters, sits, breathing detected, sleeps, 
 
 | Option                                        | Interop | Novelty | Buildability | Business value | Risk | Score |
 | --------------------------------------------- | ------: | ------: | -----------: | -------------: | ---: | ----: |
-| Extend RuView only                            |       2 |       2 |            5 |              3 |    2 |    14 |
+| Extend EchoPose only                            |       2 |       2 |            5 |              3 |    2 |    14 |
 | Build proprietary fusion engine               |       3 |       3 |            4 |              4 |    3 |    17 |
 | Create open RuField spec plus reference stack |       5 |       5 |            4 |              5 |    3 |    22 |
 | Attempt new hardware standard                 |       5 |       5 |            1 |              4 |    5 |    20 |
@@ -255,7 +255,7 @@ Every inference must include: label, confidence, supporting events, contradictin
 
 ## 25. Consequences
 
-Positive: RuView becomes part of a larger sensing ecosystem; the spec creates a standards-style wedge without waiting for silicon vendors; multimodal fusion becomes portable; privacy and provenance become differentiators; enterprise deployment becomes easier to justify; benchmark receipts reduce skepticism.
+Positive: EchoPose becomes part of a larger sensing ecosystem; the spec creates a standards-style wedge without waiting for silicon vendors; multimodal fusion becomes portable; privacy and provenance become differentiators; enterprise deployment becomes easier to justify; benchmark receipts reduce skepticism.
 
 Negative: broad scope can dilute execution; hardware variability will be painful; calibration is the hardest practical problem; some will claim existing standards already solve parts of this; medical and biometric use cases require careful governance.
 
@@ -314,7 +314,7 @@ And produces a deterministic benchmark report
 ## Implementation Status (v0.1 reference stack)
 
 The v0.1 reference stack is implemented as a **standalone Cargo workspace**
-(`rufield/`, published as `github.com/ruvnet/rufield` and vendored into RuView
+(`rufield/`, published as `github.com/ruvnet/rufield` and vendored into EchoPose
 as a submodule — the `vendor/rvcsi` pattern). It is pure Rust, builds and tests
 on Windows with no native deps (`ndarray`/`tch`/`openblas` are not used), and
 depends only on `serde`, `serde_json`, `toml`, `sha2`, and `ed25519-dalek`.

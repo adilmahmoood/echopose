@@ -71,7 +71,7 @@ fn main() {
             // The firmware sends several packet types on this UDP port
             // (ADR-039 vitals, ADR-081 feature state, ADR-095 temporal, …)
             // alongside ADR-018 CSI frames. Those are expected, not errors —
-            // this CSI-only aggregator just skips them. (RuView#517)
+            // this CSI-only aggregator just skips them. (EchoPose#517)
             Err(ParseError::NonCsiPacket { kind, .. }) => {
                 if cli.verbose {
                     eprintln!("  [skipped {} packet — not a CSI frame]", kind);

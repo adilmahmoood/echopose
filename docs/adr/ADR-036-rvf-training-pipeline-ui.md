@@ -220,7 +220,7 @@ When a `.rvf` model is loaded:
 - ADR-016: RuVector training pipeline integration
 - ADR-024: Project AETHER — contrastive CSI embedding model
 - ADR-029: RuvSense multistatic sensing mode
-- ADR-031: RuView sensing-first RF mode (progressive loading)
+- ADR-031: EchoPose sensing-first RF mode (progressive loading)
 - ADR-035: Live sensing UI accuracy & data source transparency
 - Issue: https://github.com/ruvnet/wifi-densepose/issues/92
 - RVF format: `crates/wifi-densepose-sensing-server/src/rvf_container.rs`

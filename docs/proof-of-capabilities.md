@@ -209,7 +209,7 @@ A facade hides its failures. We document ours in detail:
 - Hacker News discussion — https://news.ycombinator.com/item?id=46388904
 - Cybernews coverage — https://cybernews.com/security/viral-github-project-wifi-see-through-walls/
 - byteiota, "Real or AI-Generated Hype?" — https://byteiota.com/wifi-densepose-hits-github-2-real-or-ai-generated-hype/
-- agentpedia, "RuView and the Reproducibility Question" — https://agentpedia.codes/blog/ruview-guide
+- agentpedia, "EchoPose and the Reproducibility Question" — https://agentpedia.codes/blog/echopose-guide
 - Audit fork (the specific allegations) — https://github.com/deletexiumu/wifi-densepose
 
 ---

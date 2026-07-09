@@ -64,7 +64,7 @@ pub trait PluginRuntime: Send + Sync + 'static {
 /// Native in-process runtime — loads first-party Rust plugins directly.
 ///
 /// No WASM compilation; no sandbox. Intended for first-party plugins
-/// (RuView MQTT bridge, presence sensor, etc.) that are compiled into the
+/// (EchoPose MQTT bridge, presence sensor, etc.) that are compiled into the
 /// HOMECORE binary and therefore trusted. Third-party / community plugins
 /// must use the `WasmtimeRuntime` (P2) for isolation.
 pub struct InProcessRuntime;

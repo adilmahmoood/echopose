@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| **Status** | **Implemented (2026-04-27)** — live at https://ruvnet.github.io/RuView/nvsim/. PR #436 open against main. 8/12 §11 gates ✅, 4/12 ⚠ (require external infrastructure). |
+| **Status** | **Implemented (2026-04-27)** — live at https://ruvnet.github.io/EchoPose/nvsim/. PR #436 open against main. 8/12 §11 gates ✅, 4/12 ⚠ (require external infrastructure). |
 | **Date** | 2026-04-26 |
 | **Authors** | ruv |
 | **Refines** | ADR-089 (`nvsim` simulator), ADR-090 (Lindblad extension), ADR-091 (stand-off radar) |
-| **Companion** | `assets/NVsim Dashboard.zip` (mockup), `docs/research/quantum-sensing/15-nvsim-implementation-plan.md` (Pass-6 plan), `docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md` (use-case framing) |
+| **Companion** | `assets/NVsim Dashboard.zip` (mockup), `docs/research/quantum-sensing/15-nvsim-implementation-plan.md` (Pass-6 plan), `docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md` (use-case framing) |
 | **Branch** | `feat/nvsim-pipeline-simulator` |
 | **Acceptance gates** | Sections §11 and §12 below |
 
@@ -48,7 +48,7 @@ backed by the **real Rust simulator** through two parallel transports:
 
 The two transports share a single TypeScript client interface so the
 dashboard treats them interchangeably. This is the same dual-transport
-pattern RuView's WiFi-CSI and 60 GHz vital-signs stacks already follow
+pattern EchoPose's WiFi-CSI and 60 GHz vital-signs stacks already follow
 (`wifi-densepose-sensing-server` + `wifi-densepose-wasm`), brought to the
 quantum-sensing tier.
 
@@ -103,7 +103,7 @@ their own UI without forking the dashboard.
   after first load (PWA service worker).
 - **Embeddable**. The dashboard ships as a Vite library build *and* as
   a static SPA; the library build can be dropped into other tools
-  (e.g. a future RuView fleet console).
+  (e.g. a future EchoPose fleet console).
 - **Accessible**. WCAG 2.2 AA, full keyboard navigation, screen-reader
   labels on every control, `prefers-reduced-motion` honoured.
 - **Mobile-usable**. The mockup already has 1180px and 860px breakpoints;
@@ -287,7 +287,7 @@ artifact whose SHA-256 the dashboard pins.
 
 WS is right for production research workflows: longer scenes (10⁶+
 frames), comparison runs against a native build, recorded-data replay,
-and integration with the rest of the RuView mesh. The same dashboard,
+and integration with the rest of the EchoPose mesh. The same dashboard,
 same UI, different `NvsimClient` impl. Users opt in by entering a
 `ws://` URL in settings.
 
@@ -723,7 +723,7 @@ contributor. Parallelisable with hand-off boundaries on Pass 3.
 | 11.4 | Bundle ≤ 300 KB / WASM ≤ 1 MB | ✅ | ~140 KB gzipped JS, 162 KB WASM. |
 | 11.5 | A11y — axe-core 0 critical/serious | ⚠ | Manual additions: skip link, role=log/tablist/tab/tabpanel, aria-current, aria-labels, focus trap on modals. Formal axe-core scan deferred. |
 | 11.6 | Keyboard-only | ⚠ | Skip link + tabindex on `<main>` + focus trap. Not every flow validated Tab-only. |
-| 11.7 | Offline (PWA) | ✅ | manifest.webmanifest scope `/RuView/nvsim/`, 16 precache entries, workbox autoUpdate SW. |
+| 11.7 | Offline (PWA) | ✅ | manifest.webmanifest scope `/EchoPose/nvsim/`, 16 precache entries, workbox autoUpdate SW. |
 | 11.8 | Cross-browser | ⚠ | Chromium tested via agent-browser. FF + Safari pending post-merge. |
 | 11.9 | REPL parity | ✅ | Every command in §4.3 implemented (help, scene.list, sensor.config, run, pause, reset, seed, proof.verify, proof.export, clear, theme, status). |
 | 11.10 | Shortcut parity | ✅ | Every chord in §4.4 implemented (⌘K, Space, ⌘R, ⌘,, ⌘N, ⌘E, ⌘/, `, ?, 1/2/3, Esc, /). |
@@ -786,7 +786,7 @@ WASM/WS swap painless and what enables the third-party `@ruvnet/nvsim-client` pa
 
 ## 14. Open questions
 
-1. **PWA scope on GitHub Pages**: GitHub Pages serves at `/RuView/`
+1. **PWA scope on GitHub Pages**: GitHub Pages serves at `/EchoPose/`
    when not using a custom domain. Service worker scope must be
    declared accordingly. Resolved in Pass 6.
 2. **Onboarding copy**: who writes the welcome-tour text? Mockup has
@@ -870,7 +870,7 @@ Each entry in `dashboard/src/store/apps.ts` carries:
 
 ### 14a.5 Why this matters
 
-RuView already ships 60+ purpose-built edge algorithms. Without an
+EchoPose already ships 60+ purpose-built edge algorithms. Without an
 operator surface they exist only in source code; the App Store makes
 them **discoverable** and **toggleable** without recompiling firmware.
 This is the V3 dashboard equivalent of an iOS-style app catalog —
@@ -897,7 +897,7 @@ also have an entry in `apps.ts` (lint check planned for V2).
   the Tunables panel once shipped)
 - **ADR-091** — stand-off radar research (orthogonal; no UI overlap)
 - **`docs/research/quantum-sensing/15-nvsim-implementation-plan.md`** — six-pass plan model
-- **`docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md`** — the use-case framing
+- **`docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md`** — the use-case framing
 - **`assets/NVsim Dashboard.zip`** — the canonical UI mockup (single-file HTML, 4200 LOC)
 - **`wifi-densepose-sensing-server`** — REST/WS pattern this server follows
 - **`wifi-densepose-wasm`** — WASM pattern this client follows

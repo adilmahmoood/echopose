@@ -8,7 +8,7 @@ We already ship a contactless breathing-rate detector (`v1/v2` sensing-server, A
 
 The 10-20 year question: **what happens when every appliance with a CPU and a WiFi radio knows the occupant's physiological baseline + current state, and modulates its behaviour to support the occupant's wellbeing?**
 
-The current RuView stack provides the *sensing primitives* (breathing rate, heart rate, occupancy, motion intensity, RSSI-only counting per R8). What it doesn't yet provide is the *intent-action layer* — an appliance that says "the occupant has been breathing fast for 8 minutes; their normal baseline is 12 BPM; let me dim the lights and lower the music."
+The current EchoPose stack provides the *sensing primitives* (breathing rate, heart rate, occupancy, motion intensity, RSSI-only counting per R8). What it doesn't yet provide is the *intent-action layer* — an appliance that says "the occupant has been breathing fast for 8 minutes; their normal baseline is 12 BPM; let me dim the lights and lower the music."
 
 ## Three concrete vertical sketches
 
@@ -30,7 +30,7 @@ Thermal stress affects breathing-rate envelope (>30°C → +20% baseline RR). A 
 
 A smart speaker that **doesn't interrupt** when the occupant's breathing pattern shows high cognitive load (focused reading: shallow + regular). The sensing already exists; the appliance integration is the gap.
 
-Honest scope check: this requires that someone publishes both (a) a reliable shallow-breathing-during-focus signature, and (b) a hands-off way for appliances to receive that signal. RuView ships (a)'s building blocks; (b) needs an MCP-style standard which **ADR-104 (`@ruv/ruview-mcp`)** is the first step toward.
+Honest scope check: this requires that someone publishes both (a) a reliable shallow-breathing-during-focus signature, and (b) a hands-off way for appliances to receive that signal. EchoPose ships (a)'s building blocks; (b) needs an MCP-style standard which **ADR-104 (`@ruv/echopose-mcp`)** is the first step toward.
 
 ## Required infrastructure (already in repo or close)
 
@@ -49,7 +49,7 @@ The four ❌/⚠️ items are the actual work for V1 ship-readiness. Roughly 1-2
 
 ## Ethical framework (drafted, not normative)
 
-Empathic appliances raise three explicit consent questions that smart-speaker-vendors so far have *not* answered well. Any RuView-based empathic-appliance product should commit to all of these in writing:
+Empathic appliances raise three explicit consent questions that smart-speaker-vendors so far have *not* answered well. Any EchoPose-based empathic-appliance product should commit to all of these in writing:
 
 1. **Opt-in by default.** Sensing is on only if the occupant has actively enabled it. Default = off, not buried in settings.
 2. **Data stays on-device.** The breathing-rate stream is the most invasive biometric in the building. Per-second values **must never** leave the local appliance/Cognitum Seed. Only **aggregate state** (e.g. "stressed" / "neutral" / "asleep") may be exposed to integrations, and only via the user's explicit MCP grant.
@@ -90,12 +90,12 @@ These three constraints are surprisingly load-bearing — they rule out the most
 - **R5** (saliency) — empathic appliance state classification will have its own task-specific saliency, different from counting and structure-detection.
 - **R8** (RSSI-only) — V1 lighting only needs breathing rate, which requires CSI. V3 conversational requires the per-subcarrier shape lost in band-mean. **R14 is CSI-only**, not RSSI-feasible — bounds the rollout to ESP32-S3-class deployments.
 - **R7** (multi-link consistency) — directly relevant to the adversarial-poisoning threat in the privacy table.
-- **ADR-104** (`@ruv/ruview-mcp`) — the actual hands-off appliance API. Empathic-appliance integrations subscribe via MCP `ruview_vitals_subscribe` (not yet built; see HORIZON.md deferred list).
+- **ADR-104** (`@ruv/echopose-mcp`) — the actual hands-off appliance API. Empathic-appliance integrations subscribe via MCP `echopose_vitals_subscribe` (not yet built; see HORIZON.md deferred list).
 - **ADR-103** (`cog-person-count`) — the per-room occupancy gate ("only do empathic actions when an occupant is present and consented").
 
 ## Next ticks
 
 - Per-room baseline learner module (extend `RollingP95` to cover breathing-rate + heart-rate over 7-day windows).
 - State-classifier model architecture (3-class: stressed / neutral / asleep — simple MLP over breathing/heart/motion features).
-- MCP tool `ruview_vitals_subscribe` — the hands-off integration that lets a partner appliance subscribe to the aggregate state stream.
+- MCP tool `echopose_vitals_subscribe` — the hands-off integration that lets a partner appliance subscribe to the aggregate state stream.
 - ADR for the consent-default-off, override-one-tap, no-cloud-sync constraints. Possibly ADR-105.

@@ -7,7 +7,7 @@
 | **Deciders** | ruv |
 | **Codename** | **PIP-PHOENIX** — rising from a pure-Python server to Rust-core Python bindings |
 | **Relates to** | [ADR-021](ADR-021-esp32-vitals.md) (ESP32 vitals), [ADR-028](ADR-028-esp32-capability-audit.md) (capability audit / witness), [ADR-115](ADR-115-home-assistant-integration.md) (HA-DISCO + HA-MIND MQTT semantics), [ADR-116](ADR-116-cog-ha-matter-seed.md) (HA-COG Seed packaging) |
-| **Tracking issue** | TBD — file under RuView issue tracker |
+| **Tracking issue** | TBD — file under EchoPose issue tracker |
 
 ---
 
@@ -269,7 +269,7 @@ wifi-densepose/                  ← PyPI package name (unchanged)
     client/
       __init__.py
       ws.py                      ← asyncio WebSocket client for sensing-server /ws/sensing
-      mqtt.py                    ← paho-mqtt wrapper for ruview/<node_id>/raw/* topics
+      mqtt.py                    ← paho-mqtt wrapper for echopose/<node_id>/raw/* topics
       ha.py                      ← helpers for HA-DISCO payloads (read-only, mirrors ADR-115 §3.2)
     witness/
       __init__.py
@@ -350,8 +350,8 @@ async with SensingClient("ws://localhost:8765/ws/sensing") as client:
             print(msg.breathing_rate_bpm, msg.heartrate_bpm)
 ```
 
-`wifi_densepose.client.mqtt.RuViewMqttClient` wraps paho-mqtt and subscribes to
-`ruview/<node_id>/raw/+` as defined in ADR-115 §3.2.
+`wifi_densepose.client.mqtt.EchoPoseMqttClient` wraps paho-mqtt and subscribes to
+`echopose/<node_id>/raw/+` as defined in ADR-115 §3.2.
 
 Both clients are **pure Python** (no PyO3) and are optional dependencies (`pip install
 wifi-densepose[client]`). They depend on `websockets>=12` and `paho-mqtt>=2` respectively.
@@ -397,7 +397,7 @@ frame = BfldFrame.from_compressed_feedback(
 
 # P3 also ships a stub `BfldReport` aggregator that mirrors how
 # `VitalEstimate` aggregates `VitalReading`s. Users who have BFR
-# pipelines feeding RuView can use this today via the
+# pipelines feeding EchoPose can use this today via the
 # bring-your-own-parser path.
 
 # Tomorrow (post-v2.0): the `wifi-densepose-bfld` Rust crate (TBD —
@@ -424,7 +424,7 @@ core:
    firmware. BFR ingestion works on stock 802.11ac/ax hardware
    (capture via `tcpdump`/Wireshark + a BFR dissector). Shipping the
    Python data structures first gives the community a way to feed
-   RuView from gear we don't directly support.
+   EchoPose from gear we don't directly support.
 
 #### Implementation surface in P3
 
@@ -531,7 +531,7 @@ scaffold  core   vitals+   client   publish  deferred
 ### P4 — WS/MQTT client layer (1 week)
 
 - [ ] Implement `wifi_densepose.client.ws.SensingClient` (asyncio, `websockets>=12`).
-- [ ] Implement `wifi_densepose.client.mqtt.RuViewMqttClient` (paho-mqtt 2.x).
+- [ ] Implement `wifi_densepose.client.mqtt.EchoPoseMqttClient` (paho-mqtt 2.x).
 - [ ] Add `wifi_densepose.client.ha` helpers that parse ADR-115 MQTT discovery payloads
   into Python dataclasses.
 - [ ] Integration test: spin up `sensing-server` in Docker with `--mock-frames`;
@@ -609,7 +609,7 @@ raise ImportError(
     "wifi-densepose 1.x has been superseded by v2.0.0 which wraps "
     "the Rust-based stack. Run:\n\n"
     "    pip install wifi-densepose==2.0.0\n\n"
-    "Migration guide: https://github.com/ruvnet/RuView/blob/main/docs/pip-migration.md\n"
+    "Migration guide: https://github.com/ruvnet/EchoPose/blob/main/docs/pip-migration.md\n"
     "Legacy v1 source: archive/v1/ in the repository"
 )
 ```

@@ -98,7 +98,7 @@ cargo run -p wifi-densepose-bfld --example bfld_handle     # worker-thread + HA-
 | [119](../../../docs/adr/ADR-119-bfld-frame-format-and-wire-protocol.md) | Wire format (86-byte header + payload sections + CRC-32/ISO-HDLC) |
 | [120](../../../docs/adr/ADR-120-bfld-privacy-class-and-hash-rotation.md) | 4 privacy classes + per-site keyed hash with daily rotation |
 | [121](../../../docs/adr/ADR-121-bfld-identity-risk-scoring.md) | Multiplicative risk score + coherence-gate hysteresis + Soul Signature exemption |
-| [122](../../../docs/adr/ADR-122-bfld-ruview-ha-matter-exposure.md) | HA-DISCO + Matter cluster boundary + MQTT topic routing |
+| [122](../../../docs/adr/ADR-122-bfld-echopose-ha-matter-exposure.md) | HA-DISCO + Matter cluster boundary + MQTT topic routing |
 | [123](../../../docs/adr/ADR-123-bfld-capture-path-nexmon-and-esp32.md) | Pi 5 / Nexmon capture adapter + ESP32 self-only mode |
 
 ## Testing

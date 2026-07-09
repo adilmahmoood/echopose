@@ -80,4 +80,4 @@ The `build_firmware.ps1` script handles all of this automatically.
 - [ADR-018](ADR-018-esp32-dev-implementation.md) — ESP32 CSI frame format and UDP streaming
 - [ADR-058](ADR-058-ruvector-wasm-browser-pose-example.md) — Dual-modal WASM browser pose demo
 - [ADR-039](ADR-039-edge-intelligence-framework.md) — Edge intelligence on ESP32
-- Issue [#245](https://github.com/ruvnet/RuView/issues/245) — Tracking issue
+- Issue [#245](https://github.com/ruvnet/EchoPose/issues/245) — Tracking issue

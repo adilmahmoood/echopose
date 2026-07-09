@@ -1,7 +1,7 @@
 //! TDM (Time-Division Multiplexed) sensing protocol for multistatic WiFi sensing.
 //!
 //! Implements the TDMA sensing schedule described in ADR-029 (RuvSense) and
-//! ADR-031 (RuView). Each ESP32 node transmits NDP frames in its assigned slot
+//! ADR-031 (EchoPose). Each ESP32 node transmits NDP frames in its assigned slot
 //! while all other nodes receive, producing N*(N-1) bistatic CSI links per cycle.
 //!
 //! # 4-Node Example (ADR-029 Table)

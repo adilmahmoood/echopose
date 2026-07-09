@@ -121,8 +121,8 @@ sudo apt install -y \
 This prepares the native GTK/WebKit dependencies used by the desktop/Tauri crates in this workspace.
 
 ```bash
-git clone https://github.com/ruvnet/RuView.git
-cd RuView/v2
+git clone https://github.com/ruvnet/EchoPose.git
+cd EchoPose/v2
 
 # Build
 cargo build --release
@@ -173,29 +173,29 @@ reads better in your code:
 
 | PyPI | Install | Latest | Import |
 |---|---|---|---|
-| [`ruview`](https://pypi.org/project/ruview/) | `pip install ruview` | `2.0.0a1` | `from ruview import ...` |
+| [`echopose`](https://pypi.org/project/echopose/) | `pip install echopose` | `2.0.0a1` | `from echopose import ...` |
 | [`wifi-densepose`](https://pypi.org/project/wifi-densepose/) | `pip install wifi-densepose` | `2.0.0a1` | `from wifi_densepose import ...` |
 
 ```bash
-pip install ruview                        # core DSP (~250 KB compiled wheel)
-pip install "ruview[client]"              # + asyncio WebSocket + paho-mqtt
+pip install echopose                        # core DSP (~250 KB compiled wheel)
+pip install "echopose[client]"              # + asyncio WebSocket + paho-mqtt
 ```
 
 ```python
 # vitals
-from ruview import BreathingExtractor, HeartRateExtractor
+from echopose import BreathingExtractor, HeartRateExtractor
 br = BreathingExtractor.esp32_default()   # 56 subcarriers @ 100 Hz, 30s window
 
 # live sensing-server stream
-from ruview.client import SensingClient, EdgeVitalsMessage
+from echopose.client import SensingClient, EdgeVitalsMessage
 async with SensingClient("ws://localhost:8765/ws/sensing") as c:
     async for msg in c.stream():
         if isinstance(msg, EdgeVitalsMessage):
             print(msg.breathing_rate_bpm, msg.heartrate_bpm)
 
 # Home Assistant semantic primitives (ADR-115 HA-MIND)
-from ruview.client import (
-    RuViewMqttClient, SemanticPrimitive, SemanticPrimitiveListener,
+from echopose.client import (
+    EchoPoseMqttClient, SemanticPrimitive, SemanticPrimitiveListener,
 )
 ```
 
@@ -208,13 +208,13 @@ matrix on each `v*-pip` tag.
 > **Migrating from v1.x?** The legacy `wifi-densepose==1.1.0` FastAPI
 > server is end-of-life. `wifi-densepose==1.99.0` is a tombstone that
 > raises `ImportError` with a migration URL; upgrade to `>=2.0.0a1`
-> (or switch to `ruview`).
+> (or switch to `echopose`).
 
 To build the wheel from source (e.g. for a local change):
 
 ```bash
-git clone https://github.com/ruvnet/RuView.git
-cd RuView/python
+git clone https://github.com/ruvnet/EchoPose.git
+cd EchoPose/python
 pip install maturin>=1.7
 maturin develop --release
 pytest tests/                              # 183 tests
@@ -223,15 +223,15 @@ pytest bench/ --benchmark-only             # 12 hot-path benchmarks
 
 Full API + tests breakdown is on the PyPI front page:
 [wifi-densepose on PyPI](https://pypi.org/project/wifi-densepose/) ·
-[ruview on PyPI](https://pypi.org/project/ruview/).
+[echopose on PyPI](https://pypi.org/project/echopose/).
 
 ### Guided Installer
 
 An interactive installer that detects your hardware and recommends a profile:
 
 ```bash
-git clone https://github.com/ruvnet/RuView.git
-cd RuView
+git clone https://github.com/ruvnet/EchoPose.git
+cd EchoPose
 ./install.sh
 ```
 
@@ -317,7 +317,7 @@ Uses `netsh wlan` to capture RSSI from nearby access points. No special hardware
 docker run --network host ruvnet/wifi-densepose:latest --source wifi --tick-ms 500
 ```
 
-> **Community verified:** Tested on Windows 10 (10.0.26200) with Intel Wi-Fi 6 AX201 160MHz, Python 3.14, StormFiber 5 GHz network. All 7 tutorial steps passed with stable RSSI readings at -48 dBm. See [Tutorial #36](https://github.com/ruvnet/RuView/issues/36) for the full walkthrough and test results.
+> **Community verified:** Tested on Windows 10 (10.0.26200) with Intel Wi-Fi 6 AX201 160MHz, Python 3.14, StormFiber 5 GHz network. All 7 tutorial steps passed with stable RSSI readings at -48 dBm. See [Tutorial #36](https://github.com/ruvnet/EchoPose/issues/36) for the full walkthrough and test results.
 
 **Vital signs from RSSI:** The sensing server now supports breathing rate estimation from RSSI variance patterns (requires stationary subject near AP) and motion classification with confidence scoring. RSSI-based vital sign detection has lower fidelity than ESP32 CSI — it is best for presence detection and coarse motion classification.
 
@@ -526,7 +526,7 @@ Base URL: `http://localhost:3000` (Docker) or `http://localhost:8080` (binary de
 
 ### RuField surface (ADR-262 P3)
 
-RuView's live WiFi-CSI sensing now also speaks the standalone **RuField MFS** wire format. Each governed sensing cycle is converted (via the `wifi-densepose-rufield` anti-corruption bridge) into a **signed** `FieldEvent` (`Modality::WifiCsi`, ed25519 `ProvenanceRef`) and surfaced on two additive endpoints:
+EchoPose's live WiFi-CSI sensing now also speaks the standalone **RuField MFS** wire format. Each governed sensing cycle is converted (via the `wifi-densepose-rufield` anti-corruption bridge) into a **signed** `FieldEvent` (`Modality::WifiCsi`, ed25519 `ProvenanceRef`) and surfaced on two additive endpoints:
 
 - `GET /api/field` — the most recent signed events (JSON).
 - `GET /ws/field` — a WebSocket that streams each cycle's signed event (mirrors `/ws/sensing`).
@@ -772,7 +772,7 @@ Full design + operator guide: [`docs/integrations/home-assistant.md`](integratio
    docker run --rm --net=host ruvnet/wifi-densepose:0.7.0 \
        --source esp32 --mqtt --mqtt-host <ha-host-ip>
    ```
-4. Within ~5 seconds HA auto-creates one **device** per RuView node with 21 entities: 11 raw signals (presence, person count, HR, BR, motion, fall, RSSI, zones, pose, …) plus 10 semantic primitives (someone-sleeping, possible-distress, room-active, elderly-inactivity-anomaly, meeting, bathroom, fall-risk, bed-exit, no-movement, multi-room-transition).
+4. Within ~5 seconds HA auto-creates one **device** per EchoPose node with 21 entities: 11 raw signals (presence, person count, HR, BR, motion, fall, RSSI, zones, pose, …) plus 10 semantic primitives (someone-sleeping, possible-distress, room-active, elderly-inactivity-anomaly, meeting, bathroom, fall-risk, bed-exit, no-movement, multi-room-transition).
 
 ### Privacy mode for healthcare / AAL
 
@@ -785,10 +785,10 @@ sensing-server --mqtt --mqtt-host <broker> --mqtt-tls --privacy-mode
 ### Matter Bridge (Apple Home / Google Home / Alexa / SmartThings)
 
 ```bash
-sensing-server --matter --matter-setup-file /var/run/ruview-matter.txt
+sensing-server --matter --matter-setup-file /var/run/echopose-matter.txt
 ```
 
-Open `/var/run/ruview-matter.txt` for the Matter pairing QR / 11-digit setup code. Scan it from Apple Home / Google Home / your HA Matter integration. RuView appears as a Bridged Device with one occupancy endpoint per node + per zone, plus a momentary switch for fall events.
+Open `/var/run/echopose-matter.txt` for the Matter pairing QR / 11-digit setup code. Scan it from Apple Home / Google Home / your HA Matter integration. EchoPose appears as a Bridged Device with one occupancy endpoint per node + per zone, plus a momentary switch for fall events.
 
 Detailed entity reference, blueprint catalog, troubleshooting recipe matrix: see [`docs/integrations/home-assistant.md`](integrations/home-assistant.md).
 
@@ -852,13 +852,13 @@ The `enable_privacy_mode()` runtime toggle on `BfldPipeline` engages `Restricted
 #### MQTT topic tree
 
 ```
-ruview/<node_id>/bfld/availability         online / offline
-ruview/<node_id>/bfld/presence/state       true / false
-ruview/<node_id>/bfld/motion/state         0.000000..1.000000
-ruview/<node_id>/bfld/person_count/state   integer
-ruview/<node_id>/bfld/confidence/state     0.000000..1.000000
-ruview/<node_id>/bfld/zone_activity/state  "<zone_name>"  (if configured)
-ruview/<node_id>/bfld/identity_risk/state  0.000000..1.000000  (class 2 only)
+echopose/<node_id>/bfld/availability         online / offline
+echopose/<node_id>/bfld/presence/state       true / false
+echopose/<node_id>/bfld/motion/state         0.000000..1.000000
+echopose/<node_id>/bfld/person_count/state   integer
+echopose/<node_id>/bfld/confidence/state     0.000000..1.000000
+echopose/<node_id>/bfld/zone_activity/state  "<zone_name>"  (if configured)
+echopose/<node_id>/bfld/identity_risk/state  0.000000..1.000000  (class 2 only)
 ```
 
 The `rumqttc 0.24` (`use-rustls`) backend ships behind the `mqtt` feature; `RumqttPublisher::connect_with_lwt(node_id, opts, capacity)` pre-configures the Last Will and Testament so the broker auto-publishes `"offline"` on session drop.
@@ -867,26 +867,26 @@ Detailed surface: [`v2/crates/wifi-densepose-bfld/README.md`](../v2/crates/wifi-
 
 ### SENSE-BRIDGE — rvagent MCP server for AI agents (ADR-124)
 
-`@ruvnet/rvagent` is a dual-transport MCP server that makes RuView sensing primitives callable by Claude Code, Cursor, and ruflo swarms without bespoke HTTP client code.
+`@ruvnet/rvagent` is a dual-transport MCP server that makes EchoPose sensing primitives callable by Claude Code, Cursor, and ruflo swarms without bespoke HTTP client code.
 
 **Install (Claude Code)**:
 
 ```bash
 claude mcp add rvagent -- npx @ruvnet/rvagent stdio
 # With a remote sensing-server:
-RUVIEW_SENSING_SERVER_URL=http://cognitum-v0:3000 claude mcp add rvagent -- npx @ruvnet/rvagent stdio
+ECHOPOSE_SENSING_SERVER_URL=http://cognitum-v0:3000 claude mcp add rvagent -- npx @ruvnet/rvagent stdio
 ```
 
 **Available tools (6 of 20 in v0.1.0)**:
 
 | Tool | Returns |
 |------|---------|
-| `ruview.presence.now` | `present`, `n_persons`, `confidence`, `timestamp_ms` |
-| `ruview.vitals.get_breathing` | `breathing_rate_bpm` (null if unavailable), `confidence` |
-| `ruview.vitals.get_heart_rate` | `heartrate_bpm` (null if unavailable), `confidence` |
-| `ruview.vitals.get_all` | Full `EdgeVitalsMessage` (all vitals in one call) |
-| `ruview.bfld.last_scan` | `identity_risk_score`, `privacy_class`, `n_frames`, `timestamp_ms` |
-| `ruview.bfld.subscribe` | `subscription_id`, `expires_at`, `topic` (MQTT wildcard) |
+| `echopose.presence.now` | `present`, `n_persons`, `confidence`, `timestamp_ms` |
+| `echopose.vitals.get_breathing` | `breathing_rate_bpm` (null if unavailable), `confidence` |
+| `echopose.vitals.get_heart_rate` | `heartrate_bpm` (null if unavailable), `confidence` |
+| `echopose.vitals.get_all` | Full `EdgeVitalsMessage` (all vitals in one call) |
+| `echopose.bfld.last_scan` | `identity_risk_score`, `privacy_class`, `n_frames`, `timestamp_ms` |
+| `echopose.bfld.subscribe` | `subscription_id`, `expires_at`, `topic` (MQTT wildcard) |
 
 **Streamable HTTP** (for remote ruflo swarms):
 
@@ -896,7 +896,7 @@ RVAGENT_HTTP_TOKEN=secret npx @ruvnet/rvagent http --port 3001
 # Cross-origin requests are rejected with 403; missing/wrong token → 401.
 ```
 
-Source: [`tools/ruview-mcp/`](../tools/ruview-mcp/README.md). Tracking issue: [#787](https://github.com/ruvnet/RuView/issues/787). Full ADR: [ADR-124](adr/ADR-124-rvagent-mcp-ruvector-npm-integration.md).
+Source: [`tools/echopose-mcp/`](../tools/echopose-mcp/README.md). Tracking issue: [#787](https://github.com/ruvnet/EchoPose/issues/787). Full ADR: [ADR-124](adr/ADR-124-rvagent-mcp-ruvector-npm-integration.md).
 
 ---
 
@@ -928,7 +928,7 @@ Both UIs update in real-time via WebSocket and auto-detect the sensing server on
 
 ## Dense Point Cloud (Camera + WiFi CSI Fusion)
 
-RuView can generate real-time 3D point clouds by fusing camera depth estimation with WiFi CSI spatial sensing. This creates a spatial model of the environment that updates in real-time.
+EchoPose can generate real-time 3D point clouds by fusing camera depth estimation with WiFi CSI spatial sensing. This creates a spatial model of the environment that updates in real-time.
 
 ### Setup
 
@@ -938,14 +938,14 @@ cd v2
 cargo build --release -p wifi-densepose-pointcloud
 
 # Start the server (auto-detects camera + CSI). Loopback-only by default.
-./target/release/ruview-pointcloud serve --bind 127.0.0.1:9880
+./target/release/echopose-pointcloud serve --bind 127.0.0.1:9880
 ```
 
 Open `http://localhost:9880` for the interactive Three.js 3D viewer.
 
 > **Security note.** The server exposes live camera, skeleton, vitals, and occupancy over HTTP. The `--bind` flag defaults to `127.0.0.1:9880` (loopback-only). Exposing on `0.0.0.0` or a LAN IP is opt-in — the server logs a warning when it does, but there is no auth/TLS layer. Put a reverse proxy in front if you need remote access.
 
-> **Brain URL.** Observations are POSTed to `http://127.0.0.1:9876` by default. Override via the `RUVIEW_BRAIN_URL` environment variable or the `--brain <url>` flag on `serve` / `train`.
+> **Brain URL.** Observations are POSTed to `http://127.0.0.1:9876` by default. Override via the `ECHOPOSE_BRAIN_URL` environment variable or the `--brain <url>` flag on `serve` / `train`.
 
 ### Sensors
 
@@ -959,13 +959,13 @@ Open `http://localhost:9880` for the interactive Three.js 3D viewer.
 
 | Command | Description |
 |---------|-------------|
-| `ruview-pointcloud serve --bind 127.0.0.1:9880` | Start HTTP server + Three.js viewer (loopback-only by default) |
-| `ruview-pointcloud demo` | Generate synthetic point cloud (no hardware needed) |
-| `ruview-pointcloud capture --output room.ply` | Capture single frame to PLY file |
-| `ruview-pointcloud cameras` | List available cameras |
-| `ruview-pointcloud train --data-dir ./data [--brain URL]` | Depth calibration + occupancy training (writes under canonicalized `data-dir`; refuses `..` traversal) |
-| `ruview-pointcloud csi-test --count 100` | Send test CSI frames (no ESP32 needed) |
-| `ruview-pointcloud fingerprint <name> [--seconds 5]` | Record a named CSI room fingerprint for later matching |
+| `echopose-pointcloud serve --bind 127.0.0.1:9880` | Start HTTP server + Three.js viewer (loopback-only by default) |
+| `echopose-pointcloud demo` | Generate synthetic point cloud (no hardware needed) |
+| `echopose-pointcloud capture --output room.ply` | Capture single frame to PLY file |
+| `echopose-pointcloud cameras` | List available cameras |
+| `echopose-pointcloud train --data-dir ./data [--brain URL]` | Depth calibration + occupancy training (writes under canonicalized `data-dir`; refuses `..` traversal) |
+| `echopose-pointcloud csi-test --count 100` | Send test CSI frames (no ESP32 needed) |
+| `echopose-pointcloud fingerprint <name> [--seconds 5]` | Record a named CSI room fingerprint for later matching |
 
 ### Pipeline Components
 
@@ -993,7 +993,7 @@ Open `http://localhost:9880` for the interactive Three.js 3D viewer.
 The training pipeline calibrates depth estimation and occupancy detection:
 
 ```bash
-ruview-pointcloud train --data-dir ~/.local/share/ruview/training --brain http://127.0.0.1:9876
+echopose-pointcloud train --data-dir ~/.local/share/echopose/training --brain http://127.0.0.1:9876
 ```
 
 This captures frames, runs depth calibration (grid search over scale/offset/gamma), trains occupancy thresholds, exports DPO preference pairs, and submits results to the ruOS brain.
@@ -1011,7 +1011,7 @@ Capture a high-quality 3D model of the room:
 ```bash
 # Stop the live server first (frees the camera)
 # Then capture 20 frames and process with MiDaS
-ruview-pointcloud capture --frames 20 --output room_model.ply
+echopose-pointcloud capture --frames 20 --output room_model.ply
 ```
 
 Result: 40,000+ voxels at 5cm resolution, 12,000+ Gaussian splats.
@@ -1138,7 +1138,7 @@ What it ships (and what it does not):
 
 | Capability | Status |
 |------------|--------|
-| Presence detection (occupied / empty) | ✅ Trained head — v2 encoder reports 82.3% held-out temporal-triplet acc (v1's "100% on validation" was a single-class recording — retracted, [#882](https://github.com/ruvnet/RuView/issues/882)) |
+| Presence detection (occupied / empty) | ✅ Trained head — v2 encoder reports 82.3% held-out temporal-triplet acc (v1's "100% on validation" was a single-class recording — retracted, [#882](https://github.com/ruvnet/EchoPose/issues/882)) |
 | 128-dim CSI embeddings (re-ID, similarity, downstream training) | ✅ Trained encoder |
 | Single-person breathing / heart-rate | ⚠️ Server still uses heuristic DSP — model does not replace this yet |
 | 17-keypoint full-body pose | 🔬 No keypoint weights shipped yet — pose pipeline runs but without a learned head |
@@ -1305,7 +1305,7 @@ Once trained, the adaptive model runs automatically:
 
 ## World Model Prediction (OccWorld)
 
-RuView integrates [OccWorld](https://github.com/wzzheng/OccWorld) (ECCV 2024) to predict
+EchoPose integrates [OccWorld](https://github.com/wzzheng/OccWorld) (ECCV 2024) to predict
 future 3D occupancy from WiFi CSI — extending the Kalman tracker's 5-frame horizon to
 15 predicted frames (~7 s). See [ADR-147](adr/ADR-147-nvidia-cosmos-world-foundation-model-integration.md)
 and the [benchmark proof](adr/ADR-168-benchmark-proof.md) for full details.
@@ -1332,19 +1332,19 @@ python3 scripts/occworld_retrain.py record \
 # 2. Fine-tune VQVAE tokenizer on indoor occupancy
 python3 scripts/occworld_retrain.py vqvae \
     --snapshots /tmp/snapshots/ \
-    --work-dir out/ruview_vqvae
+    --work-dir out/echopose_vqvae
 
 # 3. Fine-tune autoregressive transformer
 python3 scripts/occworld_retrain.py transformer \
     --snapshots /tmp/snapshots/ \
-    --vqvae-checkpoint out/ruview_vqvae/latest.pth \
-    --work-dir out/ruview_occworld
+    --vqvae-checkpoint out/echopose_vqvae/latest.pth \
+    --work-dir out/echopose_occworld
 
 # 4. Restart the server with your checkpoint
-~/ml-env/bin/python3 scripts/occworld_server.py /tmp/occworld.sock out/ruview_occworld/latest.pth
+~/ml-env/bin/python3 scripts/occworld_server.py /tmp/occworld.sock out/echopose_occworld/latest.pth
 ```
 
-`scripts/ruview_occ_dataset.py` is the domain adapter used internally by the retraining
+`scripts/echopose_occ_dataset.py` is the domain adapter used internally by the retraining
 pipeline — it converts WorldGraph JSON snapshots to OccWorld-format tensors with indoor
 class remapping and zero ego-poses. See ADR-147 Phase 3 for details.
 
@@ -1497,19 +1497,19 @@ A 3-6 node ESP32-S3 mesh provides full CSI at 20 Hz. Total cost: ~$54 for a 3-no
 
 **Flashing firmware:**
 
-Pre-built binaries are available at [Releases](https://github.com/ruvnet/RuView/releases):
+Pre-built binaries are available at [Releases](https://github.com/ruvnet/EchoPose/releases):
 
 | Release | What It Includes | Tag |
 |---------|-----------------|-----|
-| [v0.7.0](https://github.com/ruvnet/RuView/releases/tag/v0.7.0-esp32) | **Latest — ADR-110 firmware-side substrate closed.** Adds ESP-NOW mesh substrate with quantified ≤100 µs alignment (104.1 µs smoothed stdev, 3.95× suppression, 99.56 % cross-board match measured live), 32-byte sync-packet UDP emission with operator-tunable cadence, ADR-018 byte 19 bit 4 wire-fix sourced from working ESP-NOW path, Python SyncPacketParser stub for host wiring ([WITNESS-LOG-110 §A0.7-§A0.13](WITNESS-LOG-110.md)) | `v0.7.0-esp32` |
-| [v0.6.9](https://github.com/ruvnet/RuView/releases/tag/v0.6.9-esp32) | Sync-packet UDP emission, `CONFIG_C6_SYNC_EVERY_N_FRAMES` tunable cadence | `v0.6.9-esp32` |
-| [v0.6.8](https://github.com/ruvnet/RuView/releases/tag/v0.6.8-esp32) | ESP-NOW EMA-smoothed cross-board offset (3.95× suppression, 104 µs stdev) | `v0.6.8-esp32` |
-| [v0.6.7](https://github.com/ruvnet/RuView/releases/tag/v0.6.7-esp32) | Real LP-core motion-gate RISC-V program (B4 code path complete) + Wi-Fi 6 soft-AP with TWT Responder for two-board iTWT benches (B1/B2 unblock) | `v0.6.7-esp32` |
-| [v0.5.0](https://github.com/ruvnet/RuView/releases/tag/v0.5.0-esp32) | **Stable (S3 mesh, recommended)** — mmWave sensor fusion (MR60BHA2/LD2410 auto-detect), 48-byte fused vitals, all v0.4.3.1 fixes | `v0.5.0-esp32` |
-| [v0.4.3.1](https://github.com/ruvnet/RuView/releases/tag/v0.4.3.1-esp32) | Fall detection fix ([#263](https://github.com/ruvnet/RuView/issues/263)), 4MB flash ([#265](https://github.com/ruvnet/RuView/issues/265)), watchdog fix ([#266](https://github.com/ruvnet/RuView/issues/266)) | `v0.4.3.1-esp32` |
-| [v0.4.1](https://github.com/ruvnet/RuView/releases/tag/v0.4.1-esp32) | CSI build fix, compile guard, AMOLED display, edge intelligence ([ADR-057](../docs/adr/ADR-057-firmware-csi-build-guard.md)) | `v0.4.1-esp32` |
-| [v0.3.0-alpha](https://github.com/ruvnet/RuView/releases/tag/v0.3.0-alpha-esp32) | Alpha — adds on-device edge intelligence (ADR-039) | `v0.3.0-alpha-esp32` |
-| [v0.2.0](https://github.com/ruvnet/RuView/releases/tag/v0.2.0-esp32) | Raw CSI streaming, TDM, channel hopping, QUIC mesh | `v0.2.0-esp32` |
+| [v0.7.0](https://github.com/ruvnet/EchoPose/releases/tag/v0.7.0-esp32) | **Latest — ADR-110 firmware-side substrate closed.** Adds ESP-NOW mesh substrate with quantified ≤100 µs alignment (104.1 µs smoothed stdev, 3.95× suppression, 99.56 % cross-board match measured live), 32-byte sync-packet UDP emission with operator-tunable cadence, ADR-018 byte 19 bit 4 wire-fix sourced from working ESP-NOW path, Python SyncPacketParser stub for host wiring ([WITNESS-LOG-110 §A0.7-§A0.13](WITNESS-LOG-110.md)) | `v0.7.0-esp32` |
+| [v0.6.9](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.9-esp32) | Sync-packet UDP emission, `CONFIG_C6_SYNC_EVERY_N_FRAMES` tunable cadence | `v0.6.9-esp32` |
+| [v0.6.8](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.8-esp32) | ESP-NOW EMA-smoothed cross-board offset (3.95× suppression, 104 µs stdev) | `v0.6.8-esp32` |
+| [v0.6.7](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.7-esp32) | Real LP-core motion-gate RISC-V program (B4 code path complete) + Wi-Fi 6 soft-AP with TWT Responder for two-board iTWT benches (B1/B2 unblock) | `v0.6.7-esp32` |
+| [v0.5.0](https://github.com/ruvnet/EchoPose/releases/tag/v0.5.0-esp32) | **Stable (S3 mesh, recommended)** — mmWave sensor fusion (MR60BHA2/LD2410 auto-detect), 48-byte fused vitals, all v0.4.3.1 fixes | `v0.5.0-esp32` |
+| [v0.4.3.1](https://github.com/ruvnet/EchoPose/releases/tag/v0.4.3.1-esp32) | Fall detection fix ([#263](https://github.com/ruvnet/EchoPose/issues/263)), 4MB flash ([#265](https://github.com/ruvnet/EchoPose/issues/265)), watchdog fix ([#266](https://github.com/ruvnet/EchoPose/issues/266)) | `v0.4.3.1-esp32` |
+| [v0.4.1](https://github.com/ruvnet/EchoPose/releases/tag/v0.4.1-esp32) | CSI build fix, compile guard, AMOLED display, edge intelligence ([ADR-057](../docs/adr/ADR-057-firmware-csi-build-guard.md)) | `v0.4.1-esp32` |
+| [v0.3.0-alpha](https://github.com/ruvnet/EchoPose/releases/tag/v0.3.0-alpha-esp32) | Alpha — adds on-device edge intelligence (ADR-039) | `v0.3.0-alpha-esp32` |
+| [v0.2.0](https://github.com/ruvnet/EchoPose/releases/tag/v0.2.0-esp32) | Raw CSI streaming, TDM, channel hopping, QUIC mesh | `v0.2.0-esp32` |
 
 > **Important:** Always use **v0.4.3.1 or later**. Earlier versions have false fall detection alerts (v0.4.2 and below) and CSI disabled in the build config (pre-v0.4.1).
 
@@ -1521,7 +1521,7 @@ python -m esptool --chip esp32s3 --port COM7 --baud 460800 \
   0xf000 ota_data_initial.bin 0x20000 esp32-csi-node.bin
 ```
 
-**4MB flash boards** (e.g. ESP32-S3 SuperMini 4MB): download `esp32-csi-node-s3-4mb.bin` + `partition-table-s3-4mb.bin` from the [v0.6.7 release](https://github.com/ruvnet/RuView/releases/tag/v0.6.7-esp32) (882 KB binary, 52 % partition slack) and use `--flash-size 4MB`:
+**4MB flash boards** (e.g. ESP32-S3 SuperMini 4MB): download `esp32-csi-node-s3-4mb.bin` + `partition-table-s3-4mb.bin` from the [v0.6.7 release](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.7-esp32) (882 KB binary, 52 % partition slack) and use `--flash-size 4MB`:
 
 ```bash
 python -m esptool --chip esp32s3 --port COM7 --baud 460800 \
@@ -1615,8 +1615,8 @@ that negotiates and benchmarks the TWT agreement.
 ```bash
 # Board #1 (AP role): append to sdkconfig.defaults.esp32c6:
 CONFIG_C6_SOFTAP_HE_ENABLE=y
-CONFIG_C6_SOFTAP_HE_SSID="ruview-c6-twt"
-CONFIG_C6_SOFTAP_HE_PSK="ruviewtwt"
+CONFIG_C6_SOFTAP_HE_SSID="echopose-c6-twt"
+CONFIG_C6_SOFTAP_HE_PSK="echoposetwt"
 CONFIG_C6_SOFTAP_HE_CHANNEL=6
 
 idf.py set-target esp32c6 && idf.py build && idf.py -p COM6 flash
@@ -1627,7 +1627,7 @@ Responder=1 on channel 6. Board #2 provisions to associate with that SSID:
 
 ```bash
 python firmware/esp32-csi-node/provision.py --port COM9 \
-  --ssid "ruview-c6-twt" --password "ruviewtwt" --target-ip 192.168.1.20
+  --ssid "echopose-c6-twt" --password "echoposetwt" --target-ip 192.168.1.20
 ```
 
 Board #2 runs the existing `c6_twt_setup_default()` on connect and now
@@ -1636,7 +1636,7 @@ negotiates a real iTWT agreement against the cooperative AP — the
 `iTWT setup event received from AP` instead of the `INVALID_ARG` graceful
 fallback that fired against the bench's 11n-only `ruv.net` AP.
 
-NVS overrides for AP role (namespace `ruview`): `softap_ssid`, `softap_psk`,
+NVS overrides for AP role (namespace `echopose`): `softap_ssid`, `softap_psk`,
 `softap_chan` — provision once and the values survive firmware updates.
 
 **What's NOT on the C6 build** (vs S3 production): no AMOLED display (ADR-045 needs 8 MB + LCD touch driver), no WASM3 (ADR-040 needs PSRAM), no Seeed mmWave fusion (separate board). The C6 is a research/seed target, not a drop-in replacement for the S3 production node.
@@ -1702,7 +1702,7 @@ Binary size: 990 KB (8MB flash, 52% free) or 773 KB (4MB flash). v0.5.0 adds mmW
 docker run -p 3000:3000 -p 3001:3001 -p 5005:5005/udp -e CSI_SOURCE=esp32 ruvnet/wifi-densepose:latest
 ```
 
-See [ADR-018](../docs/adr/ADR-018-esp32-dev-implementation.md), [ADR-029](../docs/adr/ADR-029-ruvsense-multistatic-sensing-mode.md), and [Tutorial #34](https://github.com/ruvnet/RuView/issues/34).
+See [ADR-018](../docs/adr/ADR-018-esp32-dev-implementation.md), [ADR-029](../docs/adr/ADR-029-ruvsense-multistatic-sensing-mode.md), and [Tutorial #34](https://github.com/ruvnet/EchoPose/issues/34).
 
 ### Intel 5300 / Atheros NIC
 
@@ -1719,7 +1719,7 @@ These are advanced setups. See the respective driver documentation for installat
 
 ## Camera-Free Pose Training
 
-RuView can train a 17-keypoint COCO pose model **without any camera** by fusing 10 sensor signals from the ESP32 nodes and Cognitum Seed:
+EchoPose can train a 17-keypoint COCO pose model **without any camera** by fusing 10 sensor signals from the ESP32 nodes and Cognitum Seed:
 
 | Signal | Source | What it provides |
 |--------|--------|-----------------|
@@ -1912,7 +1912,7 @@ huggingface-cli download ruvnet/wifi-densepose-pretrained --local-dir models/pre
 
 The pre-trained encoder converts 8-dim CSI feature vectors into 128-dim embeddings. These embeddings power all 17 sensing applications:
 
-- **Presence detection** — v2 encoder: 82.3% held-out temporal-triplet accuracy (v1's "100%" was a single-class recording — retracted, [#882](https://github.com/ruvnet/RuView/issues/882))
+- **Presence detection** — v2 encoder: 82.3% held-out temporal-triplet accuracy (v1's "100%" was a single-class recording — retracted, [#882](https://github.com/ruvnet/EchoPose/issues/882))
 - **Environment fingerprinting** — kNN search finds "states like this one"
 - **Anomaly detection** — embeddings that don't match known clusters = anomaly
 - **Activity classification** — different activities cluster in embedding space
@@ -2334,7 +2334,7 @@ docker run -p 3000:3000 -p 3001:3001 ruvnet/wifi-densepose:latest
 
 ### ESP32: "CSI not enabled in menuconfig"
 
-Firmware versions prior to v0.4.1 had `CONFIG_ESP_WIFI_CSI_ENABLED` disabled in the build config. Upgrade to [v0.4.1](https://github.com/ruvnet/RuView/releases/tag/v0.4.1-esp32) or later. If building from source, ensure `sdkconfig.defaults` exists (not just `sdkconfig.defaults.template`). See [ADR-057](../docs/adr/ADR-057-firmware-csi-build-guard.md).
+Firmware versions prior to v0.4.1 had `CONFIG_ESP_WIFI_CSI_ENABLED` disabled in the build config. Upgrade to [v0.4.1](https://github.com/ruvnet/EchoPose/releases/tag/v0.4.1-esp32) or later. If building from source, ensure `sdkconfig.defaults` exists (not just `sdkconfig.defaults.template`). See [ADR-057](../docs/adr/ADR-057-firmware-csi-build-guard.md).
 
 ### ESP32: No data arriving
 
@@ -2468,10 +2468,10 @@ The system uses WiFi radio signals, not cameras. No images or video are captured
 The Rust implementation (v2) is 810x faster than Python (v1) for the full CSI pipeline. The Docker image is 132 MB vs 569 MB. Rust is the primary and recommended runtime. Python v1 remains available for legacy workflows.
 
 **Q: Can I use an ESP8266 instead of ESP32-S3?**
-No. The ESP8266 does not expose WiFi Channel State Information (CSI) through its SDK, has insufficient RAM (~80 KB vs 512 KB), and runs a single-core 80 MHz CPU that cannot handle the signal processing pipeline. The ESP32-S3 is the minimum supported CSI capture device. See [Issue #138](https://github.com/ruvnet/RuView/issues/138) for alternatives including using cheap Android TV boxes as aggregation hubs.
+No. The ESP8266 does not expose WiFi Channel State Information (CSI) through its SDK, has insufficient RAM (~80 KB vs 512 KB), and runs a single-core 80 MHz CPU that cannot handle the signal processing pipeline. The ESP32-S3 is the minimum supported CSI capture device. See [Issue #138](https://github.com/ruvnet/EchoPose/issues/138) for alternatives including using cheap Android TV boxes as aggregation hubs.
 
 **Q: Does the Windows WiFi tutorial work on Windows 10?**
-Yes. Community-tested on Windows 10 (build 26200) with an Intel Wi-Fi 6 AX201 160MHz adapter on a 5 GHz network. All 7 tutorial steps passed with Python 3.14. See [Issue #36](https://github.com/ruvnet/RuView/issues/36) for full test results.
+Yes. Community-tested on Windows 10 (build 26200) with an Intel Wi-Fi 6 AX201 160MHz adapter on a 5 GHz network. All 7 tutorial steps passed with Python 3.14. See [Issue #36](https://github.com/ruvnet/EchoPose/issues/36) for full test results.
 
 **Q: Can I run the sensing server on an ARM device (Raspberry Pi, TV box)?**
 ARM64 deployment is planned ([ADR-046](adr/ADR-046-android-tv-box-armbian-deployment.md)) but not yet available as a pre-built binary. You can cross-compile from source using `cross build --release --target aarch64-unknown-linux-gnu -p wifi-densepose-sensing-server` if you have the Rust cross-compilation toolchain set up.

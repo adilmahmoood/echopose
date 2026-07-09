@@ -40,7 +40,7 @@ static char s_ota_psk[OTA_PSK_MAX_LEN] = {0};
  * ADR-050: Verify the Authorization header contains the correct PSK.
  * Returns true only when a PSK is provisioned AND the Bearer token
  * matches it. An unprovisioned node refuses all OTA requests
- * (fail-closed, see RuView#596 audit). The OTA server still starts so
+ * (fail-closed, see EchoPose#596 audit). The OTA server still starts so
  * the operator can `provision.py --ota-psk <hex>` over USB-CDC without
  * a reflash, but the upload endpoint will reject every request until
  * the PSK is set.
@@ -257,7 +257,7 @@ static esp_err_t ota_start_server(httpd_handle_t *out_handle)
  * ota_update_init_ex() so the per-boot diagnostic prints no matter which
  * entry point main.c uses — historically only ota_update_init() loaded the
  * PSK, which left ota_update_init_ex() with an empty s_ota_psk and an
- * invisible fail-closed posture (RuView#596 follow-up).
+ * invisible fail-closed posture (EchoPose#596 follow-up).
  */
 static void ota_load_psk_from_nvs(void)
 {
@@ -268,12 +268,12 @@ static void ota_load_psk_from_nvs(void)
             ESP_LOGI(TAG, "OTA PSK loaded from NVS (%d chars) — authentication enabled", (int)len - 1);
         } else {
             ESP_LOGW(TAG, "No OTA PSK in NVS — OTA upload endpoint will REJECT all requests until "
-                          "provisioned (provision.py --ota-psk <hex>). Fail-closed per RuView#596.");
+                          "provisioned (provision.py --ota-psk <hex>). Fail-closed per EchoPose#596.");
         }
         nvs_close(nvs);
     } else {
         ESP_LOGW(TAG, "NVS namespace '%s' not found — OTA upload endpoint will REJECT all "
-                      "requests until provisioned. Fail-closed per RuView#596.", OTA_NVS_NAMESPACE);
+                      "requests until provisioned. Fail-closed per EchoPose#596.", OTA_NVS_NAMESPACE);
     }
 }
 

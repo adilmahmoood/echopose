@@ -36,7 +36,7 @@ release threshold (with hysteresis) toggles OFF. The toggle file
 is the contract between this watcher and the paired HAP bridge.
 
 Usage:
-    python3 c6-presence-watcher.py [--port 5005] [--toggle /tmp/ruview-motion]
+    python3 c6-presence-watcher.py [--port 5005] [--toggle /tmp/echopose-motion]
 """
 from __future__ import annotations
 import argparse
@@ -192,13 +192,13 @@ def apply_privacy_gate(pkt: dict, allowed_class: int) -> dict | None:
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--port", type=int, default=5005)
-    p.add_argument("--toggle", default="/tmp/ruview-motion")
+    p.add_argument("--toggle", default="/tmp/echopose-motion")
     p.add_argument("--bind", default="0.0.0.0")
     p.add_argument("--privacy-class", default="anonymous",
                    choices=["raw", "derived", "anonymous", "restricted"],
                    help="ADR-118 PrivacyClass; only anonymous/restricted "
                         "may cross the HAP boundary (ADR-125 §2.1.d).")
-    p.add_argument("--state-json", default="/tmp/ruview-state.json",
+    p.add_argument("--state-json", default="/tmp/echopose-state.json",
                    help="JSON state IPC file written for the HAP daemon. "
                         "Contains motion/occupancy/anomaly_ts.")
     p.add_argument("--occupancy-window", type=float, default=3.0,
@@ -268,11 +268,11 @@ def main() -> int:
         except OSError:
             pass
 
-    # Companion contract for `scripts/ruview-sensing-server.py` (the
+    # Companion contract for `scripts/echopose-sensing-server.py` (the
     # @ruvnet/rvagent compatibility layer): write the full BFLD-gated
     # feature snapshot so the sensing-server can serve EdgeVitalsMessage
     # and BfldScanResponse without going back to the wire.
-    feature_path = "/tmp/ruview-last-feature.json"
+    feature_path = "/tmp/echopose-last-feature.json"
 
     def write_feature(gated: dict, motion: bool, occupancy: bool,
                       privacy_cls: int) -> None:

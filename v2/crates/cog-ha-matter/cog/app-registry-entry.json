@@ -5,7 +5,7 @@
   "version": "0.3.0",
   "size_kb": 12,
   "difficulty": "easy",
-  "description": "Exposes WiFi-CSI sensing as Home Assistant entities over MQTT auto-discovery, with mDNS announcement on _ruview-ha._tcp and tamper-evident Ed25519-signed audit logs. Adds 10 semantic primitives (someone_sleeping, possible_distress, fall_risk_elevated, ...) on top of the 11 raw measurements. Privacy mode strips biometrics at the wire so only the semantic layer reaches HA — the right default for any deployment with non-tenant occupants.",
+  "description": "Exposes WiFi-CSI sensing as Home Assistant entities over MQTT auto-discovery, with mDNS announcement on _echopose-ha._tcp and tamper-evident Ed25519-signed audit logs. Adds 10 semantic primitives (someone_sleeping, possible_distress, fall_risk_elevated, ...) on top of the 11 raw measurements. Privacy mode strips biometrics at the wire so only the semantic layer reaches HA — the right default for any deployment with non-tenant occupants.",
   "featured": false,
   "config": [
     {

@@ -64,7 +64,7 @@ operations.
 Adopt a **hierarchical-mesh swarm topology** with **Raft consensus** for cluster-head
 coordination, **Gossip** for environmental map dissemination, and **MAPPO-based CTDE**
 (Centralized Training, Decentralized Execution) as the MARL policy. The architecture
-integrates the RuView CSI sensing stack as the primary payload sensor, with OccWorld
+integrates the EchoPose CSI sensing stack as the primary payload sensor, with OccWorld
 (ADR-147) as the environment prior for mission planning.
 
 All design choices target legal civilian operations first. Dual-use swarming capability
@@ -206,7 +206,7 @@ Stage 3 — Swarm clock collision check:
 **Fallback: Boustrophedon (systematic coverage)**
 When no target is known (initial area search), each drone receives a partition of the
 total area from the cluster head and executes a lawnmower pattern at spacing equal to
-2× CSI detection range (~28 m for the RuView Wi2SAR configuration).
+2× CSI detection range (~28 m for the EchoPose Wi2SAR configuration).
 
 ### 4.3 Task Allocation
 
@@ -369,7 +369,7 @@ the policy validation score (on held-out sim episodes) does not decrease by > 5%
 
 ---
 
-## 6. CSI Sensing Integration (RuView Payload)
+## 6. CSI Sensing Integration (EchoPose Payload)
 
 ### 6.1 Drone Payload Architecture
 
@@ -853,7 +853,7 @@ validated; ITAR/EAR classification completed by export counsel.
 
 ### 12.1 Positive
 
-- Directly extends the RuView CSI sensing stack to airborne deployment, unlocking
+- Directly extends the EchoPose CSI sensing stack to airborne deployment, unlocking
   the MAT (Mass Casualty Assessment Tool) crate's disaster-response mission
 - Hierarchical-mesh with Raft provides production-grade fault tolerance without the
   O(n²) overhead of BFT
@@ -937,7 +937,7 @@ validated; ITAR/EAR classification completed by export counsel.
 
 ## 14. Implementation Progress (2026-05-30)
 
-Crate `wifi-densepose-swarm` implemented at `/home/ruvultra/projects/RuView/v2/crates/wifi-densepose-swarm/`.
+Crate `wifi-densepose-swarm` implemented at `/home/ruvultra/projects/EchoPose/v2/crates/wifi-densepose-swarm/`.
 
 ### Milestone Status
 
@@ -945,7 +945,7 @@ Crate `wifi-densepose-swarm` implemented at `/home/ruvultra/projects/RuView/v2/c
 |-----------|--------|-----------|
 | M1 Crate Scaffold | **COMPLETE** | 100% |
 | M2 Swarm Coordination (Raft, Gossip, formation, RRT-APF, orchestrator) | **COMPLETE** | 100% |
-| M3 CSI + RuView Integration | In Progress | 85% (remaining 15% needs real ESP32-S3 hardware) |
+| M3 CSI + EchoPose Integration | In Progress | 85% (remaining 15% needs real ESP32-S3 hardware) |
 | M4 MARL + Training (real Candle autodiff PPO, GPU-capable, A-MAPPO roles) | **COMPLETE** | 100% |
 | M5 Security Hardening | **COMPLETE** | 100% |
 | M6 Benchmarks + SOTA (5 criterion benches) | **COMPLETE** | 95% |
@@ -994,7 +994,7 @@ compile and export clean stubs returning `Err(SwarmError::Security(...))`.
 
 ### GitHub Issue
 
-Implementation tracked at: https://github.com/ruvnet/RuView/issues/861
+Implementation tracked at: https://github.com/ruvnet/EchoPose/issues/861
 
 ---
 

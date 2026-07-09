@@ -119,7 +119,7 @@ pub async fn serve(bind: &str, _brain: Option<&str>) -> anyhow::Result<()> {
     // 127.0.0.1/localhost as a "potentially trustworthy" origin so the HTTPS
     // page can reach a plain-HTTP loopback backend without mixed-content
     // blocking. Origins permitted:
-    //   - https://ruvnet.github.io (the published RuView Pages demo)
+    //   - https://ruvnet.github.io (the published EchoPose Pages demo)
     //   - http://localhost:* / http://127.0.0.1:* (developer running the
     //     viewer.html bundled with this binary)
     // Anything else is denied, so this is not a "wildcard" CORS.
@@ -147,7 +147,7 @@ pub async fn serve(bind: &str, _brain: Option<&str>) -> anyhow::Result<()> {
         .with_state(state);
 
     println!("╔══════════════════════════════════════════════╗");
-    println!("║  RuView Dense Point Cloud — ALL SENSORS      ║");
+    println!("║  EchoPose Dense Point Cloud — ALL SENSORS      ║");
     println!("╚══════════════════════════════════════════════╝");
     println!("  Viewer: http://{bind}/");
     if bind.starts_with("0.0.0.0") || bind.starts_with("::") {

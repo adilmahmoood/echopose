@@ -67,7 +67,7 @@ def test_parse_discovery_topic_event() -> None:
 
 def test_parse_discovery_topic_returns_none_for_non_discovery() -> None:
     assert parse_discovery_topic("homeassistant/binary_sensor/foo/state") is None
-    assert parse_discovery_topic("ruview/aabbccddeeff/raw/edge_vitals") is None
+    assert parse_discovery_topic("echopose/aabbccddeeff/raw/edge_vitals") is None
     assert parse_discovery_topic("") is None
 
 
@@ -107,7 +107,7 @@ def test_parse_discovery_payload_rejects_non_object_root() -> None:
 
 def test_parse_discovery_payload_returns_none_for_non_discovery_topic() -> None:
     assert parse_discovery_payload(
-        "ruview/aabbccddeeff/raw/edge_vitals",
+        "echopose/aabbccddeeff/raw/edge_vitals",
         _PRESENCE_BODY,
     ) is None
 
@@ -194,7 +194,7 @@ def test_helper_remove() -> None:
 
 def test_helper_rejects_non_discovery_topics() -> None:
     h = HABlueprintHelper()
-    ok = h.add_payload("ruview/aabbccddeeff/raw/edge_vitals", _PRESENCE_BODY)
+    ok = h.add_payload("echopose/aabbccddeeff/raw/edge_vitals", _PRESENCE_BODY)
     assert ok is False
     assert len(h) == 0
 

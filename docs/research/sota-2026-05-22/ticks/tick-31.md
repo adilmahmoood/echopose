@@ -39,7 +39,7 @@ wifi-densepose plan-antennas
 ```
 
 ```
-ruview_placement_recommend(room, targets, cog) -> {anchors, coverage, rationale}
+echopose_placement_recommend(room, targets, cog) -> {anchors, coverage, rationale}
 ```
 
 ~360 LOC total for placement-strategy productisation.

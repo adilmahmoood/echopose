@@ -10,18 +10,18 @@ Tier 1+2 sprint — it proves the full bidirectional chain:
     real C6 (192.168.1.179)
       → UDP feature_state
       → c6-presence-watcher.py (BFLD PrivacyGate)
-      → /tmp/ruview-last-feature.json
-      → ruview-sensing-server.py (sensing-server-equivalent on :3000)
+      → /tmp/echopose-last-feature.json
+      → echopose-sensing-server.py (sensing-server-equivalent on :3000)
       → @ruvnet/rvagent (this script spawns it via `npx -y`)
       → MCP JSON-RPC tools/call (this script sends them)
       → result returned to any MCP-aware agent
 
-If real data flows back, the agentic surface for RuView's BFLD-gated
+If real data flows back, the agentic surface for EchoPose's BFLD-gated
 stream is live for every MCP client in the ecosystem — Claude Code,
 Codex, custom LLM agents.
 
 Run on ruv-mac-mini (or any host with Node ≥ 20 + the running
-ruview-sensing-server.py on :3000):
+echopose-sensing-server.py on :3000):
 
     RVAGENT_SENSING_URL=http://localhost:3000 \
       python3 rvagent-mcp-consumer.py
@@ -96,7 +96,7 @@ def main() -> int:
         "params": {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
-            "clientInfo": {"name": "ruview-iter5-consumer", "version": "0.1"},
+            "clientInfo": {"name": "echopose-iter5-consumer", "version": "0.1"},
         },
     })
     resp = _recv(proc, want_id=1)
@@ -147,7 +147,7 @@ def main() -> int:
             print(f"             (response head: {text[:200]})")
 
     # 4. tools/call bfld last_scan
-    resp = call_tool(proc, bfld_tool or "ruview.bfld.last_scan",
+    resp = call_tool(proc, bfld_tool or "echopose.bfld.last_scan",
                      {"node_id": NODE_ID}, 4)
     if resp is None or "error" in resp:
         print(f"[mcp-consumer] bfld_last_scan failed: {resp}",

@@ -83,5 +83,5 @@ even unvalidated. `tauri.conf.json` ships **no** `fs`/`http` plugin and **no**
   malformed/hostile credentials.
 
 ## Links
-- ADR-176 / ADR-177 — sibling Milestone-#9 reviews (ruview-swarm, nvsim)
+- ADR-176 / ADR-177 — sibling Milestone-#9 reviews (echopose-swarm, nvsim)
 - ADR-172 — core/cli review

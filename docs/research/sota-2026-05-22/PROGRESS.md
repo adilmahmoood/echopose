@@ -42,7 +42,7 @@ Stay 8 minutes / tick. Commit + PR + auto-merge per piece. Future-tick re-entry 
 
 ### RSSI Alone (no CSI)
 
-- [x] **R8. RSSI-only person count.** DONE — 59.1% = 94.82% of full-CSI (62.3%). 656 params, 5 KB, 0.72 s CPU. See `R8-rssi-only-count.md`. Cross-links: R5 band-spread saliency explains the retained accuracy; R9 extends same stream to localisation; ADR-104 MCP server should grow `ruview_count_infer --rssi` mode for non-CSI chips. Next: 3-class ceiling, multi-room replication.
+- [x] **R8. RSSI-only person count.** DONE — 59.1% = 94.82% of full-CSI (62.3%). 656 params, 5 KB, 0.72 s CPU. See `R8-rssi-only-count.md`. Cross-links: R5 band-spread saliency explains the retained accuracy; R9 extends same stream to localisation; ADR-104 MCP server should grow `echopose_count_infer --rssi` mode for non-CSI chips. Next: 3-class ceiling, multi-room replication.
 - [ ] **R9. RSSI fingerprint topology — graph neural network on WiFi-scan beacons.** Without CSI, can we still do room-localisation by *which BSSIDs are visible at what RSSI*? Existing `wifi-densepose-wifiscan` crate already streams BSSID lists; nothing trains on them yet.
 
 ### Exotic & Future (10–20 year)

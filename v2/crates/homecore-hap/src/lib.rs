@@ -16,7 +16,7 @@
 //! | [`mapping`] | `EntityToAccessoryMapper` — HOMECORE entity → HAP |
 //! | [`bridge`] | `HapBridge` — owns exposed accessories |
 //! | [`mdns`] | `MdnsAdvertiser` trait + `NullAdvertiser` stub |
-//! | [`ruview`] | `RuViewToHapMapper` — sensing primitives → HAP |
+//! | [`echopose`] | `EchoPoseToHapMapper` — sensing primitives → HAP |
 //! | [`error`] | Unified `HapError` type |
 
 pub mod accessory;
@@ -24,11 +24,11 @@ pub mod bridge;
 pub mod error;
 pub mod mapping;
 pub mod mdns;
-pub mod ruview;
+pub mod echopose;
 
 pub use accessory::{HapAccessoryType, HapCharacteristic, HapCharacteristicValue};
 pub use bridge::{ExposedAccessory, HapBridge};
 pub use error::HapError;
 pub use mapping::EntityToAccessoryMapper;
 pub use mdns::{MdnsAdvertiser, NullAdvertiser};
-pub use ruview::RuViewToHapMapper;
+pub use echopose::EchoPoseToHapMapper;

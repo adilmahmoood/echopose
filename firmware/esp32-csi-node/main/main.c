@@ -147,7 +147,7 @@ static void wifi_init_sta(void)
 #if CONFIG_LED_GAMMA_VIZ
 /* Viridis colormap (60 steps), generated from ruv-neural-viz::ColorMap::viridis()
  * — the rUv-Neural brain-topology colormap, now no_std (ruvnet/ruv-neural#3 /
- * RuView#1126). Used as the ON-phase colour of the 40 Hz gamma flicker below:
+ * EchoPose#1126). Used as the ON-phase colour of the 40 Hz gamma flicker below:
  * dark-purple (still) -> teal -> green -> yellow (strong motion). */
 static const uint8_t VIRIDIS_LUT[60][3] = {
     { 68,  1, 84},{ 67,  6, 88},{ 67, 12, 91},{ 66, 17, 95},{ 66, 23, 99},
@@ -204,6 +204,9 @@ void app_main(void)
 
     /* Load runtime config (NVS overrides Kconfig defaults) */
     nvs_config_load(&g_nvs_config);
+
+    /* Initialize security and SipHash key derivation (ADR-032) */
+    csi_collector_init_security();
 
     /* Capture node_id IMMEDIATELY — before wifi_init_sta() can corrupt
      * g_nvs_config. See #232/#375/#390: WiFi driver init clobbers the struct
@@ -476,7 +479,7 @@ void app_main(void)
     }
 #endif
 
-    /* RuView#893/#521: the MGMT-only promiscuous filter (set in
+    /* EchoPose#893/#521: the MGMT-only promiscuous filter (set in
      * csi_collector_init as the #396 display-crash workaround) starves the CSI
      * callback on display-less boards — yield collapses to 0 pps and the node
      * looks dead despite being on the network. Now that the display probe has

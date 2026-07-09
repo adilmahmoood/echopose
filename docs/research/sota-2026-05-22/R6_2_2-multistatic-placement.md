@@ -83,7 +83,7 @@ This is a **shipping-ready cost-optimisation conclusion** with explicit numbers.
 1. **Concrete cost-optimisation answer**: 5 anchors is the practical recommendation for most consumer rooms.
 2. **Saturation curve methodology**: customer / installer can run their own room layout and see where their knee is.
 3. **ADR-029 update**: anchor-count recommendation backed by physics + benchmark.
-4. **Forward-projection**: combined with R1 (precision) and R6.2 (single-pair lift), we now have a full **sensing geometry budget** for any RuView room install.
+4. **Forward-projection**: combined with R1 (precision) and R6.2 (single-pair lift), we now have a full **sensing geometry budget** for any EchoPose room install.
 
 ## What this DOES NOT enable
 
@@ -96,7 +96,7 @@ This is a **shipping-ready cost-optimisation conclusion** with explicit numbers.
 
 - **R6.2.1**: 3D extension with ceiling/floor anchors
 - **R6.2.3**: pose-trajectory-aware target zones (need AETHER + R3 data)
-- **R6.2 productisation**: ship as `wifi-densepose plan-antennas` CLI subcommand + MCP tool `ruview_placement_recommend`
+- **R6.2 productisation**: ship as `wifi-densepose plan-antennas` CLI subcommand + MCP tool `echopose_placement_recommend`
 
 ## Connection back
 

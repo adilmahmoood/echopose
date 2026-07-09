@@ -1,10 +1,10 @@
-# ADR-106: Differential privacy + biometric primitive isolation for RuView federated training
+# ADR-106: Differential privacy + biometric primitive isolation for EchoPose federated training
 
 **Status:** Proposed · **Date:** 2026-05-22 · **Author:** SOTA research loop tick-15 · **Supersedes:** none · **Extends:** ADR-105
 
 ## Context
 
-ADR-105 specified federated learning for RuView CSI personalisation with MERIDIAN env-normalisation + Krum byzantine-robust aggregation + R7-style update-level mincut. It deferred two questions:
+ADR-105 specified federated learning for EchoPose CSI personalisation with MERIDIAN env-normalisation + Krum byzantine-robust aggregation + R7-style update-level mincut. It deferred two questions:
 
 1. **Member inference defence.** A sufficiently capable adversary observing many model deltas across rounds can in principle reconstruct training samples (Shokri 2017). ADR-105 left "DP-SGD" as a future ADR.
 2. **Biometric primitive isolation.** R15 catalogued five environment-invariant biometric primitives (gait frequency, breathing rate, HRV rate, RCS frequency response, walking dynamics). R15 said: the federation aggregator MUST NOT receive any raw per-subject biometric primitive. ADR-105 didn't yet specify which primitives qualify.
@@ -48,10 +48,10 @@ Using the **Moments Accountant** (Abadi 2016) for (ε, δ)-DP across federation 
 | Configuration | Per-round σ | Rounds | Total ε (δ=1e-5) | Verdict |
 |---|---:|---:|---:|---|
 | Conservative (medical-grade) | 1.5 | 50 | **2.0** | Strong; matches HIPAA-aligned recommendations |
-| Standard (typical RuView) | 1.0 | 100 | **5.0** | Strong; consistent with Google's federated keyboard work |
+| Standard (typical EchoPose) | 1.0 | 100 | **5.0** | Strong; consistent with Google's federated keyboard work |
 | Lenient (faster convergence) | 0.5 | 100 | **8.0** | Moderate; below ε=10 community soft-bound |
 
-Recommended **starting σ = 1.0** for most RuView cogs, with per-cog tuning:
+Recommended **starting σ = 1.0** for most EchoPose cogs, with per-cog tuning:
 
 - `cog-person-count` (R8 — simple classifier): σ=1.0 sufficient.
 - AETHER re-ID head (R3 — high discriminability needed): σ=0.7 with C=1.5 to preserve discriminative power.
@@ -68,7 +68,7 @@ Krum byzantine-robust aggregation (step 5) operates on DP-noised deltas without 
 
 ### Implementation enforcement
 
-The `ruview-fed` crate (per ADR-105 implementation plan, ~500 LOC) gains:
+The `echopose-fed` crate (per ADR-105 implementation plan, ~500 LOC) gains:
 
 | Component | LOC | Purpose |
 |---|---:|---|
@@ -115,7 +115,7 @@ Status: **rejected.** Krum defends against adversarial nodes, not adversarial *i
 
 ### Positive
 
-1. RuView federation is now **formally privacy-preserving** with a documented (ε, δ) bound — meets GDPR Art 25 ("data protection by design") technical-measure expectations.
+1. EchoPose federation is now **formally privacy-preserving** with a documented (ε, δ) bound — meets GDPR Art 25 ("data protection by design") technical-measure expectations.
 2. R15's biometric-primitive constraints are enforced at the API surface, not just policy-documented.
 3. The threat model has been written down with explicit mitigations per row, making future security review tractable.
 4. The Moments Accountant aborts federation rather than silently consuming budget — operationally safer than naive "just keep training".
@@ -123,7 +123,7 @@ Status: **rejected.** Krum defends against adversarial nodes, not adversarial *i
 ### Negative
 
 1. DP noise degrades model accuracy by ~3-8% (typical figures from DP-SGD literature; per-cog tuning needed). For `cog-person-count` v0.0.2 (this loop's earlier work), the baseline 34.3% class-1 accuracy would degrade to ~31-33% with σ=1.0.
-2. Adds ~300 LOC + Moments Accountant complexity to `ruview-fed`. Total federation budget revised to ~800 LOC.
+2. Adds ~300 LOC + Moments Accountant complexity to `echopose-fed`. Total federation budget revised to ~800 LOC.
 3. Per-cog tuning of (σ, C, max_rounds) is needed — not a one-size-fits-all.
 4. Doesn't defend against side-channel inference latency leaks; that's a separate ADR.
 5. Doesn't address cross-installation federation; cross-installation work still requires the deferred ADR (secure aggregation + DP).
@@ -142,7 +142,7 @@ Status: **rejected.** Krum defends against adversarial nodes, not adversarial *i
 - **ADR-029 (multistatic)** — per-seed federation; multistatic geometry stays per-installation.
 - **ADR-100 (cog packaging)** — Ed25519 signing covers DP-noised checkpoints with no protocol change.
 - **ADR-103 (cog-person-count)** — first cog with formal DP guarantee; this loop's v0.0.2 retrain becomes ADR-106-compliant on next training cycle.
-- **ADR-104 (ruview-mcp + ruview-cli)** — exposes ε, δ budget remaining via MCP `ruview_fed_privacy_budget` (future tool; out of scope for this ADR).
+- **ADR-104 (echopose-mcp + echopose-cli)** — exposes ε, δ budget remaining via MCP `echopose_fed_privacy_budget` (future tool; out of scope for this ADR).
 - **ADR-105 (federated training)** — DP-SGD slots into step 4; threat model extended; implementation budget grows from 500 to ~800 LOC.
 
 ## Connection to research-loop threads

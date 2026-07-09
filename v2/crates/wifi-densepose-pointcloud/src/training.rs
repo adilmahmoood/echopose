@@ -533,7 +533,7 @@ mod tests {
 
     #[test]
     fn sanitize_accepts_relative_child() {
-        assert!(sanitize_data_path("data/ruview").is_ok());
+        assert!(sanitize_data_path("data/echopose").is_ok());
         assert!(sanitize_data_path("./foo").is_ok());
     }
 
@@ -547,7 +547,7 @@ mod tests {
     #[test]
     fn training_session_new_accepts_child_path() {
         // Use a unique tmpdir to avoid cross-test interference.
-        let tmp = std::env::temp_dir().join(format!("ruview-train-test-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("echopose-train-test-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&tmp);
         let sess = TrainingSession::new(tmp.to_str().unwrap())
             .expect("TrainingSession should accept a clean tmpdir");

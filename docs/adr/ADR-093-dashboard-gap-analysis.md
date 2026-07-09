@@ -6,7 +6,7 @@
 | **Date** | 2026-04-26 |
 | **Authors** | ruv |
 | **Refines** | ADR-092 (nvsim dashboard implementation) |
-| **Companion** | `assets/NVsim Dashboard.zip` (mockup, ~4200 LOC), live deploy https://ruvnet.github.io/RuView/nvsim/ |
+| **Companion** | `assets/NVsim Dashboard.zip` (mockup, ~4200 LOC), live deploy https://ruvnet.github.io/EchoPose/nvsim/ |
 | **Trigger** | Manual UI walkthrough after the GH-Pages deploy revealed several rail buttons were no-ops, the Ghost Murmur research spec had no dashboard surface, and a handful of mockup features (scene toolbar, frame strip rate badge, scene-toolbar zoom, density toggle, cmd palette items) had not landed. |
 
 ---
@@ -38,8 +38,8 @@ The closing §5 is the iteration plan.
 |---|---|---|---|---|
 | **P0.1** | ~~Inspector rail button no-op~~ | `nv-rail.ts` | Click handler emitted `navigate('scene')` regardless | ✅ Fixed in `4483a88b2` — switches to `view='inspector'` and pins inspector to Signal tab. |
 | **P0.2** | ~~Witness rail button no-op~~ | `nv-rail.ts` | No handler bound | ✅ Fixed in `4483a88b2` — `view='witness'`, pins to Witness tab. |
-| **P0.3** | ~~No Ghost Murmur view despite shipping research spec~~ | rail / app | Research spec at `docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md` had no dashboard surface | ✅ Fixed in `4483a88b2` — new `<nv-ghost-murmur>` component, dedicated rail icon. |
-| **P0.4** | Ghost Murmur view is **read-only** | `nv-ghost-murmur.ts` | Currently a static document. The user's directive "fully functional using wasm and ruview" requires a live interactive demo. | ⏳ §5 below — interactive distance/moment sliders that actually drive `nvsim::Pipeline` via WASM and report per-tier detectability. |
+| **P0.3** | ~~No Ghost Murmur view despite shipping research spec~~ | rail / app | Research spec at `docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md` had no dashboard surface | ✅ Fixed in `4483a88b2` — new `<nv-ghost-murmur>` component, dedicated rail icon. |
+| **P0.4** | Ghost Murmur view is **read-only** | `nv-ghost-murmur.ts` | Currently a static document. The user's directive "fully functional using wasm and echopose" requires a live interactive demo. | ⏳ §5 below — interactive distance/moment sliders that actually drive `nvsim::Pipeline` via WASM and report per-tier detectability. |
 | **P0.5** | ~~Topbar `seed` pill is decorative~~ | `nv-topbar.ts` | ✅ Iter C — opens "Set seed" modal with hex input; applies via `WasmClient.setSeed`. |
 | **P0.6** | ~~Sim controls overlay absent~~ | `nv-scene.ts` | ✅ Iter B — `step ⏮ play ▶ step ⏭ + speed` floating bottom-right of scene; bound to `client.run/pause/step` and `speed.value` cycle. |
 | **P0.7** | ~~Scene toolbar (zoom / fit / layers) missing~~ | `nv-scene.ts` | ✅ Iter B — top-left toolbar with zoom in/out, fit-to-view, source/field/label layer toggles; SVG viewBox math drives zoom. |
@@ -100,7 +100,7 @@ The dynamic /loop continues with one P0/P1 item per iteration:
 | **N** | Light-theme contrast (P2.4) + keyboard scene nav (P2.6) | ✅ AA-compliant `--ink-3`/`--ink-4`/`--line` palette in light mode; Tab/arrows/Shift-arrow/Esc on scene draggables |
 
 Each iteration ends with: `npx tsc --noEmit` clean → production
-build with `NVSIM_BASE=/RuView/nvsim/` → push to `gh-pages/nvsim/`
+build with `NVSIM_BASE=/EchoPose/nvsim/` → push to `gh-pages/nvsim/`
 preserving siblings → `agent-browser` validation including console
 errors → commit on `feat/nvsim-pipeline-simulator`.
 
@@ -113,5 +113,5 @@ prerequisite for declaring §11.1 (faithful UI) green.
 - ADR-092 §4.2 — full UI inventory table (the contract).
 - ADR-092 §11 — 12 acceptance gates.
 - `assets/NVsim Dashboard.zip` — canonical mockup (committed).
-- `docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md` — Ghost Murmur source material.
-- Live deploy — https://ruvnet.github.io/RuView/nvsim/ (verified: rail buttons functional, witness verifies, App Store catalog renders, onboarding tour works).
+- `docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md` — Ghost Murmur source material.
+- Live deploy — https://ruvnet.github.io/EchoPose/nvsim/ (verified: rail buttons functional, witness verifies, App Store catalog renders, onboarding tour works).

@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | New module/crate `wifi-densepose-worldgraph` alongside `v2/crates/wifi-densepose-geo` and `v2/crates/homecore`; petgraph bridge pattern from `v2/crates/ruv-neural/ruv-neural-graph/src/petgraph_bridge.rs`; integrates `homecore/src/registry.rs` `area_id` and `wifi-densepose-mat/src/domain/scan_zone.rs` |
-| **Relates to** | ADR-044 (Geospatial Satellite Integration), ADR-113 (Multistatic Placement Strategy), ADR-127 (HomeCore State Machine), ADR-030 (Persistent Field Model), ADR-136 (RuView Streaming Engine), ADR-137 (Fusion Quality Scoring), ADR-138 (LinkGroup / ArrayCoordinator), ADR-142 (Evolution Tracker), ADR-144 (UWB Range-Constraint Fusion), ADR-145 (Ablation Eval Harness) |
+| **Relates to** | ADR-044 (Geospatial Satellite Integration), ADR-113 (Multistatic Placement Strategy), ADR-127 (HomeCore State Machine), ADR-030 (Persistent Field Model), ADR-136 (EchoPose Streaming Engine), ADR-137 (Fusion Quality Scoring), ADR-138 (LinkGroup / ArrayCoordinator), ADR-142 (Evolution Tracker), ADR-144 (UWB Range-Constraint Fusion), ADR-145 (Ablation Eval Harness) |
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 1.1 The Gap
 
-There is no single, queryable model of *the environment a RuView installation senses*. The spatial knowledge that exists in the workspace is fragmented across four crates, each holding one projection of "where things are" with no edges connecting them:
+There is no single, queryable model of *the environment a EchoPose installation senses*. The spatial knowledge that exists in the workspace is fragmented across four crates, each holding one projection of "where things are" with no edges connecting them:
 
 - **`v2/crates/wifi-densepose-geo`** holds the *outdoor / global* frame. `src/types.rs` defines `GeoPoint { lat, lon, alt }` (the ADR-044 WGS84 anchor), `GeoBBox`, `GeoScene`, and `GeoRegistration { origin, heading_deg, scale }`. `src/coord.rs` implements `wgs84_to_enu()` / `enu_to_wgs84()` — the exact transform needed to pin a room into a local East-North-Up frame relative to a `GeoPoint`. But `GeoScene` only models buildings and roads (`OsmFeature::Building`, `OsmFeature::Road`); it has no concept of an interior room, wall, doorway, sensor placement, or a person inside.
 - **`v2/crates/homecore/src/registry.rs`** holds the *entity / automation* frame. `EntityEntry` carries `area_id: Option<String>` and `device_id: Option<String>` (mirroring Home Assistant `core.entity_registry` v13 per ADR-127). This is the canonical handle for "which room an entity is in" — but `area_id` is an opaque string with no geometry, no adjacency, and no link to the sensors that observe it.
@@ -27,7 +27,7 @@ Concretely, what is **missing**:
 2. **No typed edges.** There is no `observes` edge (sensor → node), no `located_in` (person → room), no `adjacent_to` (room ↔ room through a doorway), no `supports` / `contradicts` (evidence relations), no `derived_from` (provenance), and no `privacy_limited_by` (sensor capability constrained by a privacy mode).
 3. **No provenance / contradiction tracking.** ADR-137's fusion engine produces `EvidenceRef` and `ContradictionFlag` records, but there is nowhere to *attach* them — they cannot point at the world entity they support or contradict.
 4. **No privacy-impact rollup.** ADR-141's privacy control plane will define named modes and per-action allow/deny, but no structure answers "given the current mode, which world nodes can sensor X still observe?"
-5. **No persistence of topology.** Each of the four crates persists independently (HomeCore to `core.entity_registry`, geo to a tile cache, MAT in memory). There is no single artifact a RuView appliance can load at boot to reconstitute "the rooms, the sensors, who's where, and why we believe it."
+5. **No persistence of topology.** Each of the four crates persists independently (HomeCore to `core.entity_registry`, geo to a tile cache, MAT in memory). There is no single artifact a EchoPose appliance can load at boot to reconstitute "the rooms, the sensors, who's where, and why we believe it."
 
 This ADR closes the gap with a **WorldGraph**: a typed `petgraph` over a serde-serializable node enum and typed edges, persisted as an RVF bundle, pinned to a `GeoPoint`, keyed by HomeCore `area_id`, and carrying ADR-137 evidence/contradiction provenance plus ADR-141 privacy constraints.
 
@@ -548,7 +548,7 @@ Add rows to `docs/WITNESS-LOG-028.md`:
 | ADR-113 (Multistatic Placement Strategy) | **Source**: sensor placements become `Sensor` nodes; placement geometry feeds `position` |
 | ADR-127 (HomeCore State Machine) | **Linkage**: `EntityEntry.area_id`/`device_id` join to `Room`/`Sensor` nodes via `room_for_area()` |
 | ADR-030 (Persistent Field Model) | **Adjacent**: the field model is a per-link signal model; WorldGraph is the spatial/semantic model that field-model events annotate |
-| ADR-136 (RuView Streaming Engine) | **Upstream**: frames flow through the streaming engine before fusion populates the WorldGraph |
+| ADR-136 (EchoPose Streaming Engine) | **Upstream**: frames flow through the streaming engine before fusion populates the WorldGraph |
 | ADR-137 (Fusion Quality Scoring) | **Source of provenance**: `EvidenceRef`/`ContradictionFlag` populate `DerivedFrom`/`Contradicts` edges |
 | ADR-138 (LinkGroup / ArrayCoordinator) | **Source**: `RfLink.link_group_id` references MLO LinkGroups; `Supports` edges encode clock/physical support |
 | ADR-142 (Evolution Tracker) | **Consumer**: subscribes to `TopologyChanged`; owns the deferred temporal history |

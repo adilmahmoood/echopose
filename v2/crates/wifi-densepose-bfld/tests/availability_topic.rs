@@ -12,14 +12,14 @@ use wifi_densepose_bfld::{
 fn availability_topic_format_matches_documented_path() {
     assert_eq!(
         availability_topic("seed-01"),
-        "ruview/seed-01/bfld/availability",
+        "echopose/seed-01/bfld/availability",
     );
 }
 
 #[test]
 fn online_message_is_retained_friendly_payload() {
     let msg = online_message("seed-99");
-    assert_eq!(msg.topic, "ruview/seed-99/bfld/availability");
+    assert_eq!(msg.topic, "echopose/seed-99/bfld/availability");
     assert_eq!(msg.payload, "online");
     assert_eq!(msg.payload, PAYLOAD_AVAILABLE);
 }
@@ -55,7 +55,7 @@ fn discovery_payload_includes_availability_topic_field() {
     for msg in &msgs {
         assert!(
             msg.payload
-                .contains("\"availability_topic\":\"ruview/seed-01/bfld/availability\""),
+                .contains("\"availability_topic\":\"echopose/seed-01/bfld/availability\""),
             "discovery payload must reference availability_topic, got: {}",
             msg.payload,
         );

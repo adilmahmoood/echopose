@@ -10,7 +10,7 @@ use rufield_core::{FusionEngine, InferenceQuery, PrivacyClass};
 use rufield_fusion::RuFieldFusion;
 use rufield_provenance::{is_fusable, verify_event, Signer};
 use wifi_densepose_rufield::{
-    map_privacy, snapshot_to_field_event, RuViewPrivacyClass, SensingClass, SensingFeatures,
+    map_privacy, snapshot_to_field_event, EchoPosePrivacyClass, SensingClass, SensingFeatures,
     SensingSnapshot, SignalField,
 };
 
@@ -43,7 +43,7 @@ fn sample_snapshot() -> SensingSnapshot {
             // peak at flat index 2 → cell [1,0,0]
             values: vec![0.1, 0.2, 0.9, 0.3],
         }),
-        trust_class: RuViewPrivacyClass::Anonymous,
+        trust_class: EchoPosePrivacyClass::Anonymous,
         demoted: false,
         identity_bound: false,
         node_id: "esp32_room_01".into(),
@@ -88,8 +88,8 @@ fn gate_fusion_ingest_accepts_and_infers() {
 #[test]
 fn gate_privacy_safety_derived_never_maps_to_low_privacy() {
     // THE critical §3.3 gate. Derived carries identity ⇒ P4/P5, NEVER P1.
-    let p4 = map_privacy(RuViewPrivacyClass::Derived, false);
-    let p5 = map_privacy(RuViewPrivacyClass::Derived, true);
+    let p4 = map_privacy(EchoPosePrivacyClass::Derived, false);
+    let p5 = map_privacy(EchoPosePrivacyClass::Derived, true);
     assert_eq!(p4, PrivacyClass::P4);
     assert_eq!(p5, PrivacyClass::P5);
     assert!(p4 >= PrivacyClass::P4, "Derived must be in the identity tier");
@@ -97,7 +97,7 @@ fn gate_privacy_safety_derived_never_maps_to_low_privacy() {
 
     // And end-to-end: an emitted event from a Derived snapshot must be P4/P5.
     let mut snap = sample_snapshot();
-    snap.trust_class = RuViewPrivacyClass::Derived;
+    snap.trust_class = EchoPosePrivacyClass::Derived;
     let ev = snapshot_to_field_event(&snap, &signer());
     assert!(
         ev.observation.privacy_class >= PrivacyClass::P4,
@@ -107,21 +107,21 @@ fn gate_privacy_safety_derived_never_maps_to_low_privacy() {
     assert_eq!(ev.observation.privacy_class, ev.tensor.privacy_class);
 }
 
-/// Full §3.3 table over every RuView class → expected RuField class.
+/// Full §3.3 table over every EchoPose class → expected RuField class.
 #[test]
-fn gate_privacy_table_over_every_ruview_class() {
+fn gate_privacy_table_over_every_echopose_class() {
     let cases = [
-        (RuViewPrivacyClass::Raw, false, PrivacyClass::P0),
-        (RuViewPrivacyClass::Derived, false, PrivacyClass::P4),
-        (RuViewPrivacyClass::Derived, true, PrivacyClass::P5),
-        (RuViewPrivacyClass::Anonymous, false, PrivacyClass::P2),
-        (RuViewPrivacyClass::Restricted, false, PrivacyClass::P2),
+        (EchoPosePrivacyClass::Raw, false, PrivacyClass::P0),
+        (EchoPosePrivacyClass::Derived, false, PrivacyClass::P4),
+        (EchoPosePrivacyClass::Derived, true, PrivacyClass::P5),
+        (EchoPosePrivacyClass::Anonymous, false, PrivacyClass::P2),
+        (EchoPosePrivacyClass::Restricted, false, PrivacyClass::P2),
     ];
-    for (ruview, id_bound, expected) in cases {
+    for (echopose, id_bound, expected) in cases {
         assert_eq!(
-            map_privacy(ruview, id_bound),
+            map_privacy(echopose, id_bound),
             expected,
-            "{ruview:?} (identity_bound={id_bound}) must map to {expected:?}"
+            "{echopose:?} (identity_bound={id_bound}) must map to {expected:?}"
         );
     }
 }
@@ -130,7 +130,7 @@ fn gate_privacy_table_over_every_ruview_class() {
 #[test]
 fn gate_demotion_is_fail_closed() {
     let mut snap = sample_snapshot();
-    snap.trust_class = RuViewPrivacyClass::Raw; // would be P0
+    snap.trust_class = EchoPosePrivacyClass::Raw; // would be P0
     snap.demoted = true; // governed engine demotion
     let ev = snapshot_to_field_event(&snap, &signer());
     assert!(

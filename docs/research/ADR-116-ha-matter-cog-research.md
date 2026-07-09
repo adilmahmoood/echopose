@@ -20,14 +20,14 @@ sources:
   - https://community.st.com/t5/stm32-summit-q-a/what-is-the-usual-cost-for-a-matter-certification/td-p/652346
   - https://github.com/p01di/esp32c6-thread-border-router
   - https://libraries.io/npm/ruvllm-esp32
-  - https://github.com/ruvnet/RuView/blob/main/docs/adr/ADR-069-cognitum-seed-csi-pipeline.md
+  - https://github.com/ruvnet/EchoPose/blob/main/docs/adr/ADR-069-cognitum-seed-csi-pipeline.md
   - https://www.matteralpha.com/news/home-assistant-2025-12-adds-enhancements-to-matter-sensor-doorlock-and-covering
   - https://docs.nordicsemi.com/bundle/ncs-3.1.0/page/nrf/protocols/matter/getting_started/testing/thread_one_otbr.html
 ---
 
 # ADR-116 Research Dossier: Home Assistant + Matter Integration as a Cognitum Seed Cog
 
-**Research question**: How far can we take HA + Matter integration for WiFi-DensePose / RuView, specifically packaged as a Cognitum Seed cog running on the ESP32-S3 Seed appliance?
+**Research question**: How far can we take HA + Matter integration for WiFi-DensePose / EchoPose, specifically packaged as a Cognitum Seed cog running on the ESP32-S3 Seed appliance?
 
 **Baseline**: ADR-110 (ESP32-C6 mesh firmware, v0.7.0-esp32) and ADR-115 (HA-DISCO MQTT + HA-FABRIC Matter scaffold, v0.7.0) are both merged to main. This research scopes ADR-116.
 
@@ -116,7 +116,7 @@ Based on ADR-069 and the cognitum-v0 appliance surface observed in the fleet:
 
 The cog runs as a long-lived process on the Seed (aarch64 binary, supervised by `cognitum-agent`). It owns two surfaces:
 
-**Surface A — MQTT bridge**: connects to a user-configured Mosquitto broker (or uses the Seed's internal broker), republishes telemetry from the Seed's `ruview-vitals-worker` (port 50054) as HA auto-discovery messages. This reuses the HA-DISCO logic already in `wifi-densepose-sensing-server` but runs as a Seed-native cog rather than requiring the user to run the sensing-server separately. The cog registers a `ha_mqtt` MCP tool (114-tool catalog) so automations running on other cogs can call `ha_mqtt.publish_state(entity_id, state)`.
+**Surface A — MQTT bridge**: connects to a user-configured Mosquitto broker (or uses the Seed's internal broker), republishes telemetry from the Seed's `echopose-vitals-worker` (port 50054) as HA auto-discovery messages. This reuses the HA-DISCO logic already in `wifi-densepose-sensing-server` but runs as a Seed-native cog rather than requiring the user to run the sensing-server separately. The cog registers a `ha_mqtt` MCP tool (114-tool catalog) so automations running on other cogs can call `ha_mqtt.publish_state(entity_id, state)`.
 
 **Surface B — Matter bridge**: wraps `esp-matter` / `matter-rs` as a Matter Accessory Bridge. The Seed acts as a WiFi-connected Matter Bridge — one Fabric node with N dynamic endpoints, one per sensing zone. Device types used: `OccupancySensor` (0x0107, clusters: `OccupancySensing 0x0406` with `RFSensing` feature flag + `BooleanState 0x0045`), `ContactSensor` for fall events, and a vendor-specific numeric attribute for person count on the Bridge root endpoint. The Seed's AMOLED display shows the Matter QR code for commissioning — no phone or scanning app required.
 
@@ -128,7 +128,7 @@ The cog runs as a long-lived process on the Seed (aarch64 binary, supervised by 
 
 **MQTT to local HA is the lower-risk, faster path**: it requires no Matter SDK linkage, no CSA certification, and reuses the existing HA-DISCO logic. Matter direct publishing requires the Seed to hold a valid Fabric certificate (obtained through the commissioning flow with the user's HA or Apple Home controller), manage operational credentials, and handle rekey events. The overhead is manageable on the Seed (S3 processor + Pi aarch64 appliance stack), but the development and QA cost is 3-4x higher. The recommended architecture is: **MQTT as primary, Matter as secondary** — matching ADR-115's dual-protocol decision but now native to the cog.
 
-**Key sources**: [ADR-069 CSI pipeline](https://github.com/ruvnet/RuView/blob/main/docs/adr/ADR-069-cognitum-seed-csi-pipeline.md), [ESP32 Matter Bridge example](https://project-chip.github.io/connectedhomeip-doc/examples/bridge-app/esp32/README.html), [Tasmota Matter internals](https://tasmota.github.io/docs/Matter-Internals/), [cognitum-v0 fleet stack].
+**Key sources**: [ADR-069 CSI pipeline](https://github.com/ruvnet/EchoPose/blob/main/docs/adr/ADR-069-cognitum-seed-csi-pipeline.md), [ESP32 Matter Bridge example](https://project-chip.github.io/connectedhomeip-doc/examples/bridge-app/esp32/README.html), [Tasmota Matter internals](https://tasmota.github.io/docs/Matter-Internals/), [cognitum-v0 fleet stack].
 
 ---
 
@@ -173,7 +173,7 @@ The Seed's RuVector 2.0.4 integration (ADR-016) maintains HNSW embeddings of CSI
 
 Three viable discovery layers for two Seeds in adjacent rooms:
 
-**mDNS**: each Seed already advertises `_ruview._tcp` and `_matter._tcp` on the LAN. A second Seed can discover the first via `mdns-sd` query at startup and register it as a peer node. The cognitum-fleet service (port 9002) already implements fleet orchestration; adding peer-to-peer node registration is an extension of that model. **Caveat**: mDNS is link-local and does not cross VLANs. For multi-VLAN deployments (common in prosumer and commercial setups), a Tailscale overlay (the project already has a fleet on Tailscale — see CLAUDE.local.md) provides routable discovery at the cost of adding the Tailscale daemon to the cog's dependency list.
+**mDNS**: each Seed already advertises `_echopose._tcp` and `_matter._tcp` on the LAN. A second Seed can discover the first via `mdns-sd` query at startup and register it as a peer node. The cognitum-fleet service (port 9002) already implements fleet orchestration; adding peer-to-peer node registration is an extension of that model. **Caveat**: mDNS is link-local and does not cross VLANs. For multi-VLAN deployments (common in prosumer and commercial setups), a Tailscale overlay (the project already has a fleet on Tailscale — see CLAUDE.local.md) provides routable discovery at the cost of adding the Tailscale daemon to the cog's dependency list.
 
 **Matter multi-admin**: once both Seeds are commissioned to the same Matter Fabric (e.g., via HA's Matter integration), the Fabric provides a shared namespace. However, Matter does not define a cross-device occupancy-handoff event — it only publishes per-device state. Handoff logic must live in HA automations or in the Seed cog's federation layer.
 
@@ -203,7 +203,7 @@ ADR-069 defines a SHA-256 tamper-evident witness chain per node. For cross-Seed 
 
 ### 6.2 TOMMY (tommysense.com)
 
-Wi-Fi CSI sensing for HA. Uses ESP32 nodes. Exposes zones as binary sensors (MQTT, port 1886) and as Matter `OccupancySensor` endpoints (QR-based pairing). Motion and presence only — no vitals, no pose, no fall detection. Privacy: fully local, one periodic license-check outbound call. Closed-source algorithm and firmware; open-source HA integration. **Pricing**: free trial (1 zone, 2-min pause per 2 min of detection), Pro (unlimited zones, continuous). **Key gap vs RuView**: no HR/BR, no pose keypoints, no fall detection, no witness chain, no SONA adaptation.
+Wi-Fi CSI sensing for HA. Uses ESP32 nodes. Exposes zones as binary sensors (MQTT, port 1886) and as Matter `OccupancySensor` endpoints (QR-based pairing). Motion and presence only — no vitals, no pose, no fall detection. Privacy: fully local, one periodic license-check outbound call. Closed-source algorithm and firmware; open-source HA integration. **Pricing**: free trial (1 zone, 2-min pause per 2 min of detection), Pro (unlimited zones, continuous). **Key gap vs EchoPose**: no HR/BR, no pose keypoints, no fall detection, no witness chain, no SONA adaptation.
 
 ### 6.3 ESPectre (github.com/francescopace/espectre)
 
@@ -211,7 +211,7 @@ Open-source CSI motion detection with HA integration (HACS). ESP32-only. Motion 
 
 ### 6.4 Frigate NVR
 
-Video-based local AI NVR. MQTT integration with HA creates binary sensors (`binary_sensor.frigate_<camera>_person_motion`), person count sensors, and clip/snapshot sensors per camera. All inference on-device (Coral EdgeTPU or Hailo). **Privacy**: fully local, no cloud. Frigate's MQTT entity catalog per camera: 1 camera stream entity, N object detection binary sensors (person, car, dog, etc.), N object count sensors. No vitals, no pose skeleton. Matter support: none in Frigate itself. **Key privacy contrast vs RuView**: Frigate requires cameras (video pixels), RuView uses RF only — privacy advantage in bedrooms, bathrooms, and care settings.
+Video-based local AI NVR. MQTT integration with HA creates binary sensors (`binary_sensor.frigate_<camera>_person_motion`), person count sensors, and clip/snapshot sensors per camera. All inference on-device (Coral EdgeTPU or Hailo). **Privacy**: fully local, no cloud. Frigate's MQTT entity catalog per camera: 1 camera stream entity, N object detection binary sensors (person, car, dog, etc.), N object count sensors. No vitals, no pose skeleton. Matter support: none in Frigate itself. **Key privacy contrast vs EchoPose**: Frigate requires cameras (video pixels), EchoPose uses RF only — privacy advantage in bedrooms, bathrooms, and care settings.
 
 ### 6.5 RoomMe (Intellithings)
 
@@ -219,7 +219,7 @@ Bluetooth LE room presence using smartphone proximity. Supports HomeKit and some
 
 ### 6.6 Competitor entity catalog comparison
 
-| Feature | RuView (ADR-115) | Aqara FP2 | Aqara FP300 | TOMMY | Frigate |
+| Feature | EchoPose (ADR-115) | Aqara FP2 | Aqara FP300 | TOMMY | Frigate |
 |---|---|---|---|---|---|
 | Presence (binary) | yes | yes | yes | yes | yes (person class) |
 | Person count | yes | yes (5 max) | no | no | yes (per class) |
@@ -247,7 +247,7 @@ The FDA issued updated General Wellness Device guidance on January 6, 2026. Key 
 
 **Claims that trigger medical device classification**: any output labeled as "abnormal, pathological, or diagnostic"; recommendations concerning clinical thresholds or treatment; ongoing clinical monitoring or alerts for medical management; substitution for an FDA-approved device. A fall detection feature framed as "alert a caregiver when you might have fallen" is materially different from one framed as "diagnose fall injury" — the former qualifies as wellness under the 2026 guidance; the latter does not.
 
-**The defensible wellness-device position for RuView**: (a) market fall detection as an "activity anomaly notification" not a "medical fall diagnosis"; (b) include explicit disclaimers against diagnostic or clinical use in app-store descriptions, labeling, and HA integration documentation; (c) avoid "medical-grade" accuracy claims for HR/BR readings; (d) position the device as a "smart home occupancy and wellness assistant" rather than a "patient monitoring system."
+**The defensible wellness-device position for EchoPose**: (a) market fall detection as an "activity anomaly notification" not a "medical fall diagnosis"; (b) include explicit disclaimers against diagnostic or clinical use in app-store descriptions, labeling, and HA integration documentation; (c) avoid "medical-grade" accuracy claims for HR/BR readings; (d) position the device as a "smart home occupancy and wellness assistant" rather than a "patient monitoring system."
 
 ### 7.2 HIPAA applicability
 
@@ -269,7 +269,7 @@ Matter currently has no "Health" or "Wellness" device class in the formal taxono
 
 **Build cost**: medium (4–6 weeks for a gold-tier integration). **User impact**: very high — one-click install removes the MQTT broker prerequisite for non-power-users.
 
-Architecture: Python package at `custom_components/wifi_densepose/`, config flow that discovers Seeds via mDNS (`_ruview._tcp`) or manual IP, bearer token authentication against `GET /api/v1/status`, full entity catalog matching ADR-115 §3.1 (21 entities per node), repairs for offline nodes, diagnostics export, translations for EN/FR/DE/ES. Start from `hacs.integration_blueprint` template. Submit via HACS default repositories GitHub submission.
+Architecture: Python package at `custom_components/wifi_densepose/`, config flow that discovers Seeds via mDNS (`_echopose._tcp`) or manual IP, bearer token authentication against `GET /api/v1/status`, full entity catalog matching ADR-115 §3.1 (21 entities per node), repairs for offline nodes, diagnostics export, translations for EN/FR/DE/ES. Start from `hacs.integration_blueprint` template. Submit via HACS default repositories GitHub submission.
 
 ### 8.2 Matter Bridge with OccupancySensor / ContactSensor / BooleanState
 
@@ -293,7 +293,7 @@ Manifest structure (based on ADR-069/ADR-100 patterns):
   "version": "1.0.0",
   "platforms": ["aarch64", "x86_64"],
   "min_seed_version": "0.8.1",
-  "capabilities": ["network.mqtt", "network.matter", "api.ruview_vitals"],
+  "capabilities": ["network.mqtt", "network.matter", "api.echopose_vitals"],
   "resource_budget": {"ram_mb": 128, "cpu_percent": 15},
   "signing_key_id": "ed25519:ruv-cog-signing-v1",
   "registry_url": "https://seed.cognitum.one/store/cog-ha-matter",
@@ -318,7 +318,7 @@ Implementation: the cog runs a presence graph across all Seeds in the fleet. Nod
 
 **Build cost**: medium (3–4 weeks). **User impact**: medium-high for sustainability-focused users.
 
-Non-Intrusive Load Monitoring (NILM) in HA already exists as a community blueprint (github.com/tronikos NILM blueprint). The opportunity for RuView is the inverse: rather than using energy to infer occupancy, use RuView's presence data to validate NILM's occupancy assumptions. When RuView reports presence_score < 0.1 (no one home) but the NILM model predicts an active appliance load inconsistent with unoccupied state (e.g., a TV left on), HA can surface a "phantom load detected" notification. The cog publishes a `phantom_load_candidate` event when this condition holds for more than 5 minutes. Pairs with HA's Energy dashboard (introduced in 2021, stable since 2023) and the `homeassistant/sensor/<node>/phantom_load/config` MQTT discovery topic.
+Non-Intrusive Load Monitoring (NILM) in HA already exists as a community blueprint (github.com/tronikos NILM blueprint). The opportunity for EchoPose is the inverse: rather than using energy to infer occupancy, use EchoPose's presence data to validate NILM's occupancy assumptions. When EchoPose reports presence_score < 0.1 (no one home) but the NILM model predicts an active appliance load inconsistent with unoccupied state (e.g., a TV left on), HA can surface a "phantom load detected" notification. The cog publishes a `phantom_load_candidate` event when this condition holds for more than 5 minutes. Pairs with HA's Energy dashboard (introduced in 2021, stable since 2023) and the `homeassistant/sensor/<node>/phantom_load/config` MQTT discovery topic.
 
 ### 8.7 Privacy-mode "audit logs only"
 

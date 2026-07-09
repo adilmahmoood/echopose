@@ -87,15 +87,15 @@ fn every_payload_contains_unique_id_and_state_topic_pointing_at_correct_state_to
             msg.payload.contains("\"unique_id\":\""),
             "missing unique_id in {msg:?}",
         );
-        // state_topic must point back at the BFLD `ruview/<node>/bfld/<entity>/state` path.
+        // state_topic must point back at the BFLD `echopose/<node>/bfld/<entity>/state` path.
         assert!(
-            msg.payload.contains("\"state_topic\":\"ruview/seed-99/bfld/"),
+            msg.payload.contains("\"state_topic\":\"echopose/seed-99/bfld/"),
             "state_topic wrong in {msg:?}",
         );
         // Device block ties all six entities to one HA device.
         assert!(msg.payload.contains("\"device\":{"));
         assert!(msg.payload.contains("\"identifiers\":\"seed-99\""));
-        assert!(msg.payload.contains("\"manufacturer\":\"RuView\""));
+        assert!(msg.payload.contains("\"manufacturer\":\"EchoPose\""));
     }
 }
 

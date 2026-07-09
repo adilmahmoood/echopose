@@ -1,6 +1,6 @@
 //! HA MQTT auto-discovery payload generators.
 //!
-//! Per ADR-115 §3.1 — §3.4 each RuView node becomes one HA `device` and
+//! Per ADR-115 §3.1 — §3.4 each EchoPose node becomes one HA `device` and
 //! each capability (presence, person count, heart rate, breathing rate,
 //! motion, fall, RSSI, zone occupancy, pose) becomes one entity on that
 //! device. This module owns the JSON-serializable structures HA expects
@@ -119,7 +119,7 @@ impl AvailabilityPayload {
     }
 }
 
-/// All entity kinds RuView publishes via MQTT. Used by [`DiscoveryBuilder`]
+/// All entity kinds EchoPose publishes via MQTT. Used by [`DiscoveryBuilder`]
 /// to generate matching `config` and `state` topic strings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EntityKind {
@@ -242,7 +242,7 @@ impl EntityKind {
     }
 }
 
-/// Builds HA discovery payloads for a specific RuView node.
+/// Builds HA discovery payloads for a specific EchoPose node.
 pub struct DiscoveryBuilder<'a> {
     pub discovery_prefix: &'a str,
     pub node_id: &'a str,
@@ -291,7 +291,7 @@ impl<'a> DiscoveryBuilder<'a> {
         let display = self
             .node_friendly_name
             .map(|n| n.to_string())
-            .unwrap_or_else(|| format!("RuView node {}", self.node_id));
+            .unwrap_or_else(|| format!("EchoPose node {}", self.node_id));
         DeviceMeta {
             identifiers: vec![format!("wifi_densepose_{}", self.node_id)],
             name: display,

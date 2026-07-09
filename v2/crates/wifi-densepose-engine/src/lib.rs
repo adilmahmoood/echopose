@@ -1,4 +1,4 @@
-//! # RuView Streaming Engine — integration layer
+//! # EchoPose Streaming Engine — integration layer
 //!
 //! This crate is the **composition root** that wires the ADR-135..146 building
 //! blocks into one end-to-end *trust-traceable* pipeline cycle. Each block was
@@ -111,7 +111,7 @@ pub struct TrustedOutput {
     pub mesh: Option<MeshPartitionReport>,
 }
 
-/// Composition root for the RuView streaming engine.
+/// Composition root for the EchoPose streaming engine.
 pub struct StreamingEngine {
     fuser: MultistaticFuser,
     coherence_accept: f32,
@@ -628,7 +628,7 @@ impl StreamingEngine {
 
 /// Domain-separation tag for the witness hash. Bumping this string
 /// intentionally invalidates every previously-recorded witness (a schema break).
-const WITNESS_DOMAIN: &[u8] = b"ruview.engine.witness.v1";
+const WITNESS_DOMAIN: &[u8] = b"echopose.engine.witness.v1";
 
 /// Length-prefix a variable-length field into the witness hash so adjacent
 /// fields can never be confused for one another. The 8-byte little-endian

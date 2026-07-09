@@ -1,6 +1,6 @@
 //! Validate the workspace-root `README.md` Documentation table cites the
 //! BFLD crate. crates.io won't show this, but new contributors browsing
-//! `ruvnet/RuView` on GitHub will — the entry is the primary discovery
+//! `ruvnet/EchoPose` on GitHub will — the entry is the primary discovery
 //! path for operators looking for "WiFi sensing privacy layer".
 
 #![cfg(feature = "std")]

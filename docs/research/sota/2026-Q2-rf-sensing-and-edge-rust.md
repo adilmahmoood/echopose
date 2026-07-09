@@ -35,7 +35,7 @@ DensePose-from-WiFi (2022) lit the fuse:
 - **Topological priors.** GraphPose-Fi (2025) and topology-constrained
   decoders (DT-Pose) explicitly use the human skeleton as a graph,
   improving plausibility under occlusion.
-- **Multistatic geometry.** RuView's own ADR-029/ADR-031 line is the
+- **Multistatic geometry.** EchoPose's own ADR-029/ADR-031 line is the
   practical multistatic story; ISAC-Fi (Aug 2024) and the multistatic
   ISAC-MIMO papers (2024–2025) describe similar geometry as a 6G research
   topic. IEEE 802.11bf-2025 (published 26 September 2025) is the
@@ -47,7 +47,7 @@ The proposal's claim that "3–6 ESP32-S3 nodes can do meaningful pose
 work" is consistent with WiFlow's network sizes (4.82 M params, INT8
 ~5 MB) and with the MM-Fi multi-link benchmark. The CSI pipeline does
 not need a Pi *per node* to run inference; one Pi per cluster is
-sufficient. RuView's existing ESP32-mesh + sensing-server already
+sufficient. EchoPose's existing ESP32-mesh + sensing-server already
 demonstrates the shape.
 
 ### 1.3 What to reconsider
@@ -62,7 +62,7 @@ demonstrates the shape.
   up to 80 MHz BW on Broadcom chips and gives more subcarriers per frame
   than ESP32, but the Pi platform has no equivalent of ESP32 Secure Boot
   V2, and the Broadcom firmware-patch path is fragile across kernel
-  releases. RuView's existing ESP32-S3 mesh already beats Nexmon-on-Pi
+  releases. EchoPose's existing ESP32-S3 mesh already beats Nexmon-on-Pi
   on cost, security posture, and provisioning.
 - **USRP/SDR is overkill for occupancy and pose**, and is far over the
   proposal's BOM ceiling. It would only become attractive for
@@ -228,7 +228,7 @@ runs the model" is the right shape. ML inference at the WiFlow scale is
   the ADR-039 Tier-0/Tier-1 outputs — fit on ESP32-S3 with TFLite Micro
   or hand-written DSP. They do not fit `tract` or `candle` no_std.
 - **For Rust-on-MCU-ML**, the realistic path is hand-rolled INT8
-  inference (RuView's `wifi-densepose-nn` already has FFI hooks) or a
+  inference (EchoPose's `wifi-densepose-nn` already has FFI hooks) or a
   Rust port of a tiny TFLM-style runtime. **No mainstream Rust
   no_std-no_alloc ONNX runtime exists in production at 2026 Q2.**
 - **The Pi Zero 2W's 1 GB RAM is fine for WiFlow but tight for larger
@@ -406,7 +406,7 @@ BQ24074 (linear) is sufficient. The proposal's choice is fine.
 ### 8.2 What holds up
 
 For < 25-node deployments, ESP-WIFI-MESH (or `esp-mesh-lite`) is the
-direct continuation of today's RuView mesh and the proposal's choice is
+direct continuation of today's EchoPose mesh and the proposal's choice is
 defensible.
 
 ### 8.3 What to reconsider
@@ -494,7 +494,7 @@ A short list of items that affect more than one section:
    QUIC/ML/secure-boot story at the cluster level.
 3. **IEEE 802.11bf-2025's ratification** changes the regulatory and
    ecosystem landscape but does not change what off-the-shelf ESP32
-   silicon can do today. RuView's pre-standard work (ADR-029, ADR-073,
+   silicon can do today. EchoPose's pre-standard work (ADR-029, ADR-073,
    ADR-081) is well-aligned with the standard's direction; nothing in
    the proposal makes it more or less compatible.
 4. **The right "comms MCU" might be ESP32-C6 instead of a second S3.**

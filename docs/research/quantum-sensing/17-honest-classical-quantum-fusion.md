@@ -9,13 +9,13 @@
 | **Status** | Research integration — bridges the 11-16 quantum-sensing series with the 2026-05-22 SOTA research loop |
 | **Refines** | docs 11, 12, 13, 14, 15, 16; ADR-089 (nvsim); ADR-029 (multistatic); ADR-021 (vitals) |
 | **Companion docs** | SOTA loop's `R1, R3, R5-R15, R16-R20` + ADR-105 through ADR-109 + ADR-113 |
-| **Audience** | RuView contributors deciding whether/how to integrate quantum sensors with the existing classical stack |
+| **Audience** | EchoPose contributors deciding whether/how to integrate quantum sensors with the existing classical stack |
 
 ---
 
 ## TL;DR
 
-Doc 16 (Ghost Murmur) reality-checked overclaimed 40-mile NV magnetometry and sketched a sober RuView-grounded version. Doc 17 takes the next step: **maps the SOTA loop's classical findings (R1-R20) onto the quantum-sensing series and identifies the highest-leverage honest fusion points**.
+Doc 16 (Ghost Murmur) reality-checked overclaimed 40-mile NV magnetometry and sketched a sober EchoPose-grounded version. Doc 17 takes the next step: **maps the SOTA loop's classical findings (R1-R20) onto the quantum-sensing series and identifies the highest-leverage honest fusion points**.
 
 Two claims:
 
@@ -95,7 +95,7 @@ This is the cleanest **near-term** quantum-classical fusion: one expensive preci
 
 **Honest range**: vapor cell heated to 150°C; requires magnetic shielding for shipped sensitivity. Lab + niche industrial.
 
-**Fusion proposal**: out of scope for typical RuView deployment. Useful for highly specialised biomedical scenarios in shielded rooms.
+**Fusion proposal**: out of scope for typical EchoPose deployment. Useful for highly specialised biomedical scenarios in shielded rooms.
 
 ## 3. The "honest fusion" pattern
 
@@ -196,7 +196,7 @@ This index lets a reader navigate: "I'm interested in X loop finding; here's the
 
 This document is the **explicit handshake** between the SOTA research loop (2026-05-22) and the quantum-sensing research series (2026-03-08 onwards). The two series produced complementary outputs — the loop on classical CSI primitives, the quantum series on quantum sensors. Doc 17 stitches them together with the same "sober scope, honest claims" posture that doc 16 established.
 
-The closing observation matches doc 16's: **the architectural value of RuView is in honest, well-factored sensing infrastructure that survives reality-checks**. Adding quantum sensors doesn't change the architecture; it adds parameters. The same R3, R7, R12, R14, ADR-106, ADR-113 framework applies. **The loop's output is the contract; quantum sensors are an upgrade path.**
+The closing observation matches doc 16's: **the architectural value of EchoPose is in honest, well-factored sensing infrastructure that survives reality-checks**. Adding quantum sensors doesn't change the architecture; it adds parameters. The same R3, R7, R12, R14, ADR-106, ADR-113 framework applies. **The loop's output is the contract; quantum sensors are an upgrade path.**
 
 ---
 

@@ -4,7 +4,7 @@
 //! > Sketch compare cost reduction: **8×–30×** vs full-float compare.
 //!
 //! This bench measures the per-pair compare cost at the embedding sizes
-//! actually used in RuView:
+//! actually used in EchoPose:
 //!
 //! - 128-d (AETHER re-ID embeddings, ADR-024)
 //! - 256-d (CSI spectrogram embeddings, ADR-076)

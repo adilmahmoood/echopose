@@ -1,12 +1,12 @@
 # Examples
 
-Real-time sensing applications built on the RuView platform.
+Real-time sensing applications built on the EchoPose platform.
 
 ## Unified Dashboard (start here)
 
 ```bash
 pip install pyserial numpy
-python examples/ruview_live.py --csi COM7 --mmwave COM4
+python examples/echopose_live.py --csi COM7 --mmwave COM4
 ```
 
 The live dashboard auto-detects available sensors and displays fused vitals, environment data, and events in real-time. Works with any combination of sensors.
@@ -15,7 +15,7 @@ The live dashboard auto-detects available sensors and displays fused vitals, env
 
 | Example | Sensors | What It Does |
 |---------|---------|-------------|
-| [**ruview_live.py**](ruview_live.py) | CSI + mmWave + Light | Unified dashboard: HR, BR, BP, stress, presence, light, RSSI |
+| [**echopose_live.py**](echopose_live.py) | CSI + mmWave + Light | Unified dashboard: HR, BR, BP, stress, presence, light, RSSI |
 | [Medical: Blood Pressure](medical/) | mmWave | Contactless BP estimation from HRV |
 | [Medical: Vitals Suite](medical/vitals_suite.py) | mmWave | 10-in-1: HR, BR, BP, HRV, sleep stages, apnea, cough, snoring, activity, meditation |
 | [Sleep: Apnea Screener](sleep/) | mmWave | Detects breathing cessation events, computes AHI |
@@ -37,7 +37,7 @@ Either sensor works alone. Both together enable fusion (mmWave 80% + CSI 20%).
 pip install pyserial numpy
 
 # Unified dashboard (recommended)
-python examples/ruview_live.py --csi COM7 --mmwave COM4
+python examples/echopose_live.py --csi COM7 --mmwave COM4
 
 # Blood pressure estimation
 python examples/medical/bp_estimator.py --port COM4
@@ -52,7 +52,7 @@ python examples/stress/hrv_stress_monitor.py --port COM4 --duration 3600
 python examples/environment/room_monitor.py --csi-port COM7 --mmwave-port COM4
 
 # CSI only (no mmWave)
-python examples/ruview_live.py --csi COM7 --mmwave none
+python examples/echopose_live.py --csi COM7 --mmwave none
 ```
 
 ## Web UI

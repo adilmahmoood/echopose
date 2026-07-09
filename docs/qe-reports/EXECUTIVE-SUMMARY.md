@@ -1,4 +1,4 @@
-# RuView / WiFi-DensePose -- QE Executive Summary
+# EchoPose / WiFi-DensePose -- QE Executive Summary
 
 **Date:** 2026-04-05
 **Analysis:** Full-spectrum Quality Engineering assessment (8 specialized agents)

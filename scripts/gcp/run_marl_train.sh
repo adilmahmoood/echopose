@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Run ruview-swarm MARL training on a GCP L4 instance (ADR-148 M4).
+# Run echopose-swarm MARL training on a GCP L4 instance (ADR-148 M4).
 # Usage: bash scripts/gcp/run_marl_train.sh <INSTANCE_IP> [EPISODES] [DRONES] [PROFILE]
 #
 # Rsyncs the v2/ Rust workspace to the instance, then runs the Candle PPO
 # MARL trainer:
-#   cargo run --release -p ruview-swarm --features train,cuda --bin train_marl
+#   cargo run --release -p echopose-swarm --features train,cuda --bin train_marl
 # Downloads the trained checkpoints back on completion.
 #
 # NOTE: the `--bin train_marl` target is added by the companion MARL trainer
@@ -37,8 +37,8 @@ GCP_USER="${GCP_USER:-$(gcloud config get-value account 2>/dev/null | cut -d@ -f
 REMOTE="${GCP_USER}@${INSTANCE_IP}"
 LOCAL_V2_DIR="$(cd "$(dirname "$0")/../.." && pwd)/v2"
 OUTPUT_DIR="./out/gcp-checkpoints/marl"
-REMOTE_CRATE="~/ruview-swarm"
-REMOTE_CHECKPOINTS="~/ruview-swarm/marl-checkpoints"
+REMOTE_CRATE="~/echopose-swarm"
+REMOTE_CHECKPOINTS="~/echopose-swarm/marl-checkpoints"
 
 log() { echo "[run_marl_train] $*"; }
 
@@ -64,10 +64,10 @@ log "SSH connection OK"
 # ── Startup script completion check ───────────────────────────────────────────
 log "Checking that startup script completed ..."
 STARTUP_READY=$(ssh $SSH_OPTS "$REMOTE" \
-  "grep -c 'setup complete' /var/log/ruview-marl-startup.log 2>/dev/null || echo 0")
+  "grep -c 'setup complete' /var/log/echopose-marl-startup.log 2>/dev/null || echo 0")
 if [[ "$STARTUP_READY" -lt 1 ]]; then
   log "WARNING: Startup script may not have finished yet."
-  log "         Check /var/log/ruview-marl-startup.log on the instance."
+  log "         Check /var/log/echopose-marl-startup.log on the instance."
   log "         Continuing anyway — the Rust toolchain may need more time."
 fi
 
@@ -93,13 +93,13 @@ ssh $SSH_OPTS "$REMOTE" bash << REMOTE_TRAIN
 set -euo pipefail
 # shellcheck source=/dev/null
 source "\$HOME/.cargo/env"
-cd "\$HOME/ruview-swarm"
+cd "\$HOME/echopose-swarm"
 
 mkdir -p ./marl-checkpoints
 
 echo "[train] \$(date): starting Candle PPO MARL trainer"
 # --bin train_marl is provided by the companion MARL trainer work.
-cargo run --release -p ruview-swarm --features train,cuda --bin train_marl -- \\
+cargo run --release -p echopose-swarm --features train,cuda --bin train_marl -- \\
     --episodes ${EPISODES} --drones ${DRONES} --profile ${PROFILE} \\
     --checkpoint-dir ./marl-checkpoints
 

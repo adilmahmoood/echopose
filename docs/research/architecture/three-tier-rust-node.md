@@ -66,7 +66,7 @@ runtimes:
    model weights, vision inference, persistent storage, QUIC-based fleet
    sync, optional cloud APIs.
 
-Today's RuView node tries to fit jobs 1 and 2 onto one ESP32-S3, and job 3
+Today's EchoPose node tries to fit jobs 1 and 2 onto one ESP32-S3, and job 3
 either runs on a separate machine (the "sensing-server" host) or is
 absent. The thesis of this proposal is that **collapsing all three onto
 a single PCB but onto three separate dies** captures most of the
@@ -224,7 +224,7 @@ Three concentric rings:
 1. **Inner ring — node-local IPC.** Postcard over UART/SPI between the
    three dies. Length-prefixed, CRC-checked, no encryption (it's on a
    trace, not a wire).
-2. **Middle ring — RuView mesh.** ESP-WIFI-MESH (or ESP-MESH-LITE)
+2. **Middle ring — EchoPose mesh.** ESP-WIFI-MESH (or ESP-MESH-LITE)
    between comms MCUs across nodes, carrying L3 mesh-plane messages
    from ADR-081 (TIME_SYNC, ROLE_ASSIGN, CHANNEL_PLAN, FEATURE_DELTA,
    HEALTH, ANOMALY_ALERT). Authenticated with HMAC-SHA256 per ADR-032.
@@ -274,7 +274,7 @@ survey expands each of these.
 ### 7.1 The cost story is bad before volume
 
 A single ESP32-S3 node is ~$9 today. A three-tier node is closer to
-$40–55. RuView's design point of "many cheap nodes" rewards low BOM. The
+$40–55. EchoPose's design point of "many cheap nodes" rewards low BOM. The
 three-tier shape is justified only if each node *also* replaces a
 sensing-server host (i.e., a Pi or laptop running the sensing pipeline)
 that would have cost more than the marginal Pi-on-each-node. In a
@@ -410,7 +410,7 @@ adopting it. The recommendation, if a decision is forced, is:
 3. **Spend the first chunk of effort on the three "evidence" gates from
    §8** — CSI no_std maturity, ESP-WIFI-MESH at scale, and Pi
    secure-boot reality — *before* committing to a hardware re-spin.
-4. **Reserve the three-tier shape** for a future "RuView Pro" SKU
+4. **Reserve the three-tier shape** for a future "EchoPose Pro" SKU
    targeting deployments where per-node BOM is not the dominant cost
    and full secure-boot + dm-verity at the edge is mandatory.
 

@@ -1,13 +1,13 @@
 //! ADR-115 P4 — MQTT integration tests against a real broker.
 //!
 //! These tests require an MQTT broker reachable at `localhost:11883`
-//! (overridable via `RUVIEW_TEST_MQTT_PORT`). They are gated behind the
+//! (overridable via `ECHOPOSE_TEST_MQTT_PORT`). They are gated behind the
 //! `mqtt` feature (which pulls in `rumqttc`) **and** behind the
-//! `RUVIEW_RUN_INTEGRATION` env var so the default test run on
+//! `ECHOPOSE_RUN_INTEGRATION` env var so the default test run on
 //! developer machines doesn't break when there's no broker.
 //!
 //! In CI, the `.github/workflows/mqtt-integration.yml` workflow spins
-//! up a Mosquitto sidecar container, sets `RUVIEW_RUN_INTEGRATION=1`,
+//! up a Mosquitto sidecar container, sets `ECHOPOSE_RUN_INTEGRATION=1`,
 //! and runs `cargo test -p wifi-densepose-sensing-server --features mqtt
 //! --test mqtt_integration`.
 //!
@@ -47,11 +47,11 @@ use wifi_densepose_sensing_server::mqtt::{
 };
 
 fn should_run() -> Option<u16> {
-    if std::env::var("RUVIEW_RUN_INTEGRATION").is_err() {
-        eprintln!("[skip] set RUVIEW_RUN_INTEGRATION=1 + run a broker on the test port");
+    if std::env::var("ECHOPOSE_RUN_INTEGRATION").is_err() {
+        eprintln!("[skip] set ECHOPOSE_RUN_INTEGRATION=1 + run a broker on the test port");
         return None;
     }
-    let port = std::env::var("RUVIEW_TEST_MQTT_PORT")
+    let port = std::env::var("ECHOPOSE_TEST_MQTT_PORT")
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(11883);
@@ -67,7 +67,7 @@ fn make_cfg(port: u16, privacy_mode: bool, label: &str) -> std::sync::Arc<MqttCo
         // Per-test client_id so cargo test --test-threads=1 doesn't make
         // mosquitto kick the previous session when the next test connects
         // with the same client_id (default MQTT session-takeover behaviour).
-        client_id: format!("ruview-int-test-{}-{}", std::process::id(), label),
+        client_id: format!("echopose-int-test-{}-{}", std::process::id(), label),
         discovery_prefix: "homeassistant".into(),
         tls: TlsConfig::Off,
         refresh_secs: 60,
@@ -103,7 +103,7 @@ async fn subscribe_client(port: u16, topics: &[&str]) -> (AsyncClient, EventLoop
         .map(|d| d.subsec_nanos() as u64)
         .unwrap_or(0);
     let mut opts = MqttOptions::new(
-        format!("ruview-test-sub-{}-{}", std::process::id(), suffix),
+        format!("echopose-test-sub-{}-{}", std::process::id(), suffix),
         "127.0.0.1",
         port,
     );

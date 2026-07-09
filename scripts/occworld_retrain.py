@@ -1,22 +1,22 @@
 """
-Phase 5 — OccWorld VQVAE + Transformer retraining on RuView indoor occupancy.
+Phase 5 — OccWorld VQVAE + Transformer retraining on EchoPose indoor occupancy.
 
 Two-stage training pipeline:
-  Stage 1: Retrain VQVAE tokenizer on RuView snapshots
+  Stage 1: Retrain VQVAE tokenizer on EchoPose snapshots
   Stage 2: Retrain autoregressive transformer on tokenized sequences
 
 Usage:
     # Stage 1: VQVAE
     python3 scripts/occworld_retrain.py vqvae \
         --snapshots /tmp/snapshots/ \
-        --work-dir out/ruview_vqvae \
+        --work-dir out/echopose_vqvae \
         --epochs 200
 
     # Stage 2: Transformer (requires Stage 1 checkpoint)
     python3 scripts/occworld_retrain.py transformer \
         --snapshots /tmp/snapshots/ \
-        --vqvae-checkpoint out/ruview_vqvae/latest.pth \
-        --work-dir out/ruview_occworld \
+        --vqvae-checkpoint out/echopose_vqvae/latest.pth \
+        --work-dir out/echopose_occworld \
         --epochs 200
 
     # Generate training snapshots from the live sensing server
@@ -78,7 +78,7 @@ def cmd_record(args: argparse.Namespace) -> None:
 # ── Stage 1: VQVAE retraining ────────────────────────────────────────────────
 
 def cmd_vqvae(args: argparse.Namespace) -> None:
-    """Retrain the OccWorld VQVAE tokenizer on RuView indoor occupancy."""
+    """Retrain the OccWorld VQVAE tokenizer on EchoPose indoor occupancy."""
     sys.path.insert(0, str(Path(args.occworld_dir).resolve()))
 
     import torch
@@ -91,7 +91,7 @@ def cmd_vqvae(args: argparse.Namespace) -> None:
         log.error("Could not import OccWorld model package. Set --occworld-dir correctly.")
         sys.exit(1)
 
-    from ruview_occ_dataset import RuViewOccDataset
+    from echopose_occ_dataset import EchoPoseOccDataset
 
     cfg = Config.fromfile(args.config)
     work_dir = Path(args.work_dir)
@@ -101,7 +101,7 @@ def cmd_vqvae(args: argparse.Namespace) -> None:
     vae = MODELS.build(cfg.model.vae).cuda()
     log.info("VQVAE params: %.1fM", sum(p.numel() for p in vae.parameters()) / 1e6)
 
-    ds = RuViewOccDataset(
+    ds = EchoPoseOccDataset(
         args.snapshots,
         return_len=cfg.model.get("num_frames", 15) + 1,
         voxel_m=args.voxel_m,
@@ -162,7 +162,7 @@ def cmd_vqvae(args: argparse.Namespace) -> None:
 # ── Stage 2: Transformer retraining ─────────────────────────────────────────
 
 def cmd_transformer(args: argparse.Namespace) -> None:
-    """Retrain the OccWorld autoregressive transformer on tokenized RuView sequences."""
+    """Retrain the OccWorld autoregressive transformer on tokenized EchoPose sequences."""
     sys.path.insert(0, str(Path(args.occworld_dir).resolve()))
 
     import torch
@@ -177,7 +177,7 @@ def cmd_transformer(args: argparse.Namespace) -> None:
         log.error("OccWorld model package not found.")
         sys.exit(1)
 
-    from ruview_occ_dataset import RuViewOccDataset
+    from echopose_occ_dataset import EchoPoseOccDataset
 
     cfg = Config.fromfile(args.config)
     work_dir = Path(args.work_dir)
@@ -197,7 +197,7 @@ def cmd_transformer(args: argparse.Namespace) -> None:
     log.info("Transformer params: %.1fM",
              sum(p.numel() for p in full_model.transformer.parameters()) / 1e6)
 
-    ds = RuViewOccDataset(args.snapshots, return_len=cfg.model.get("num_frames", 15) + 1)
+    ds = EchoPoseOccDataset(args.snapshots, return_len=cfg.model.get("num_frames", 15) + 1)
     loader = torch.utils.data.DataLoader(
         ds, batch_size=1, shuffle=True, num_workers=0,
         collate_fn=lambda b: b[0],
@@ -244,7 +244,7 @@ def cmd_transformer(args: argparse.Namespace) -> None:
 # ── CLI ──────────────────────────────────────────────────────────────────────
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="OccWorld retraining pipeline for RuView (ADR-147 Phase 5)")
+    p = argparse.ArgumentParser(description="OccWorld retraining pipeline for EchoPose (ADR-147 Phase 5)")
     p.add_argument("--occworld-dir", default=os.path.expanduser("~/projects/OccWorld"),
                    help="Path to OccWorld repo root")
     p.add_argument("--config", default=os.path.expanduser("~/projects/OccWorld/config/occworld.py"),
@@ -262,7 +262,7 @@ def _build_parser() -> argparse.ArgumentParser:
     # vqvae
     vae = sub.add_parser("vqvae", help="Retrain VQVAE tokenizer")
     vae.add_argument("--snapshots", required=True)
-    vae.add_argument("--work-dir", default="out/ruview_vqvae")
+    vae.add_argument("--work-dir", default="out/echopose_vqvae")
     vae.add_argument("--epochs", type=int, default=200)
     vae.add_argument("--voxel-m", type=float, dest="voxel_m", default=0.4)
     vae.add_argument("--x-min", type=float, dest="x_min", default=-40.0)
@@ -273,7 +273,7 @@ def _build_parser() -> argparse.ArgumentParser:
     xfm = sub.add_parser("transformer", help="Retrain autoregressive transformer")
     xfm.add_argument("--snapshots", required=True)
     xfm.add_argument("--vqvae-checkpoint", default=None)
-    xfm.add_argument("--work-dir", default="out/ruview_occworld")
+    xfm.add_argument("--work-dir", default="out/echopose_occworld")
     xfm.add_argument("--epochs", type=int, default=200)
 
     return p

@@ -11,7 +11,7 @@
 
 `docs/research/quantum-sensing/14-nv-diamond-sensor-simulator.md` surveyed
 the state of NV-diamond magnetometry hardware and software in 2026 and
-landed on a "lean toward skip" verdict for a RuView NV-simulator absent a
+landed on a "lean toward skip" verdict for a EchoPose NV-simulator absent a
 hardware target. That verdict was honest: the COTS NV-diamond noise floor
 (~300 pT/√Hz at the Element Six DNV-B1 price point) is 1–2 orders of
 magnitude worse than QuSpin OPMs at similar cost, so a *biomagnetic-grade*
@@ -38,9 +38,9 @@ shippable independently with a measured acceptance gate.
 
 Build `nvsim` as a **standalone Rust leaf crate** at `v2/crates/nvsim/`
 implementing the six-pass plan in doc 15. The crate is deliberately
-independent of the rest of the RuView workspace — no internal dependencies
+independent of the rest of the EchoPose workspace — no internal dependencies
 on `wifi-densepose-core`, `wifi-densepose-signal`, or `wifi-densepose-mat`,
-because the simulator is generally useful outside RuView's WiFi-CSI
+because the simulator is generally useful outside EchoPose's WiFi-CSI
 context (magnetic-anomaly modelling, NV-physics teaching, COTS sensor
 noise-floor sanity checks).
 
@@ -56,7 +56,7 @@ Six-pass implementation:
 3. **Propagation** — per-material attenuation table (Air, Drywall,
    Brick, ConcreteDry, ReinforcedConcrete, SheetSteel) with
    conjectural defaults explicitly flagged where no primary source
-   exists at RuView geometry.
+   exists at EchoPose geometry.
 4. **NV ensemble sensor** — Lorentzian ODMR lineshape at FWHM ≈ 1 MHz,
    shot-noise floor `δB ∝ 1/(γ_e · C · √(N · t · T₂*))`, T₂ decay
    envelope, 4-axis 〈111〉 crystallographic projection with
@@ -87,8 +87,8 @@ test suite.
   Cullity & Graham, Ortner & Bandeira); every conjectural default flagged
   in code; the Wolf 2015 sanity-floor test is the canary that fires if
   anyone silently changes the ensemble constants.
-- **Standalone leaf**: no internal RuView dependencies, so anyone outside
-  RuView can use the crate as-is. RuView integrations land behind opt-in
+- **Standalone leaf**: no internal EchoPose dependencies, so anyone outside
+  EchoPose can use the crate as-is. EchoPose integrations land behind opt-in
   feature flags.
 - **Forward-simulation niche filled**: gives DSP / ML engineers a known-
   answer-key stream for regression replay without sourcing a magnetic
@@ -105,7 +105,7 @@ test suite.
   the wrong starting point" caveat.
 - **Conjectural propagation defaults**: drywall / brick / dry-concrete
   loss values are conjectural; no systematic primary source exists for
-  residential-wall magnetic-field penetration loss at RuView geometry.
+  residential-wall magnetic-field penetration loss at EchoPose geometry.
   Flagged in code and in `15.md` §2.2; the `HEAVY_ATTENUATION` flag
   surfaces this to downstream consumers.
 - **No pulsed-protocol simulation**: Rabi nutation, Hahn echo, dynamical
@@ -168,7 +168,7 @@ Branch: `feat/nvsim-pipeline-simulator`. README at
   `MAG_FRAME_MAGIC` (`0xC51A_6E70`) is deliberately distinct.
 - **ADR-028** — ESP32 capability audit + witness verification. nvsim's
   proof bundle pattern is the same shape as `archive/v1/data/proof/`.
-- **ADR-066** — Swarm bridge to Cognitum Seed coordinator. If RuView
+- **ADR-066** — Swarm bridge to Cognitum Seed coordinator. If EchoPose
   ever wants to publish nvsim outputs across the mesh, the
   `MagFrame` shape is the wire format.
 - **ADR-086** — Edge novelty gate. Independent firmware-track ADR;
@@ -178,7 +178,7 @@ Branch: `feat/nvsim-pipeline-simulator`. README at
 ## Open questions
 
 - **Should nvsim be published to crates.io as a standalone crate?** It
-  already has no internal RuView deps. The repo's MIT/Apache-2.0
+  already has no internal EchoPose deps. The repo's MIT/Apache-2.0
   license is permissive. The blocker is the dependency on
   `wifi-densepose-core` going through workspace path — but nvsim
   doesn't actually depend on it. If the answer is yes, this is a

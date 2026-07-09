@@ -360,7 +360,7 @@ congestion-aware pacing, replacing raw UDP for WASM event streams.
 
 ---
 
-## Appendix C: Hardware Benchmark (RuView ESP32-S3)
+## Appendix C: Hardware Benchmark (EchoPose ESP32-S3)
 
 Measured on ESP32-S3 (QFN56 rev v0.2, 8 MB flash, 160 MHz, ESP-IDF v5.2,
 board without PSRAM). WiFi connected to AP at RSSI -25 dBm, channel 5 BW20.

@@ -212,7 +212,7 @@ struct Args {
     #[arg(
         long,
         value_name = "URL",
-        env = "RUVIEW_EDGE_REGISTRY_URL",
+        env = "ECHOPOSE_EDGE_REGISTRY_URL",
         default_value = "https://storage.googleapis.com/cognitum-apps/app-registry.json"
     )]
     edge_registry_url: String,
@@ -221,14 +221,14 @@ struct Args {
     #[arg(
         long,
         value_name = "SECS",
-        env = "RUVIEW_EDGE_REGISTRY_TTL_SECS",
+        env = "ECHOPOSE_EDGE_REGISTRY_TTL_SECS",
         default_value = "3600"
     )]
     edge_registry_ttl_secs: u64,
 
     /// Disable the edge module registry endpoint entirely. Returns 404 on
     /// `GET /api/v1/edge/registry`. Use for air-gapped deployments.
-    #[arg(long, env = "RUVIEW_NO_EDGE_REGISTRY")]
+    #[arg(long, env = "ECHOPOSE_NO_EDGE_REGISTRY")]
     no_edge_registry: bool,
 }
 
@@ -4075,7 +4075,7 @@ fn derive_single_person_pose(
 /// (ADR-262 §4 P3 / §6). Cycles before the governed engine has produced a trust
 /// class are likewise skipped (no class ⇒ nothing honest to stamp).
 ///
-/// `identity_bound` is `false` on the live path: RuView's live cycle does not
+/// `identity_bound` is `false` on the live path: EchoPose's live cycle does not
 /// bind an enrolled identity to the surface yet (that is a per-room-calibration
 /// / AETHER concern, ADR-262 §8 Q4). This is conservative for egress — it only
 /// ever *lowers* a Derived cycle from P5 to P4, both of which are already held
@@ -4120,7 +4120,7 @@ fn emit_rufield_event(s: &AppStateInner, update: &SensingUpdate, node_id: u8) {
             grid_size: update.signal_field.grid_size,
             values: update.signal_field.values.clone(),
         }),
-        rufield_surface::ruview_class_from_bfld(effective_class),
+        rufield_surface::echopose_class_from_bfld(effective_class),
         s.engine_bridge.demoted(),
         false, // identity_bound — see fn-doc (conservative, cannot leak).
     );
@@ -7470,9 +7470,9 @@ async fn main() {
                     let builder = mqtt::publisher::OwnedDiscoveryBuilder {
                         discovery_prefix: mcfg.discovery_prefix.clone(),
                         node_id: node_id.clone(),
-                        node_friendly_name: Some("RuView".to_string()),
+                        node_friendly_name: Some("EchoPose".to_string()),
                         sw_version: env!("CARGO_PKG_VERSION").to_string(),
-                        model: "RuView WiFi Sensing".to_string(),
+                        model: "EchoPose WiFi Sensing".to_string(),
                         via_device: None,
                     };
                     let (vtx, vrx) = broadcast::channel::<mqtt::state::VitalsSnapshot>(64);
@@ -7648,12 +7648,12 @@ async fn main() {
         .parse()
         .expect("Invalid --bind-addr (use 127.0.0.1 or 0.0.0.0)");
 
-    // #443: optional bearer-token auth on `/api/v1/*`. `RUVIEW_API_TOKEN`
+    // #443: optional bearer-token auth on `/api/v1/*`. `ECHOPOSE_API_TOKEN`
     // unset/empty ⇒ middleware is a no-op (LAN-mode default preserved); set ⇒
     // every `/api/v1/*` request must carry `Authorization: Bearer <token>`.
     let bearer_auth_state = wifi_densepose_sensing_server::bearer_auth::AuthState::from_env();
     if bearer_auth_state.is_enabled() {
-        info!("API auth: bearer-token enforcement ON for /api/v1/* (RUVIEW_API_TOKEN set)");
+        info!("API auth: bearer-token enforcement ON for /api/v1/* (ECHOPOSE_API_TOKEN set)");
         if bind_ip.is_unspecified() {
             warn!(
                 "API auth ON but bind-addr is {} — consider --bind-addr 127.0.0.1 for LAN-only deployments",
@@ -7662,7 +7662,7 @@ async fn main() {
         }
     } else {
         info!(
-            "API auth: OFF — /api/v1/* is unauthenticated. Set RUVIEW_API_TOKEN=<token> to enforce bearer auth."
+            "API auth: OFF — /api/v1/* is unauthenticated. Set ECHOPOSE_API_TOKEN=<token> to enforce bearer auth."
         );
     }
 
@@ -7809,7 +7809,7 @@ async fn main() {
             axum::http::header::CACHE_CONTROL,
             HeaderValue::from_static("no-cache, no-store, must-revalidate"),
         ))
-        // Opt-in bearer-token auth on `/api/v1/*` (#443). When `RUVIEW_API_TOKEN`
+        // Opt-in bearer-token auth on `/api/v1/*` (#443). When `ECHOPOSE_API_TOKEN`
         // is unset/empty the middleware is a no-op — the default stays
         // LAN-mode-friendly. `/health*`, `/ws/sensing`, and `/ui/*` are never
         // gated (orchestrator probes + local browsers).
@@ -8470,11 +8470,11 @@ mod mqtt_bridge_tests {
                   "classification": { "presence": false, "motion_level": "absent", "confidence": 0.1 } }
             ]
         });
-        let snaps = vitals_snapshots_from_sensing_json(&v, "ruview");
+        let snaps = vitals_snapshots_from_sensing_json(&v, "echopose");
         assert_eq!(snaps.len(), 2, "one snapshot per node");
 
-        let n1 = snaps.iter().find(|s| s.node_id == "ruview-node1").unwrap();
-        let n2 = snaps.iter().find(|s| s.node_id == "ruview-node2").unwrap();
+        let n1 = snaps.iter().find(|s| s.node_id == "echopose-node1").unwrap();
+        let n2 = snaps.iter().find(|s| s.node_id == "echopose-node2").unwrap();
 
         assert!(n1.presence && n1.motion > 0.0, "node1 present + moving");
         assert!(
@@ -8521,9 +8521,9 @@ mod mqtt_bridge_tests {
             "vital_signs": { "breathing_rate_bpm": 12.0 },
             "persons": [{}]
         });
-        let snaps = vitals_snapshots_from_sensing_json(&v, "ruview");
+        let snaps = vitals_snapshots_from_sensing_json(&v, "echopose");
         assert_eq!(snaps.len(), 1);
-        assert_eq!(snaps[0].node_id, "ruview");
+        assert_eq!(snaps[0].node_id, "echopose");
         assert!(snaps[0].presence);
         assert_eq!(snaps[0].motion, 0.0, "idle => no motion");
         assert_eq!(snaps[0].n_persons, 1);

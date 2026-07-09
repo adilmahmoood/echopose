@@ -1,12 +1,12 @@
-# ADR-124: rvagent — MCP (stdio + Streamable HTTP) + ruvector npm/TypeScript library for RuView with ruflo integration
+# ADR-124: rvagent — MCP (stdio + Streamable HTTP) + ruvector npm/TypeScript library for EchoPose with ruflo integration
 
 | Field | Value |
 |-------|-------|
 | **Status** | Proposed |
 | **Date** | 2026-05-24 |
 | **Deciders** | ruv |
-| **Codename** | **SENSE-BRIDGE** — a typed bridge between the RuView sensing stack and the MCP agent ecosystem |
-| **Relates to** | [ADR-055](ADR-055-integrated-sensing-server.md) (sensing-server), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI), [ADR-097](ADR-097-adopt-rvcsi-as-ruview-csi-runtime.md) (rvCSI adoption), [ADR-115](ADR-115-home-assistant-integration.md) (HA-DISCO), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Seed cog), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (PIP-PHOENIX), [ADR-118](ADR-118-bfld-beamforming-feedback-layer-for-detection.md) (BFLD) |
+| **Codename** | **SENSE-BRIDGE** — a typed bridge between the EchoPose sensing stack and the MCP agent ecosystem |
+| **Relates to** | [ADR-055](ADR-055-integrated-sensing-server.md) (sensing-server), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI), [ADR-097](ADR-097-adopt-rvcsi-as-echopose-csi-runtime.md) (rvCSI adoption), [ADR-115](ADR-115-home-assistant-integration.md) (HA-DISCO), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Seed cog), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (PIP-PHOENIX), [ADR-118](ADR-118-bfld-beamforming-feedback-layer-for-detection.md) (BFLD) |
 | **Tracking issue** | TBD |
 
 ---
@@ -15,9 +15,9 @@
 
 ### 1.1 The access-layer gap
 
-The RuView / wifi-densepose Rust stack exposes sensing data through three surfaces: a Tokio/Axum HTTP REST API and WebSocket at `wifi-densepose-sensing-server` (ADR-055); an MQTT namespace under `ruview/<node_id>/*` (ADR-115); and an rvCSI edge runtime (ADR-095/096). None of these surfaces speaks Model Context Protocol (MCP).
+The EchoPose / wifi-densepose Rust stack exposes sensing data through three surfaces: a Tokio/Axum HTTP REST API and WebSocket at `wifi-densepose-sensing-server` (ADR-055); an MQTT namespace under `echopose/<node_id>/*` (ADR-115); and an rvCSI edge runtime (ADR-095/096). None of these surfaces speaks Model Context Protocol (MCP).
 
-MCP is the dominant inter-process contract through which AI assistants (Claude, GPT, Codex) invoke external capabilities in 2026. Without an MCP bridge, RuView's sensing primitives are invisible to AI-driven automation workflows. An agent cannot ask "who is in the room?" or "subscribe me to fall alerts" without bespoke HTTP integration code in every consuming agent.
+MCP is the dominant inter-process contract through which AI assistants (Claude, GPT, Codex) invoke external capabilities in 2026. Without an MCP bridge, EchoPose's sensing primitives are invisible to AI-driven automation workflows. An agent cannot ask "who is in the room?" or "subscribe me to fall alerts" without bespoke HTTP integration code in every consuming agent.
 
 Two concrete user stories that SENSE-BRIDGE resolves:
 
@@ -26,11 +26,11 @@ Two concrete user stories that SENSE-BRIDGE resolves:
 
 ### 1.2 What rvagent is today
 
-Research of the ruvnet npm registry profile and the ruflo GitHub repository (issue #1689) establishes that **rvagent is not yet a published standalone npm package** as of 2026-05-24. The name "rvagent" appears in the ruflo project exclusively as a WASM artifact (`rvagent_wasm_bg.wasm`, 588 KB) bundled with the RuFlo Web UI (PR #1687). That artifact exports 13 WASM functions including `callMcp`, `executeTool`, `listTools`, `listGalleryTemplates`, `searchGalleryTemplates`, and `loadGalleryTemplate`. It is an in-browser MCP client runner, not a RuView-specific MCP server.
+Research of the ruvnet npm registry profile and the ruflo GitHub repository (issue #1689) establishes that **rvagent is not yet a published standalone npm package** as of 2026-05-24. The name "rvagent" appears in the ruflo project exclusively as a WASM artifact (`rvagent_wasm_bg.wasm`, 588 KB) bundled with the RuFlo Web UI (PR #1687). That artifact exports 13 WASM functions including `callMcp`, `executeTool`, `listTools`, `listGalleryTemplates`, `searchGalleryTemplates`, and `loadGalleryTemplate`. It is an in-browser MCP client runner, not a EchoPose-specific MCP server.
 
 There is no `rvagent` package on the npm registry as of this writing. The npm name is therefore available (Q1 in §8). The package name to register is `@ruvnet/rvagent` (scoped form, reduces name-squatting risk) or `rvagent` (unscoped form, simpler `npx` invocation). This ADR proposes `@ruvnet/rvagent`.
 
-The WASM `callMcp` / `executeTool` surface of the existing ruflo rvagent is the functional model for what the new npm package should expose in TypeScript — but the new package is a **server**, not a client, and its tools are RuView-domain-specific rather than general ruflo-gallery tools.
+The WASM `callMcp` / `executeTool` surface of the existing ruflo rvagent is the functional model for what the new npm package should expose in TypeScript — but the new package is a **server**, not a client, and its tools are EchoPose-domain-specific rather than general ruflo-gallery tools.
 
 ### 1.3 MCP transport landscape as of 2026-05-24
 
@@ -55,9 +55,9 @@ The `ruvector` package is already a dependency in the existing Rust workspace's 
 
 ### 1.5 ruflo integration context
 
-The project's `CLAUDE.md` documents the 3-tier model routing (ADR-026) and the `mcp__claude-flow__*` tool namespace. ruflo exposes 314 native MCP tools. SENSE-BRIDGE adds a new domain namespace `mcp__rvagent__*` that represents RuView sensing capabilities, parallel to but separate from the ruflo tools. The boundary is:
+The project's `CLAUDE.md` documents the 3-tier model routing (ADR-026) and the `mcp__claude-flow__*` tool namespace. ruflo exposes 314 native MCP tools. SENSE-BRIDGE adds a new domain namespace `mcp__rvagent__*` that represents EchoPose sensing capabilities, parallel to but separate from the ruflo tools. The boundary is:
 - **ruflo**: agent orchestration, memory, swarm coordination, hooks, task management
-- **rvagent / SENSE-BRIDGE**: RuView-specific sensing — presence, vitals, pose, BFLD, semantic primitives
+- **rvagent / SENSE-BRIDGE**: EchoPose-specific sensing — presence, vitals, pose, BFLD, semantic primitives
 
 ruflo can call rvagent tools via the standard MCP tool-call mechanism; rvagent does not depend on ruflo at runtime (but may optionally use ruflo memory namespaces for persistence).
 
@@ -67,7 +67,7 @@ ruflo can call rvagent tools via the standard MCP tool-call mechanism; rvagent d
 
 Ship `@ruvnet/rvagent` as a standalone npm TypeScript library that:
 
-1. Exposes a **dual-transport MCP server** (stdio + Streamable HTTP) wrapping RuView sensing primitives.
+1. Exposes a **dual-transport MCP server** (stdio + Streamable HTTP) wrapping EchoPose sensing primitives.
 2. Uses `ruvector` (npm) as the vector storage layer for pose embeddings and AETHER-class semantic search, with no reimplementation of vector ops in TypeScript.
 3. Mirrors the Python `wifi_densepose.client.*` surface (ADR-117 P4 — `python/wifi_densepose/client/ws.py`, `mqtt.py`, `primitives.py`) in TypeScript for parity across runtimes.
 4. Integrates as a ruflo plugin via the `ruflo-plugin` manifest convention, exposing tools in the `mcp__rvagent__*` namespace callable by ruflo agents.
@@ -84,7 +84,7 @@ Ship `@ruvnet/rvagent` as a standalone npm TypeScript library that:
 | **Connection state** | One client per server process; process dies with client | Multiple clients per server process; stateless or session-keyed |
 | **Streaming** | Newline-delimited JSON on stdout | `text/event-stream` response body |
 | **Auth** | None needed (process-level isolation) | Bearer token or mTLS required (per MCP spec security rules) |
-| **RuView sensing-server connectivity** | Server process holds a single WebSocket + MQTT connection to sensing-server; results forwarded to client via JSON-RPC | Server process holds a connection pool; session affinity via `Mcp-Session-Id` header |
+| **EchoPose sensing-server connectivity** | Server process holds a single WebSocket + MQTT connection to sensing-server; results forwarded to client via JSON-RPC | Server process holds a connection pool; session affinity via `Mcp-Session-Id` header |
 | **Tailscale fleet** | Works on local node only | Works across Tailscale fleet (cognitum-v0, cognitum-seed-1, ruvultra) with DNS name |
 | **Origin validation** | Not applicable | Required; server MUST reject cross-origin requests unless CORS policy explicitly permits |
 | **Resumability** | Not applicable (process is co-located) | Optional `Last-Event-ID` header for stream resumption after reconnect |
@@ -98,43 +98,43 @@ Both transports are served by the same `Server` instance from `@modelcontextprot
 
 ## 4. MCP tool catalog
 
-All tools are in the `ruview` namespace. Input schemas below are TypeScript interface stubs; output types mirror the Python dataclasses from `python/wifi_densepose/client/ws.py` and `primitives.py`.
+All tools are in the `echopose` namespace. Input schemas below are TypeScript interface stubs; output types mirror the Python dataclasses from `python/wifi_densepose/client/ws.py` and `primitives.py`.
 
 ### 4.1 Tool catalog table
 
-| Tool name | Input interface | Return shape | RuView surface wrapped |
+| Tool name | Input interface | Return shape | EchoPose surface wrapped |
 |---|---|---|---|
-| `ruview.presence.now` | `{ node_id?: string }` | `{ node_id: string; present: boolean; n_persons: number; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.presence` / `EdgeVitalsMessage.n_persons` (ws.py:74-88) |
-| `ruview.vitals.get_breathing` | `{ node_id?: string; window_s?: number }` | `{ node_id: string; breathing_rate_bpm: number \| null; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.breathing_rate_bpm` (ws.py:82) |
-| `ruview.vitals.get_heart_rate` | `{ node_id?: string; window_s?: number }` | `{ node_id: string; heartrate_bpm: number \| null; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.heartrate_bpm` (ws.py:83) |
-| `ruview.vitals.get_all` | `{ node_id?: string }` | `EdgeVitalsResult` (all fields of `EdgeVitalsMessage` except `raw`) | Full `EdgeVitalsMessage` (ws.py:74-88) |
-| `ruview.pose.latest` | `{ node_id?: string }` | `{ node_id: string; persons: PosePersonResult[]; confidence: number; timestamp_ms: number }` | `PoseDataMessage` (ws.py:91-98) |
-| `ruview.pose.subscribe` | `{ node_id?: string; duration_s: number; callback_url?: string }` | `{ subscription_id: string; started_at: number; expires_at: number }` | WS stream — streams `PoseDataMessage` events for `duration_s` seconds |
-| `ruview.primitives.get` | `{ node_id?: string; primitive: SemanticPrimitiveKind }` | `SemanticPrimitiveResult` | `SemanticPrimitive` + `SemanticPrimitiveEvent` (primitives.py:36-75) |
-| `ruview.primitives.list_active` | `{ node_id?: string }` | `{ primitives: SemanticPrimitiveResult[] }` | All 10 ADR-115 semantic primitives (primitives.py:36-45) |
-| `ruview.primitives.subscribe` | `{ node_id?: string; primitive?: SemanticPrimitiveKind; duration_s: number }` | `{ subscription_id: string; expires_at: number }` | MQTT topic `homeassistant/+/wifi_densepose_<node>/+/state` (mqtt.py:8-9) |
-| `ruview.bfld.last_scan` | `{ node_id?: string }` | `{ node_id: string; identity_risk_score: number; privacy_class: number; n_frames: number; timestamp_ms: number }` | MQTT `ruview/<node_id>/bfld/scan_result` (ADR-118/ADR-121) |
-| `ruview.bfld.subscribe` | `{ node_id?: string; duration_s: number }` | `{ subscription_id: string; expires_at: number }` | MQTT `ruview/<node_id>/bfld/*` |
-| `ruview.node.list` | `{ }` | `{ nodes: NodeInfo[] }` | MQTT discovery + REST `/api/nodes` |
-| `ruview.node.status` | `{ node_id: string }` | `NodeStatusResult` | REST `/api/status` or MQTT will-message |
-| `ruview.vector.search_pose` | `{ query_embedding: number[]; k?: number; node_id?: string }` | `{ matches: VectorMatch[] }` | `ruvector` HNSW index of stored pose keypoints (ADR-016) |
-| `ruview.vector.store_pose` | `{ pose: PosePersonResult; node_id: string }` | `{ vector_id: string }` | `ruvector` HNSW upsert |
+| `echopose.presence.now` | `{ node_id?: string }` | `{ node_id: string; present: boolean; n_persons: number; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.presence` / `EdgeVitalsMessage.n_persons` (ws.py:74-88) |
+| `echopose.vitals.get_breathing` | `{ node_id?: string; window_s?: number }` | `{ node_id: string; breathing_rate_bpm: number \| null; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.breathing_rate_bpm` (ws.py:82) |
+| `echopose.vitals.get_heart_rate` | `{ node_id?: string; window_s?: number }` | `{ node_id: string; heartrate_bpm: number \| null; confidence: number; timestamp_ms: number }` | `EdgeVitalsMessage.heartrate_bpm` (ws.py:83) |
+| `echopose.vitals.get_all` | `{ node_id?: string }` | `EdgeVitalsResult` (all fields of `EdgeVitalsMessage` except `raw`) | Full `EdgeVitalsMessage` (ws.py:74-88) |
+| `echopose.pose.latest` | `{ node_id?: string }` | `{ node_id: string; persons: PosePersonResult[]; confidence: number; timestamp_ms: number }` | `PoseDataMessage` (ws.py:91-98) |
+| `echopose.pose.subscribe` | `{ node_id?: string; duration_s: number; callback_url?: string }` | `{ subscription_id: string; started_at: number; expires_at: number }` | WS stream — streams `PoseDataMessage` events for `duration_s` seconds |
+| `echopose.primitives.get` | `{ node_id?: string; primitive: SemanticPrimitiveKind }` | `SemanticPrimitiveResult` | `SemanticPrimitive` + `SemanticPrimitiveEvent` (primitives.py:36-75) |
+| `echopose.primitives.list_active` | `{ node_id?: string }` | `{ primitives: SemanticPrimitiveResult[] }` | All 10 ADR-115 semantic primitives (primitives.py:36-45) |
+| `echopose.primitives.subscribe` | `{ node_id?: string; primitive?: SemanticPrimitiveKind; duration_s: number }` | `{ subscription_id: string; expires_at: number }` | MQTT topic `homeassistant/+/wifi_densepose_<node>/+/state` (mqtt.py:8-9) |
+| `echopose.bfld.last_scan` | `{ node_id?: string }` | `{ node_id: string; identity_risk_score: number; privacy_class: number; n_frames: number; timestamp_ms: number }` | MQTT `echopose/<node_id>/bfld/scan_result` (ADR-118/ADR-121) |
+| `echopose.bfld.subscribe` | `{ node_id?: string; duration_s: number }` | `{ subscription_id: string; expires_at: number }` | MQTT `echopose/<node_id>/bfld/*` |
+| `echopose.node.list` | `{ }` | `{ nodes: NodeInfo[] }` | MQTT discovery + REST `/api/nodes` |
+| `echopose.node.status` | `{ node_id: string }` | `NodeStatusResult` | REST `/api/status` or MQTT will-message |
+| `echopose.vector.search_pose` | `{ query_embedding: number[]; k?: number; node_id?: string }` | `{ matches: VectorMatch[] }` | `ruvector` HNSW index of stored pose keypoints (ADR-016) |
+| `echopose.vector.store_pose` | `{ pose: PosePersonResult; node_id: string }` | `{ vector_id: string }` | `ruvector` HNSW upsert |
 
-### 4.1a Policy / governance tools (RUVIEW-POLICY)
+### 4.1a Policy / governance tools (ECHOPOSE-POLICY)
 
 **Added 2026-05-24 per maintainer review.** Once tools can answer "who is in the room?", the library is no longer middleware — it is environmental intelligence infrastructure, and that changes the trust model. Every sensing tool above MUST route through this policy layer before returning data. The layer is enforced server-side in the MCP server, not client-side, so a malicious or misconfigured agent cannot bypass it.
 
 | Tool name | Input interface | Return shape | Purpose |
 |---|---|---|---|
-| `ruview.policy.can_access_vitals` | `{ agent_id: string; node_id: string; vital: "breathing" \| "heart_rate" \| "all" }` | `{ allowed: boolean; reason: string; expires_at?: number }` | Gate every `ruview.vitals.*` call. Default-deny when no policy is registered for the (agent_id, node_id) pair. |
-| `ruview.policy.can_query_presence` | `{ agent_id: string; scope: "node" \| "fleet"; node_id?: string; zone?: string }` | `{ allowed: boolean; reason: string; redactions?: string[] }` | Fleet-scope presence queries (e.g. "is anyone home?") require explicit scope grant; node-scope is the safer default. |
-| `ruview.policy.can_subscribe` | `{ agent_id: string; topic: string; duration_s: number }` | `{ allowed: boolean; max_duration_s: number; reason: string }` | Subscriptions can be denied entirely or capped to a shorter duration than requested (e.g. agent asks for 1 h, policy returns 5 min). |
-| `ruview.policy.redact_identity_fields` | `{ payload: Record<string, unknown>; agent_id: string }` | `{ payload: Record<string, unknown>; redacted_fields: string[] }` | Server-side redaction pass applied to every tool return value. Strips `sta_mac`, raw BFLD matrices, and any keypoint set marked `privacy_class >= 2` per ADR-120. Called automatically by the MCP server; agents never see the un-redacted payload. |
-| `ruview.policy.audit_log` | `{ agent_id?: string; since_ts?: number }` | `{ events: PolicyAuditEvent[] }` | Returns the policy-decision audit trail for a maintainer-tier agent. Other agents are denied even if they hold valid tool grants — auditability of the auditor is itself a policy decision. |
+| `echopose.policy.can_access_vitals` | `{ agent_id: string; node_id: string; vital: "breathing" \| "heart_rate" \| "all" }` | `{ allowed: boolean; reason: string; expires_at?: number }` | Gate every `echopose.vitals.*` call. Default-deny when no policy is registered for the (agent_id, node_id) pair. |
+| `echopose.policy.can_query_presence` | `{ agent_id: string; scope: "node" \| "fleet"; node_id?: string; zone?: string }` | `{ allowed: boolean; reason: string; redactions?: string[] }` | Fleet-scope presence queries (e.g. "is anyone home?") require explicit scope grant; node-scope is the safer default. |
+| `echopose.policy.can_subscribe` | `{ agent_id: string; topic: string; duration_s: number }` | `{ allowed: boolean; max_duration_s: number; reason: string }` | Subscriptions can be denied entirely or capped to a shorter duration than requested (e.g. agent asks for 1 h, policy returns 5 min). |
+| `echopose.policy.redact_identity_fields` | `{ payload: Record<string, unknown>; agent_id: string }` | `{ payload: Record<string, unknown>; redacted_fields: string[] }` | Server-side redaction pass applied to every tool return value. Strips `sta_mac`, raw BFLD matrices, and any keypoint set marked `privacy_class >= 2` per ADR-120. Called automatically by the MCP server; agents never see the un-redacted payload. |
+| `echopose.policy.audit_log` | `{ agent_id?: string; since_ts?: number }` | `{ events: PolicyAuditEvent[] }` | Returns the policy-decision audit trail for a maintainer-tier agent. Other agents are denied even if they hold valid tool grants — auditability of the auditor is itself a policy decision. |
 
 Policy storage is a local JSON file (`~/.config/rvagent/policy.json` on Unix, `%APPDATA%\rvagent\policy.json` on Windows) backed by a CLI editor (`npx @ruvnet/rvagent policy grant ...`). Schema mirrors the ADR-010 claims-based authorization model where it exists in the Rust workspace, but the npm library keeps a self-contained store so SENSE-BRIDGE can ship without the full claims infrastructure on day one.
 
-**Default policy when no file exists**: deny `ruview.vitals.*` and `ruview.policy.audit_log`; allow `ruview.presence.now` and `ruview.node.list` (coarse, non-biometric); allow `ruview.primitives.list_active` with `redact_identity_fields` applied. This is the "explore safely" default so a new install can sanity-check the agent is wired up without leaking biometric data.
+**Default policy when no file exists**: deny `echopose.vitals.*` and `echopose.policy.audit_log`; allow `echopose.presence.now` and `echopose.node.list` (coarse, non-biometric); allow `echopose.primitives.list_active` with `redact_identity_fields` applied. This is the "explore safely" default so a new install can sanity-check the agent is wired up without leaking biometric data.
 
 ### 4.2 MCP resource catalog
 
@@ -142,22 +142,22 @@ Resources provide read-only data that can be embedded in the LLM context window.
 
 | Resource URI | Description | MIME type |
 |---|---|---|
-| `ruview://nodes` | JSON list of all discovered nodes (IP, firmware version, capabilities) | `application/json` |
-| `ruview://nodes/{node_id}/config` | Node configuration (channel, MAC filter, privacy class) | `application/json` |
-| `ruview://nodes/{node_id}/vitals/latest` | Latest `EdgeVitalsMessage` for the node | `application/json` |
-| `ruview://nodes/{node_id}/pose/latest` | Latest `PoseDataMessage` | `application/json` |
-| `ruview://nodes/{node_id}/bfld/latest` | Latest BFLD scan result | `application/json` |
-| `ruview://primitives/schema` | JSON schema for the 10 semantic primitives (ADR-115) | `application/json` |
-| `ruview://fleet/topology` | Tailscale-fleet topology (host, TS IP, role) — sourced from local CLAUDE.local.md fleet table | `text/markdown` |
+| `echopose://nodes` | JSON list of all discovered nodes (IP, firmware version, capabilities) | `application/json` |
+| `echopose://nodes/{node_id}/config` | Node configuration (channel, MAC filter, privacy class) | `application/json` |
+| `echopose://nodes/{node_id}/vitals/latest` | Latest `EdgeVitalsMessage` for the node | `application/json` |
+| `echopose://nodes/{node_id}/pose/latest` | Latest `PoseDataMessage` | `application/json` |
+| `echopose://nodes/{node_id}/bfld/latest` | Latest BFLD scan result | `application/json` |
+| `echopose://primitives/schema` | JSON schema for the 10 semantic primitives (ADR-115) | `application/json` |
+| `echopose://fleet/topology` | Tailscale-fleet topology (host, TS IP, role) — sourced from local CLAUDE.local.md fleet table | `text/markdown` |
 
 ### 4.3 MCP prompt templates
 
 | Prompt name | Description | Arguments |
 |---|---|---|
-| `ruview.diagnose_node` | Walk the user through node connectivity check, firmware version, and live vitals stream | `{ node_id: string }` |
-| `ruview.presence_report` | Summarize presence + persons over a time window in natural language | `{ node_id: string; window_s: number }` |
-| `ruview.vitals_alert_rule` | Generate an HA automation YAML fragment for a vitals threshold alert | `{ primitive: SemanticPrimitiveKind; threshold: number }` |
-| `ruview.bfld_privacy_audit` | Produce a compliance-ready privacy audit paragraph from the last BFLD scan | `{ node_id: string }` |
+| `echopose.diagnose_node` | Walk the user through node connectivity check, firmware version, and live vitals stream | `{ node_id: string }` |
+| `echopose.presence_report` | Summarize presence + persons over a time window in natural language | `{ node_id: string; window_s: number }` |
+| `echopose.vitals_alert_rule` | Generate an HA automation YAML fragment for a vitals threshold alert | `{ primitive: SemanticPrimitiveKind; threshold: number }` |
+| `echopose.bfld_privacy_audit` | Produce a compliance-ready privacy audit paragraph from the last BFLD scan | `{ node_id: string }` |
 
 ---
 
@@ -172,7 +172,7 @@ Resources provide read-only data that can be embedded in the LLM context window.
 ├── zod                          ^3.x  — Input schema validation for all tool inputs
 ├── ws                           ^8.x  — WebSocket client to sensing-server /ws/sensing
 │   └── @types/ws
-├── mqtt                         ^5.x  — MQTT client for ruview/<node_id>/* topics
+├── mqtt                         ^5.x  — MQTT client for echopose/<node_id>/* topics
 │                                        (replaces paho-mqtt; mqtt.js is the npm standard)
 ├── node-fetch / undici           —     — HTTP client for REST endpoints on sensing-server
 └── tsup                         (dev) — ESM + CJS dual build
@@ -181,7 +181,7 @@ Runtime back-ends (NOT bundled — must be reachable at runtime):
 ├── wifi-densepose-sensing-server (Rust binary)
 │   ├── REST API   :3000  /api/*
 │   ├── WebSocket  :8765  /ws/sensing
-│   └── MQTT       via local broker or ruview/<node_id>/*
+│   └── MQTT       via local broker or echopose/<node_id>/*
 ├── MQTT broker    (mosquitto or broker at cognitum-v0:1883)
 └── ruvector HNSW index (in-process via napi-rs; no separate service)
 ```
@@ -204,7 +204,7 @@ The Python client in `python/wifi_densepose/client/` (ADR-117 P4) is the canonic
 | `SemanticPrimitive` (enum) | `primitives.py:36-45` | `enum SemanticPrimitive` |
 | `SemanticPrimitiveEvent` | `primitives.py:60-75` | `interface SemanticPrimitiveEvent` |
 | `SemanticPrimitiveListener` | `primitives.py:84-155` | `class SemanticPrimitiveListener` |
-| `RuViewMqttClient` | `mqtt.py:56` | `class RuViewMqttClient` (wraps mqtt.js `MqttClient`) |
+| `EchoPoseMqttClient` | `mqtt.py:56` | `class EchoPoseMqttClient` (wraps mqtt.js `MqttClient`) |
 | `_topic_matches` | `mqtt.py:237-257` | `function topicMatches(pattern, topic)` |
 
 ---
@@ -234,13 +234,13 @@ scaffold stdio  SSE   integration  publish + ruflo bridge
 **Goal**: `npx @ruvnet/rvagent stdio` connects to a running sensing-server over WebSocket + MQTT and exposes the tool catalog from §4.1 over stdio transport.
 
 - [ ] `src/server.ts` — create `McpServer` instance, register all tools from §4.1 with Zod input schemas. Tools that require a live sensing-server connection return a structured error `{ error: "SENSING_SERVER_UNAVAILABLE" }` rather than throwing, so the LLM gets useful context.
-- [ ] `src/transports/stdio.ts` — `StdioServerTransport` entrypoint. Reads `RUVIEW_HOST` and `RUVIEW_PORT` env vars (default `localhost:8765` WS, `localhost:3000` REST, `localhost:1883` MQTT).
+- [ ] `src/transports/stdio.ts` — `StdioServerTransport` entrypoint. Reads `ECHOPOSE_HOST` and `ECHOPOSE_PORT` env vars (default `localhost:8765` WS, `localhost:3000` REST, `localhost:1883` MQTT).
 - [ ] `src/sensing/ws-client.ts` — TypeScript port of `python/wifi_densepose/client/ws.py`. Async generator yielding `SensingMessage` variants. Reconnect with exponential back-off (the Python client explicitly does not reconnect — the TS one should, because the stdio process is long-lived).
 - [ ] `src/sensing/mqtt-client.ts` — TypeScript port of `python/wifi_densepose/client/mqtt.py` using `mqtt.js ^5`. Per-pattern callbacks, `topicMatches` wildcard helper.
 - [ ] `src/sensing/primitives.ts` — `SemanticPrimitive` enum + `SemanticPrimitiveListener`. Mirror of `primitives.py`.
-- [ ] Tool implementations for the 5 highest-priority tools: `ruview.presence.now`, `ruview.vitals.get_all`, `ruview.pose.latest`, `ruview.primitives.get`, `ruview.node.list`.
-- [ ] Resource implementations: `ruview://nodes`, `ruview://nodes/{node_id}/vitals/latest`.
-- [ ] Integration test: spin up `sensing-server --mock-frames` in Docker; assert `npx @ruvnet/rvagent stdio` receives a `ruview.vitals.get_all` tool call response with non-null `breathing_rate_bpm`.
+- [ ] Tool implementations for the 5 highest-priority tools: `echopose.presence.now`, `echopose.vitals.get_all`, `echopose.pose.latest`, `echopose.primitives.get`, `echopose.node.list`.
+- [ ] Resource implementations: `echopose://nodes`, `echopose://nodes/{node_id}/vitals/latest`.
+- [ ] Integration test: spin up `sensing-server --mock-frames` in Docker; assert `npx @ruvnet/rvagent stdio` receives a `echopose.vitals.get_all` tool call response with non-null `breathing_rate_bpm`.
 - [ ] `claude mcp add rvagent -- npx @ruvnet/rvagent stdio` smoke-test (manual).
 
 ### P3 — MCP Streamable HTTP server (2 weeks)
@@ -249,24 +249,24 @@ scaffold stdio  SSE   integration  publish + ruflo bridge
 
 - [ ] `src/transports/http.ts` — `StreamableHTTPServerTransport` backed by an Express 5 or Hono app (Hono preferred for lightweight edge deployability).
 - [ ] Session management: issue `Mcp-Session-Id` UUIDs on `POST /mcp` initialize; reject subsequent requests without session header with HTTP 400.
-- [ ] Origin validation: configurable `RUVIEW_ALLOWED_ORIGINS` env var; default reject all cross-origin requests (MCP spec security requirement §Streamable HTTP §Security Warning).
-- [ ] Auth: optional `RUVIEW_BEARER_TOKEN` env var. If set, require `Authorization: Bearer <token>` on all requests. This mirrors `v2/crates/wifi-densepose-sensing-server/src/bearer_auth.rs`.
+- [ ] Origin validation: configurable `ECHOPOSE_ALLOWED_ORIGINS` env var; default reject all cross-origin requests (MCP spec security requirement §Streamable HTTP §Security Warning).
+- [ ] Auth: optional `ECHOPOSE_BEARER_TOKEN` env var. If set, require `Authorization: Bearer <token>` on all requests. This mirrors `v2/crates/wifi-densepose-sensing-server/src/bearer_auth.rs`.
 - [ ] Legacy SSE compatibility: `--legacy-sse` flag mounts the deprecated `SSEServerTransport` on `/sse` + `/message` for Claude Desktop clients on protocol version `2024-11-05`. Document this as a single-release compat shim.
-- [ ] Remaining tools from §4.1: `ruview.vitals.get_breathing`, `ruview.vitals.get_heart_rate`, `ruview.pose.subscribe`, `ruview.primitives.list_active`, `ruview.primitives.subscribe`, `ruview.bfld.last_scan`, `ruview.bfld.subscribe`, `ruview.node.status`.
+- [ ] Remaining tools from §4.1: `echopose.vitals.get_breathing`, `echopose.vitals.get_heart_rate`, `echopose.pose.subscribe`, `echopose.primitives.list_active`, `echopose.primitives.subscribe`, `echopose.bfld.last_scan`, `echopose.bfld.subscribe`, `echopose.node.status`.
 - [ ] Prompt template registrations from §4.3.
 - [ ] Integration test: `curl -X POST http://localhost:3100/mcp` with a `tools/list` request; assert the response lists all 15 tools.
 - [ ] Docker Compose entry for local fleet testing: `rvagent` HTTP container talking to `sensing-server` and `mosquitto` containers.
 
 ### P4 — ruvector integration (1 week)
 
-**Goal**: `ruview.vector.search_pose` and `ruview.vector.store_pose` tools work end-to-end with a live HNSW index.
+**Goal**: `echopose.vector.search_pose` and `echopose.vector.store_pose` tools work end-to-end with a live HNSW index.
 
 - [ ] `src/vector/index.ts` — wrapper around `ruvector` napi-rs bindings. Initialise an HNSW index at server startup; expose `store(id, embedding)` and `search(embedding, k)`.
 - [ ] Pose-to-embedding pipeline: when a `PoseDataMessage` arrives from the WS client, extract the 17-keypoint array, normalise to `[-1, 1]` per keypoint coordinate, flatten to a 34-dimensional float vector, store in HNSW with `node_id:person_index:timestamp_ms` as the ID.
 - [ ] `src/vector/aether.ts` — AETHER-style cross-viewpoint search (ADR-024): given a pose embedding query, search HNSW index across all stored poses and return the top-k matches with their source node IDs. This enables cross-node person re-identification via the MCP tool without any network call between nodes.
 - [ ] Verify that the `ruvector` napi-rs binary loads correctly on Node 20 linux/x86_64, macos/arm64, and windows/amd64. Document any platform-specific caveats.
-- [ ] Index persistence: optional `RUVIEW_VECTOR_DB_PATH` env var. If set, persist the HNSW index to disk using `ruvector`'s serialise API. If unset, in-memory only (default for stdio transport).
-- [ ] Integration test: feed 100 synthetic pose frames with known clustering, assert `ruview.vector.search_pose` retrieves nearest neighbours with recall >0.9.
+- [ ] Index persistence: optional `ECHOPOSE_VECTOR_DB_PATH` env var. If set, persist the HNSW index to disk using `ruvector`'s serialise API. If unset, in-memory only (default for stdio transport).
+- [ ] Integration test: feed 100 synthetic pose frames with known clustering, assert `echopose.vector.search_pose` retrieves nearest neighbours with recall >0.9.
 
 ### P5 — npm publish + ruflo bridge (1 week)
 
@@ -275,7 +275,7 @@ scaffold stdio  SSE   integration  publish + ruflo bridge
 - [ ] Populate `package.json` with `publishConfig: { access: "public" }`, `engines: { node: ">=20" }`, `files` whitelist (`dist/`, `src/`, `README.md`).
 - [ ] Publish `@ruvnet/rvagent@0.1.0-alpha.1` to npm under the `@ruvnet` scope.
 - [ ] ruflo plugin manifest: create `.claude/plugins/rvagent/plugin.json` following the ruflo `plugin/` convention in the ruflo repo. The manifest registers the HTTP transport URL (configurable) and maps `mcp__rvagent__*` tool calls to the rvagent MCP server.
-- [ ] `ruview` skill in `.claude/agents/` (CLAUDE.md §Available Agents): an agent description that documents the rvagent tool namespace for ruflo orchestration.
+- [ ] `echopose` skill in `.claude/agents/` (CLAUDE.md §Available Agents): an agent description that documents the rvagent tool namespace for ruflo orchestration.
 - [ ] `claude mcp add rvagent -- npx @ruvnet/rvagent stdio` tested against claude-flow MCP server on the local dev machine (ruvzen host on CLAUDE.local.md fleet).
 - [ ] Document the fleet deployment pattern: run `npx @ruvnet/rvagent serve` on cognitum-v0 (Tailscale IP 100.77.59.83, port 50060 range to avoid conflict with existing services; see CLAUDE.local.md services table). Register the URL as a remote MCP server in `.claude/settings.json`.
 - [ ] Publish announcement: link from project README (`docs/` link, not root README per CLAUDE.md rules).
@@ -298,14 +298,14 @@ Raw sensing frequency ≠ agent interaction frequency. If a tool call ever waits
 
 1. **Continuous local cache**: on startup the rvagent MCP server opens one WebSocket + one MQTT subscription per configured sensing-server endpoint and ingests every frame into an in-memory `Map<node_id, EdgeVitalsMessage>` (plus parallel maps for `PoseDataMessage` and BFLD). Cache hits return in <1 ms regardless of CSI frame rate.
 2. **Event-driven invalidation**: the cache entry's `received_at` timestamp is bumped on every received frame. The cache itself is never purged on a timer — only overwritten when fresh data lands, so a node that went quiet still serves its last-known value.
-3. **Bounded freshness windows**: each tool accepts an optional `max_age_ms` argument (default 1000). If the cached `received_at` is older than `max_age_ms`, the tool returns `{ value: null, reason: "stale", last_seen_ms: N, threshold_ms: max_age_ms }` rather than blocking. The agent decides whether to accept the staleness, raise to the user, or escalate to a `ruview.node.status` health check.
+3. **Bounded freshness windows**: each tool accepts an optional `max_age_ms` argument (default 1000). If the cached `received_at` is older than `max_age_ms`, the tool returns `{ value: null, reason: "stale", last_seen_ms: N, threshold_ms: max_age_ms }` rather than blocking. The agent decides whether to accept the staleness, raise to the user, or escalate to a `echopose.node.status` health check.
 
 This pattern is required because P3's Streamable HTTP transport may serve dozens of concurrent agent sessions — see Q8. A shared cache + per-session freshness contract scales; per-session WS connections do not.
 
 P2 must implement this cache; P3 must verify that fanning the same cache to N concurrent HTTP sessions still maintains <1 ms median tool-call latency under load.
 
 **Q5. Subscription tool lifetime management**
-Tools `ruview.pose.subscribe`, `ruview.primitives.subscribe`, and `ruview.bfld.subscribe` return a `subscription_id` and stream events. In the stdio transport there is one client, so this is straightforward. In the HTTP transport with multiple sessions, subscription state must be tracked per `Mcp-Session-Id`. When a session expires (HTTP 404) or is deleted via HTTP DELETE, the subscription must be cleaned up. The lifecycle mechanism is not fully designed — this is a known gap that P3 must close.
+Tools `echopose.pose.subscribe`, `echopose.primitives.subscribe`, and `echopose.bfld.subscribe` return a `subscription_id` and stream events. In the stdio transport there is one client, so this is straightforward. In the HTTP transport with multiple sessions, subscription state must be tracked per `Mcp-Session-Id`. When a session expires (HTTP 404) or is deleted via HTTP DELETE, the subscription must be cleaned up. The lifecycle mechanism is not fully designed — this is a known gap that P3 must close.
 
 **Q6. AETHER embedding dimension**
 The ADR proposes a 34-dimensional pose embedding (17 keypoints × 2 coordinates). The actual AETHER embedding model (ADR-024) uses a learned contrastive encoder, not raw keypoints. If the AETHER ONNX model is available in the Rust workspace at P4 time, the embedding should use it. If not, the raw-keypoint approach is a reasonable placeholder. The question is whether `wifi-densepose-nn` exposes the AETHER encoder in a form that can be called from Node.js without bundling libtorch in the npm package.
@@ -334,9 +334,9 @@ Add `wifi_densepose.mcp` as a P6 module in the PIP-PHOENIX wheel (ADR-117). The 
 
 ### Alt-B — Pure WebSocket/REST client without MCP framing
 
-Ship a TypeScript client library `@ruvnet/ruview-client` that wraps the sensing-server WebSocket and REST API without the MCP layer. Consumers who want MCP integration would wrap it themselves.
+Ship a TypeScript client library `@ruvnet/echopose-client` that wraps the sensing-server WebSocket and REST API without the MCP layer. Consumers who want MCP integration would wrap it themselves.
 
-**Rejected because**: it solves the connectivity problem but not the agent integration problem. Without MCP framing, Claude Code and ruflo agents cannot discover or call RuView capabilities through the standard `mcp__*` namespace — they would need custom prompt injection or bespoke tool definitions per agent. The whole value proposition of this ADR is that a single `claude mcp add rvagent` command makes all RuView primitives discoverable to any MCP-capable AI assistant. Splitting the library forces every consumer to re-add the MCP layer.
+**Rejected because**: it solves the connectivity problem but not the agent integration problem. Without MCP framing, Claude Code and ruflo agents cannot discover or call EchoPose capabilities through the standard `mcp__*` namespace — they would need custom prompt injection or bespoke tool definitions per agent. The whole value proposition of this ADR is that a single `claude mcp add rvagent` command makes all EchoPose primitives discoverable to any MCP-capable AI assistant. Splitting the library forces every consumer to re-add the MCP layer.
 
 ### Alt-C — Embed MCP server inside the existing wifi-densepose-sensing-server Rust binary
 
@@ -344,9 +344,9 @@ Add an MCP endpoint to the existing Axum server in `v2/crates/wifi-densepose-sen
 
 **Rejected because**: (a) it couples the release cycle of the npm-hosted MCP interface to the firmware/Rust release cycle, which are on separate cadences — a new MCP tool that merely adds a JSON field should not require a firmware rebuild; (b) the ruflo plugin ecosystem is TypeScript and expects npm packages, not Rust binaries; (c) the ruvector vector layer is a napi-rs Node.js native module and cannot be called directly from a Rust process without going through the napi-rs server-side API, adding unnecessary complexity; (d) the sensing-server binary is already 15-30 MB stripped — adding the MCP endpoint and its JSON-RPC machinery would further bloat it. This alternative is worth revisiting if the Rust `rmcp` crate matures and the vector layer migrates fully to native Rust, but it is not appropriate for the first implementation.
 
-### Alt-D — Wrapping the existing ruflo WASM rvagent in a RuView shim
+### Alt-D — Wrapping the existing ruflo WASM rvagent in a EchoPose shim
 
-The ruflo WASM rvagent (`rvagent_wasm_bg.wasm`) already exports `callMcp` / `executeTool` / `listTools`. One could define a RuView shim that registers custom tools into the ruflo WASM rvagent gallery.
+The ruflo WASM rvagent (`rvagent_wasm_bg.wasm`) already exports `callMcp` / `executeTool` / `listTools`. One could define a EchoPose shim that registers custom tools into the ruflo WASM rvagent gallery.
 
 **Rejected because**: the ruflo WASM rvagent is an in-browser MCP *client* runner for the ruflo gallery, not a general-purpose MCP server that can expose sensing data. Its 13 exported functions are focused on template management and ruflo-gallery operations. Patching sensing tools into a browser WASM module is the wrong architecture for a server-side sensing bridge. The naming overlap is a reason to publish the new package promptly and clearly document the distinction.
 
@@ -377,7 +377,7 @@ Minimum Node.js 20 LTS. Node 22 is supported and recommended for production (act
 
 ### 10.5 MQTT broker compatibility
 
-SENSE-BRIDGE uses `mqtt.js ^5` which implements MQTT 3.1.1 and MQTT 5.0. The `mosquitto` local broker (CLAUDE.local.md §Local mosquitto) and cognitum-v0's MQTT stack (CLAUDE.local.md fleet table) are both compatible. TLS mode is optional via `RUVIEW_MQTT_TLS=1` env var.
+SENSE-BRIDGE uses `mqtt.js ^5` which implements MQTT 3.1.1 and MQTT 5.0. The `mosquitto` local broker (CLAUDE.local.md §Local mosquitto) and cognitum-v0's MQTT stack (CLAUDE.local.md fleet table) are both compatible. TLS mode is optional via `ECHOPOSE_MQTT_TLS=1` env var.
 
 ---
 
@@ -385,7 +385,7 @@ SENSE-BRIDGE uses `mqtt.js ^5` which implements MQTT 3.1.1 and MQTT 5.0. The `mo
 
 ### 11.1 Positive consequences
 
-- Any MCP-capable AI assistant can query RuView presence, vitals, pose, and BFLD data with zero custom integration code after `claude mcp add rvagent`.
+- Any MCP-capable AI assistant can query EchoPose presence, vitals, pose, and BFLD data with zero custom integration code after `claude mcp add rvagent`.
 - ruflo multi-agent swarms gain first-class access to real-world sensing data, enabling swarms to gate decisions on physical events (fall detected → page caregiver workflow).
 - The TypeScript surface provides a second reference implementation of the sensing-server client protocol alongside the Python client (ADR-117), validating the protocol design against two independent consumers.
 - The ruvector HNSW integration enables cross-node person re-identification entirely within the rvagent process — no additional network calls between sensing nodes.
@@ -400,17 +400,17 @@ SENSE-BRIDGE uses `mqtt.js ^5` which implements MQTT 3.1.1 and MQTT 5.0. The `mo
 | **sensing-server WS disconnect** — stdio process dies if not reconnecting | Low | High | Implement exponential back-off reconnect in `ws-client.ts`; emit `{ error: "RECONNECTING" }` tool responses during gap |
 | **npm name collision** — `rvagent` taken by another publisher before P5 | Low | Medium | Publish `@ruvnet/rvagent` scoped; use that name throughout |
 | **ruflo plugin manifest incompatibility** — format not publicly specced | Medium | Medium | Confirm format in P5 preparation; use the minimal required fields only |
-| **Sensing-tool surface becomes a surveillance API** — "who is in the room" is a privacy-charged primitive | High | High | RUVIEW-POLICY layer (§4.1a) gates every sensing call; default-deny for biometric tools; redaction applied server-side so agents cannot opt out |
+| **Sensing-tool surface becomes a surveillance API** — "who is in the room" is a privacy-charged primitive | High | High | ECHOPOSE-POLICY layer (§4.1a) gates every sensing call; default-deny for biometric tools; redaction applied server-side so agents cannot opt out |
 
 ### 11.3 Strategic implication: ambient-sensing normalization layer
 
-The MCP tool catalog in §4 is RuView-WiFi-CSI-specific today. The shape of the catalog — `presence.now`, `vitals.get_*`, `pose.latest`, `primitives.*`, `bfld.*` — is **modality-agnostic at the semantic layer**: the same tools could be backed by any sensing modality that produces the same questions.
+The MCP tool catalog in §4 is EchoPose-WiFi-CSI-specific today. The shape of the catalog — `presence.now`, `vitals.get_*`, `pose.latest`, `primitives.*`, `bfld.*` — is **modality-agnostic at the semantic layer**: the same tools could be backed by any sensing modality that produces the same questions.
 
-If the project later adds BLE, mmWave (e.g. the ESP32-C6 + Seeed MR60BHA2 already on COM4 per CLAUDE.md), LiDAR, thermal, camera, radar, or UWB inputs, the rvagent MCP surface stays the same. Only the source-multiplexer behind `cache.ts` changes — it now ingests from multiple modalities and resolves conflicts (e.g. WiFi CSI says "presence: true" but mmWave says "presence: false" → fusion policy decides; this is the kind of decision the RUVIEW-POLICY layer can also gate).
+If the project later adds BLE, mmWave (e.g. the ESP32-C6 + Seeed MR60BHA2 already on COM4 per CLAUDE.md), LiDAR, thermal, camera, radar, or UWB inputs, the rvagent MCP surface stays the same. Only the source-multiplexer behind `cache.ts` changes — it now ingests from multiple modalities and resolves conflicts (e.g. WiFi CSI says "presence: true" but mmWave says "presence: false" → fusion policy decides; this is the kind of decision the ECHOPOSE-POLICY layer can also gate).
 
 This positions the npm package not as "a WiFi client" but as the **semantic-environment API**: agents ask "is anyone here?" without caring which radio answered. The competitive landscape (Aqara FP2, ESPHome LD2410) exposes raw telemetry; SENSE-BRIDGE exposes environmental cognition.
 
-The follow-on ADR (call it ADR-13x — RUVIEW-FUSION) would formalize the per-modality adapter contract. It is intentionally out of scope for ADR-124 — this ADR ships the WiFi-CSI path only — but the tool catalog and policy layer are designed to absorb additional modalities without API churn.
+The follow-on ADR (call it ADR-13x — ECHOPOSE-FUSION) would formalize the per-modality adapter contract. It is intentionally out of scope for ADR-124 — this ADR ships the WiFi-CSI path only — but the tool catalog and policy layer are designed to absorb additional modalities without API churn.
 
 ---
 
@@ -421,8 +421,8 @@ The following must all pass before ADR-124 is considered Accepted:
 - [ ] `npm install @ruvnet/rvagent` succeeds on Node 20/22, linux/x86_64, macos/arm64, windows/amd64 with no Rust toolchain required (ruvector prebuilts must ship).
 - [ ] `npx @ruvnet/rvagent stdio` starts and responds to a `tools/list` JSON-RPC request with the 15 tools from §4.1.
 - [ ] `npx @ruvnet/rvagent serve --port 3100` starts; `curl -X POST http://localhost:3100/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'` returns the tool list.
-- [ ] `ruview.vitals.get_all` with a running `sensing-server --mock-frames` returns `breathing_rate_bpm` and `heartrate_bpm` values within 5 seconds.
-- [ ] `ruview.vector.store_pose` followed by `ruview.vector.search_pose` with the same embedding returns the stored pose as the top-1 match.
+- [ ] `echopose.vitals.get_all` with a running `sensing-server --mock-frames` returns `breathing_rate_bpm` and `heartrate_bpm` values within 5 seconds.
+- [ ] `echopose.vector.store_pose` followed by `echopose.vector.search_pose` with the same embedding returns the stored pose as the top-1 match.
 - [ ] `claude mcp add rvagent -- npx @ruvnet/rvagent stdio` followed by `/mcp` in a Claude Code session shows the rvagent tools listed.
 - [ ] All MCP tool input schemas are validated via Zod; an invalid input returns an MCP `INVALID_PARAMS` error, not an unhandled exception.
 - [ ] TypeScript strict-mode compilation (`tsc --noEmit`) passes with zero errors.

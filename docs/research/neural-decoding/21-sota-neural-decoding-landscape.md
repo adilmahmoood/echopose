@@ -594,7 +594,7 @@ speed. MEG's temporal resolution enabled tracking of dynamic visual processing.
 
 ---
 
-## 9. Strategic Implications for RuView Architecture
+## 9. Strategic Implications for EchoPose Architecture
 
 ### 9.1 What the SOTA Map Tells Us
 

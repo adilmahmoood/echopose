@@ -7,11 +7,11 @@
 
 ## Context
 
-RuView currently pins all five core RuVector crates at **v2.0.4** (from crates.io) plus a vendored `ruvector-crv` v0.1.1 and optional `ruvector-gnn` v2.0.5. The upstream RuVector workspace has moved to **v2.0.5** with meaningful improvements to the crates we depend on, and has introduced new crates that could benefit RuView's detection pipeline.
+EchoPose currently pins all five core RuVector crates at **v2.0.4** (from crates.io) plus a vendored `ruvector-crv` v0.1.1 and optional `ruvector-gnn` v2.0.5. The upstream RuVector workspace has moved to **v2.0.5** with meaningful improvements to the crates we depend on, and has introduced new crates that could benefit EchoPose's detection pipeline.
 
 ### Current Integration Map
 
-| RuView Module | RuVector Crate | Current Version | Purpose |
+| EchoPose Module | RuVector Crate | Current Version | Purpose |
 |---------------|----------------|-----------------|---------|
 | `signal/subcarrier.rs` | ruvector-mincut | 2.0.4 | Graph min-cut subcarrier partitioning |
 | `signal/spectrogram.rs` | ruvector-attn-mincut | 2.0.4 | Attention-gated spectrogram denoising |

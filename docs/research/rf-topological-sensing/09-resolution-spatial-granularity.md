@@ -3,7 +3,7 @@
 **Research Document 09** | March 2026
 **Status**: Theoretical Analysis + Experimental Design
 **Scope**: Fundamental spatial resolution limits of WiFi CSI-based RF sensing
-using graph minimum cut, with practical bounds for the RuView ESP32 mesh
+using graph minimum cut, with practical bounds for the EchoPose ESP32 mesh
 deployment topology.
 
 ---
@@ -18,7 +18,7 @@ deployment topology.
 6. [Tomographic Resolution](#6-tomographic-resolution)
 7. [Experimental Validation](#7-experimental-validation)
 8. [Resolution Scaling Laws](#8-resolution-scaling-laws)
-9. [Integration with RuView Codebase](#9-integration-with-ruview-codebase)
+9. [Integration with EchoPose Codebase](#9-integration-with-echopose-codebase)
 10. [References](#10-references)
 
 ---
@@ -119,7 +119,7 @@ more tightly than any single link.
 
 ### 2.1 Graph Topology and Spatial Sampling
 
-In the RuView deployment model, N ESP32 nodes are placed around the
+In the EchoPose deployment model, N ESP32 nodes are placed around the
 perimeter of a room. Each pair of nodes with line-of-sight forms a
 bidirectional link. For N nodes, the maximum number of links is:
 
@@ -1199,12 +1199,12 @@ configuration. Practical algorithms achieve 3-10x this limit.
 
 ---
 
-## 9. Integration with RuView Codebase
+## 9. Integration with EchoPose Codebase
 
 ### 9.1 Resolution-Aware Modules
 
 The spatial resolution analysis in this document maps to specific
-modules in the RuView Rust codebase:
+modules in the EchoPose Rust codebase:
 
 | Module | Resolution Role | Section |
 |--------|----------------|---------|
@@ -1375,7 +1375,7 @@ cross-room tracker) to weight their inputs by spatial confidence.
 ---
 
 *This document provides the theoretical foundation for spatial resolution
-characterization in the RuView RF topological sensing system. The analysis
+characterization in the EchoPose RF topological sensing system. The analysis
 connects fundamental electromagnetic limits (Fresnel zones), information
 theory (CRLB), graph theory (mincut resolution), and practical system
 parameters (node count, bandwidth, SNR) into a unified framework. The

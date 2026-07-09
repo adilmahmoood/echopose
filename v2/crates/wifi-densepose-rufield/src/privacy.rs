@@ -1,12 +1,12 @@
 //! The ADR-262 §3.3 privacy mapping — the critical correctness item.
 //!
-//! RuView's effective `PrivacyClass` (4 byte-level classes) is the source of
+//! EchoPose's effective `PrivacyClass` (4 byte-level classes) is the source of
 //! truth; the bridge maps it onto RuField's `PrivacyClass` (P0–P5) **at the
 //! egress boundary, by information content, NEVER by byte value**.
 //!
 //! ## The trap (ADR-262 §3, §6)
 //!
-//! RuView's `Derived` has byte value `1`, which sorts *below* `Anonymous`
+//! EchoPose's `Derived` has byte value `1`, which sorts *below* `Anonymous`
 //! (byte `2`). A naive byte-mapping (`Derived = 1 → P1`) would leak
 //! identity-bearing features (`identity_embedding`, `identity_risk_score`) as a
 //! **low-privacy P1** event. Because `Derived` carries derived *identity*, it
@@ -16,18 +16,18 @@
 //!
 //! ## Fail-closed
 //!
-//! [`RuViewPrivacyClass`] is a closed enum, so there is no runtime "unknown"
+//! [`EchoPosePrivacyClass`] is a closed enum, so there is no runtime "unknown"
 //! value to receive — but the mapping is written `match`-exhaustively with an
 //! explicit, documented arm per class, and the `demoted`/`identity_bound`
 //! overlays only ever move the result **toward more privacy**, never less.
 
-use crate::snapshot::RuViewPrivacyClass;
+use crate::snapshot::EchoPosePrivacyClass;
 use rufield_core::PrivacyClass;
 
-/// Map a RuView effective `PrivacyClass` onto a RuField `PrivacyClass`
+/// Map a EchoPose effective `PrivacyClass` onto a RuField `PrivacyClass`
 /// (ADR-262 §3.3), by information content.
 ///
-/// | RuView (byte) | → RuField | Rationale |
+/// | EchoPose (byte) | → RuField | Rationale |
 /// |---|---|---|
 /// | `Raw` (0) | `P0` | raw CSI waveform |
 /// | `Derived` (1) | `P4` (or `P5` if `identity_bound`) | derived **identity** features ⇒ biometric/identity tier, **not** P1 |
@@ -37,15 +37,15 @@ use rufield_core::PrivacyClass;
 /// `identity_bound` only promotes `Derived` (already identity-derived) from P4
 /// to P5; it can never lower the class.
 #[must_use]
-pub fn map_privacy(ruview_class: RuViewPrivacyClass, identity_bound: bool) -> PrivacyClass {
-    match ruview_class {
+pub fn map_privacy(echopose_class: EchoPosePrivacyClass, identity_bound: bool) -> PrivacyClass {
+    match echopose_class {
         // Raw CSI amplitude → raw waveform tier.
-        RuViewPrivacyClass::Raw => PrivacyClass::P0,
+        EchoPosePrivacyClass::Raw => PrivacyClass::P0,
 
         // THE CRITICAL ARM (§3.3 / §6): `Derived` carries identity. Map by
         // information content to the biometric/identity tier P4, and to P5 when
         // the surface is bound to a named identity. NEVER P1.
-        RuViewPrivacyClass::Derived => {
+        EchoPosePrivacyClass::Derived => {
             if identity_bound {
                 PrivacyClass::P5
             } else {
@@ -54,12 +54,12 @@ pub fn map_privacy(ruview_class: RuViewPrivacyClass, identity_bound: bool) -> Pr
         }
 
         // Anonymous occupancy / motion aggregate → P2.
-        RuViewPrivacyClass::Anonymous => PrivacyClass::P2,
+        EchoPosePrivacyClass::Anonymous => PrivacyClass::P2,
 
         // Restricted: occupancy with risk score / hash stripped and raw
         // suppressed. Capped at P2 (occupancy tier), matching
         // `EngineBridge::suppress_raw_outputs` (`engine_bridge.rs:240`).
-        RuViewPrivacyClass::Restricted => PrivacyClass::P2,
+        EchoPosePrivacyClass::Restricted => PrivacyClass::P2,
     }
 }
 
@@ -83,11 +83,11 @@ pub fn apply_demotion_floor(class: PrivacyClass, demoted: bool) -> PrivacyClass 
 /// `FieldEvent`.
 #[must_use]
 pub fn egress_class(
-    ruview_class: RuViewPrivacyClass,
+    echopose_class: EchoPosePrivacyClass,
     identity_bound: bool,
     demoted: bool,
 ) -> PrivacyClass {
-    apply_demotion_floor(map_privacy(ruview_class, identity_bound), demoted)
+    apply_demotion_floor(map_privacy(echopose_class, identity_bound), demoted)
 }
 
 #[cfg(test)]
@@ -98,16 +98,16 @@ mod tests {
     fn derived_maps_to_identity_tier_not_p1() {
         // The single most dangerous mapping mistake: Derived (byte 1) must NOT
         // become P1. It carries identity ⇒ P4, or P5 if identity-bound.
-        assert_eq!(map_privacy(RuViewPrivacyClass::Derived, false), PrivacyClass::P4);
-        assert_eq!(map_privacy(RuViewPrivacyClass::Derived, true), PrivacyClass::P5);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Derived, false), PrivacyClass::P4);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Derived, true), PrivacyClass::P5);
     }
 
     #[test]
     fn full_table_matches_adr_262_section_3_3() {
-        assert_eq!(map_privacy(RuViewPrivacyClass::Raw, false), PrivacyClass::P0);
-        assert_eq!(map_privacy(RuViewPrivacyClass::Derived, false), PrivacyClass::P4);
-        assert_eq!(map_privacy(RuViewPrivacyClass::Anonymous, false), PrivacyClass::P2);
-        assert_eq!(map_privacy(RuViewPrivacyClass::Restricted, false), PrivacyClass::P2);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Raw, false), PrivacyClass::P0);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Derived, false), PrivacyClass::P4);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Anonymous, false), PrivacyClass::P2);
+        assert_eq!(map_privacy(EchoPosePrivacyClass::Restricted, false), PrivacyClass::P2);
     }
 
     #[test]
@@ -115,10 +115,10 @@ mod tests {
         // Derived's byte (1) is *below* Anonymous's byte (2), but Derived's
         // mapped class must be *above* Anonymous's mapped class — proving the
         // mapping uses information content, not the byte.
-        assert!(RuViewPrivacyClass::Derived.raw_byte() < RuViewPrivacyClass::Anonymous.raw_byte());
+        assert!(EchoPosePrivacyClass::Derived.raw_byte() < EchoPosePrivacyClass::Anonymous.raw_byte());
         assert!(
-            map_privacy(RuViewPrivacyClass::Derived, false)
-                > map_privacy(RuViewPrivacyClass::Anonymous, false)
+            map_privacy(EchoPosePrivacyClass::Derived, false)
+                > map_privacy(EchoPosePrivacyClass::Anonymous, false)
         );
     }
 
@@ -136,10 +136,10 @@ mod tests {
     fn identity_bound_only_promotes() {
         // identity_bound never lowers privacy; it only promotes Derived P4→P5.
         for c in [
-            RuViewPrivacyClass::Raw,
-            RuViewPrivacyClass::Derived,
-            RuViewPrivacyClass::Anonymous,
-            RuViewPrivacyClass::Restricted,
+            EchoPosePrivacyClass::Raw,
+            EchoPosePrivacyClass::Derived,
+            EchoPosePrivacyClass::Anonymous,
+            EchoPosePrivacyClass::Restricted,
         ] {
             assert!(map_privacy(c, true) >= map_privacy(c, false));
         }

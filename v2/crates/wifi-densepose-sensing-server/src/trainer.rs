@@ -361,7 +361,7 @@ pub fn oks_single(
 /// # ADR-155 §2.1 / §8 — FAKE-GOLD `area = 1.0` (flagged finding, not yet fixed)
 ///
 /// This passes `area = 1.0` to [`oks_single`] — the **exact "fake Gold tier"
-/// pattern** ADR-155 §2.1 said it had closed in `ruview_metrics` / the train
+/// pattern** ADR-155 §2.1 said it had closed in `echopose_metrics` / the train
 /// crate's `compute_oks`. With keypoints in a small coordinate range and
 /// `area = 1.0`, every squared distance is tiny relative to `2 σ² area`, so the
 /// exponential kernel returns ≈1.0 and the reported OKS is inflated regardless

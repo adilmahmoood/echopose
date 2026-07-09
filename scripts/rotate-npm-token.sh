@@ -11,7 +11,7 @@
 #   GCP_PROJECT          (default: cognitum-20260110)
 #   NPM_TOKEN_SECRET     (default: NPM_TOKEN)
 #   ENV_FILE             (default: <repo-root>/.env)
-#   PUBLISH_PACKAGE_DIR  (default: <repo-root>/tools/ruview-mcp)
+#   PUBLISH_PACKAGE_DIR  (default: <repo-root>/tools/echopose-mcp)
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="${ENV_FILE:-$REPO_ROOT/.env}"
 PROJECT="${GCP_PROJECT:-cognitum-20260110}"
 SECRET="${NPM_TOKEN_SECRET:-NPM_TOKEN}"
-PKG_DIR="${PUBLISH_PACKAGE_DIR:-$REPO_ROOT/tools/ruview-mcp}"
+PKG_DIR="${PUBLISH_PACKAGE_DIR:-$REPO_ROOT/tools/echopose-mcp}"
 
 [ -f "$ENV_FILE" ] || { echo "ERROR: .env not found at $ENV_FILE" >&2; exit 1; }
 

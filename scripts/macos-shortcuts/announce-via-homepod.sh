@@ -2,7 +2,7 @@
 #
 # announce-via-homepod.sh — ADR-125 §1.4 Tier 2 glue.
 #
-# Polls the RuView sensing-server's semantic-events endpoint and, on
+# Polls the EchoPose sensing-server's semantic-events endpoint and, on
 # the rising edge of a configurable event, runs a named Shortcut via
 # osascript. The Shortcut itself is owned by the operator in
 # Shortcuts.app — typically a "Speak Text on HomePod" action — so this
@@ -11,17 +11,17 @@
 # Run manually for testing:
 #   bash announce-via-homepod.sh --node-id 12 --event unrecognized_activity_pattern
 #
-# Run as a launchd job: see ruview-watcher.plist + README.md.
+# Run as a launchd job: see echopose-watcher.plist + README.md.
 
 set -euo pipefail
 
-SENSING_URL="${RUVIEW_SENSING_URL:-http://localhost:3000}"
+SENSING_URL="${ECHOPOSE_SENSING_URL:-http://localhost:3000}"
 NODE_ID="12"
 EVENT="unrecognized_activity_pattern"
-SHORTCUT_NAME="RuView Announce"
+SHORTCUT_NAME="EchoPose Announce"
 ANNOUNCEMENT=""
 POLL_INTERVAL="5"
-LOG_FILE="${RUVIEW_LOG:-/tmp/ruview-watcher.log}"
+LOG_FILE="${ECHOPOSE_LOG:-/tmp/echopose-watcher.log}"
 
 usage() {
     cat >&2 <<EOF
@@ -34,7 +34,7 @@ Options:
                                unexpected_occupancy
                                unrecognized_activity_pattern
                              (default: unrecognized_activity_pattern)
-  --shortcut-name <name>     Shortcut to invoke (default: "RuView Announce")
+  --shortcut-name <name>     Shortcut to invoke (default: "EchoPose Announce")
   --announcement <text>      Text to speak when event fires (default: event name)
   --sensing-url <url>        Sensing-server base URL (default: http://localhost:3000)
   --poll-interval <s>        Poll interval in seconds (default: 5)

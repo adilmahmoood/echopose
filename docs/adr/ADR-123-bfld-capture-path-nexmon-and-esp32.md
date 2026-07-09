@@ -145,7 +145,7 @@ For local dev iteration on the Windows / ruvultra box, the AX210 adapter provide
 
 ## 4. Alternatives Considered
 
-### Alt 1: Centralized capture host streams raw BFI to RuView nodes
+### Alt 1: Centralized capture host streams raw BFI to EchoPose nodes
 
 Rejected: violates ADR-120 I1 (raw never leaves the capture host). The capture host **is** the BFLD node; there is no separation.
 

@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-The RuView Desktop application (ADR-054) requires the WiFi sensing server to provide real-time CSI data, activity detection, and vital signs monitoring. Currently, the sensing server is a separate binary (`wifi-densepose-sensing-server`) that must be installed separately and found in the system PATH.
+The EchoPose Desktop application (ADR-054) requires the WiFi sensing server to provide real-time CSI data, activity detection, and vital signs monitoring. Currently, the sensing server is a separate binary (`wifi-densepose-sensing-server`) that must be installed separately and found in the system PATH.
 
 This creates several problems:
 1. **Distribution complexity**: Users must install two binaries

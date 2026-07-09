@@ -39,7 +39,7 @@ A toggle is the right answer because none of these reasons are universal — som
 
 ## 2. Decision
 
-Add a **client-side theme toggle** to `05-skinned-realtime.html` that switches between the existing dark theme and a new light theme called **adam-mode**, driven by a `data-theme="adam"` attribute on `<body>` plus a sibling `:root[data-theme="adam"]` CSS block that re-defines the existing custom properties. A new toggle button in the existing `#helpers` panel switches between modes and persists the choice in `localStorage` under the key `ruview.theme`.
+Add a **client-side theme toggle** to `05-skinned-realtime.html` that switches between the existing dark theme and a new light theme called **adam-mode**, driven by a `data-theme="adam"` attribute on `<body>` plus a sibling `:root[data-theme="adam"]` CSS block that re-defines the existing custom properties. A new toggle button in the existing `#helpers` panel switches between modes and persists the choice in `localStorage` under the key `echopose.theme`.
 
 ### 2.1 CSS — the colour swap
 
@@ -118,7 +118,7 @@ Add to the `#helpers` panel (top of its labels list):
 Handler:
 
 ```js
-const THEME_KEY = 'ruview.theme';
+const THEME_KEY = 'echopose.theme';
 const root = document.documentElement;
 const toggle = document.getElementById('adam-mode-toggle');
 
@@ -175,7 +175,7 @@ The string `"adam"` is the only literal value the `data-theme` attribute and the
 
 - Two themes to maintain. Any future colour change requires updating both `:root` blocks. Mitigated by keeping the existing custom-property names — adam-mode's values are the only edits.
 - The vignette + scanlines lose some of the CRT charm in adam-mode. Tradeoff accepted by design.
-- One additional `localStorage` slot consumed per origin (`ruview.theme`).
+- One additional `localStorage` slot consumed per origin (`echopose.theme`).
 - The amber accent in adam-mode (`#b8741a`) is visibly different from the dark-mode amber (`#ffb840`) — they share the same CSS variable name but a screenshot from each mode is not pixel-comparable. This is the correct call for accessibility (the bright amber is unreadable on cream) but does mean side-by-side comparisons need both screenshots labelled.
 
 ### 3.3 Risks
@@ -209,7 +209,7 @@ Acceptance criteria:
 
 - Manual visual check in two themes (no automated visual regression — demos aren't in the CI test loop today).
 - `view-source` confirms the new CSS block, the toggle markup, and the handler are present.
-- DevTools `localStorage` shows `ruview.theme` after a toggle.
+- DevTools `localStorage` shows `echopose.theme` after a toggle.
 - Three.js inspector (or a `console.log(scene.background.getHexString())`) confirms scene colour swap.
 
 ## 6. Follow-on work (out of scope for this ADR)

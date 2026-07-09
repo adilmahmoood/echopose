@@ -158,7 +158,7 @@ def _decode(raw_text: str) -> SensingMessage:
 
 
 class SensingClient:
-    """Asyncio WebSocket client for the RuView sensing-server.
+    """Asyncio WebSocket client for the EchoPose sensing-server.
 
     Usage as async context manager:
 

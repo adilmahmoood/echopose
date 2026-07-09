@@ -6,7 +6,7 @@
 
 Published claims of "contactless BP from WiFi CSI" exist (Yang 2022, Liu 2021, others), with reported MAE of ±8-12 mmHg. **The physics says these claims are either (a) over-fit per-subject calibration that doesn't generalise, or (b) require hardware capabilities that production ESP32-S3 systems don't have at the typical deployment configuration.**
 
-The honest verdict for the RuView roadmap: **do not ship BP as a primary feature.** It would be slower, less accurate, and harder to deploy than a $20 arm cuff. The breathing-rate and heart-rate features we already ship work because their motion amplitudes are 30-100× larger than the pulse waveform we'd need to recover for BP.
+The honest verdict for the EchoPose roadmap: **do not ship BP as a primary feature.** It would be slower, less accurate, and harder to deploy than a $20 arm cuff. The breathing-rate and heart-rate features we already ship work because their motion amplitudes are 30-100× larger than the pulse waveform we'd need to recover for BP.
 
 This thread spells out **exactly why**, with numbers, so anyone trying to add BP from CSI in the future has the scrutiny in hand.
 
@@ -55,7 +55,7 @@ For a single Tx-Rx pair to resolve carotid and femoral as **separate scatterers*
 
 Multistatic with multiple anchors could in principle invert the spatial mixing — but the inverse problem is severely ill-posed with the 4-6 anchors that are practically deployable. R12 already showed that this kind of structural-inverse-problem is the regime where naive approaches fail (negative result).
 
-**Conclusion:** PTT from CSI requires either an unusually short link (< 1.5 m, with subject between two co-planar antennas) or a non-trivial multistatic array with a custom forward operator. Neither matches a typical RuView room deployment.
+**Conclusion:** PTT from CSI requires either an unusually short link (< 1.5 m, with subject between two co-planar antennas) or a non-trivial multistatic array with a custom forward operator. Neither matches a typical EchoPose room deployment.
 
 ## Floor 3 — Contour recovery SNR
 
@@ -82,7 +82,7 @@ Literature consensus (Mukkamala 2015) for **pulse-contour shape recovery** is +2
 | Arm cuff (BIHS Grade A) | ±2 mmHg | $20 | 30 s | none |
 | Wrist cuff (consumer) | ±5 mmHg | $30 | 60 s | none |
 | Best published CSI BP (Yang 2022) | ±10 mmHg | n/a | 30 s | per-subject |
-| RuView CSI (hypothetical) | ±10-15 mmHg | $9 (ESP32) | 30 s | per-subject |
+| EchoPose CSI (hypothetical) | ±10-15 mmHg | $9 (ESP32) | 30 s | per-subject |
 
 CSI BP is **5-7× worse** than a $20 arm cuff, requires **per-subject calibration**, and saves the user *nothing* in time or convenience compared to a wrist cuff. The "contactless" benefit is real but doesn't outweigh the accuracy gap.
 

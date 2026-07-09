@@ -62,6 +62,15 @@ typedef struct {
     char     zone_name[16];              /**< Zone name for this node (e.g. "lobby"). */
     uint16_t swarm_heartbeat_sec;        /**< Heartbeat interval (seconds, default 30). */
     uint16_t swarm_ingest_sec;           /**< Vector ingest interval (seconds, default 5). */
+
+    /* ADR-032 §2.3: NDP rate limiter configuration */
+    uint8_t  ndp_max_tokens;             /**< NDP token bucket capacity (0 = use default 20). */
+    uint8_t  ndp_refill_hz;              /**< NDP token refill rate in Hz (0 = use default 20). */
+
+    /* ADR-032 §2.8: Mesh key and security level */
+    uint8_t  mesh_key[16];               /**< 16-byte pre-shared mesh key. */
+    uint8_t  mesh_key_valid;             /**< 1 if mesh_key was loaded from NVS. */
+    uint8_t  sec_level;                  /**< Security level (0=permissive, 1=transitional, 2=enforcing). */
 } nvs_config_t;
 
 /**

@@ -77,7 +77,7 @@ deps (a `--workspace` bench link pulls the whole graph), path-filtered triggers.
 - **Bit-rot caught + fixed** (above), re-verified `--no-run`.
 - **MEASURED locally** (`--no-default-features`, Windows): nvsim, ruvector
   (sketch/fusion/ann), signal/cir_bench, mat/detection_bench (post-fix),
-  vitals, ruview-swarm/swarm_bench all compile; fast subset runs (`nvsim
+  vitals, echopose-swarm/swarm_bench all compile; fast subset runs (`nvsim
   pipeline_run/d1/256` ≈ 55 µs; `ruvector sketch_hamming` ≈ 3–7 ns vs `float_l2`
   ≈ 63–371 ns).
 - `cargo test -p wifi-densepose-mat --no-default-features` → 166/6/2 passed, 0 failed.

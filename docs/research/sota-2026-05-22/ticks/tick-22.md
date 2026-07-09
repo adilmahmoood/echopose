@@ -38,7 +38,7 @@ Additive on prior ADRs:
 | ADR-105 (federation) | 500 |
 | ADR-106 (DP-SGD + isolation) | +300 |
 | **ADR-107 (cross-installation)** | **+530** |
-| **Total `ruview-fed` budget** | **~1,330 LOC, ~6 weeks** |
+| **Total `echopose-fed` budget** | **~1,330 LOC, ~6 weeks** |
 
 ## Why this closes the chain
 

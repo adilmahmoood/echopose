@@ -6,7 +6,7 @@
 | **Date** | 2026-03-02 |
 | **Deciders** | MaTriXy, rUv |
 | **Codename** | **FieldView** -- Mobile Companion for WiFi-DensePose Field Deployment |
-| **Relates to** | ADR-019 (Sensing-Only UI Mode), ADR-021 (Vital Sign Detection), ADR-026 (Survivor Track Lifecycle), ADR-029 (RuvSense Multistatic), ADR-031 (RuView Sensing-First RF), ADR-032 (Mesh Security) |
+| **Relates to** | ADR-019 (Sensing-Only UI Mode), ADR-021 (Vital Sign Detection), ADR-026 (Survivor Track Lifecycle), ADR-029 (RuvSense Multistatic), ADR-031 (EchoPose Sensing-First RF), ADR-032 (Mesh Security) |
 
 ---
 
@@ -669,7 +669,7 @@ Support connecting to multiple sensing servers simultaneously (e.g., one per flo
 | ADR-021 (Vital Sign Detection) | **Consumed**: VitalsScreen displays breathing_rate_bpm and heart_rate_bpm extracted by the ADR-021 pipeline |
 | ADR-026 (Survivor Track Lifecycle) | **Consumed**: MATScreen displays survivor tracks with lifecycle states (detected, confirmed, rescued, lost) from ADR-026 |
 | ADR-029 (RuvSense Multistatic) | **Consumed**: The sensing server aggregates ESP32 TDM frames (ADR-029) and streams processed results to the mobile app |
-| ADR-031 (RuView Sensing-First RF) | **Consumed**: The WebSocket and REST APIs exposed by `wifi-densepose-sensing-server` (ADR-031) are the mobile app's data source |
+| ADR-031 (EchoPose Sensing-First RF) | **Consumed**: The WebSocket and REST APIs exposed by `wifi-densepose-sensing-server` (ADR-031) are the mobile app's data source |
 | ADR-032 (Mesh Security) | **Consumed**: Authenticated CSI frames (ADR-032) ensure the mobile app displays trustworthy data, not spoofed sensor readings |
 
 ---

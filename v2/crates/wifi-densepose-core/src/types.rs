@@ -26,7 +26,7 @@ use crate::{DEFAULT_CONFIDENCE_THRESHOLD, MAX_KEYPOINTS};
 // ADR-136 — Canonical complex sample contract
 // =============================================================================
 
-/// Canonical complex sample for all RuView frame contracts (CSI, CIR, Doppler).
+/// Canonical complex sample for all EchoPose frame contracts (CSI, CIR, Doppler).
 ///
 /// Wraps [`num_complex::Complex64`]. The `serde` impl and [`Self::to_le_bytes`]
 /// write `(re, im)` as two little-endian `f64`, matching the ADR-119 endianness

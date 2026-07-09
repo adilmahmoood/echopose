@@ -21,10 +21,10 @@ cited; where it does not, the gap is marked **conjecture** with a defensible def
 ### 1.1 Crate name — locked: **`nvsim`**
 
 Standalone, *not* prefixed with `wifi-densepose-`: the simulator is generally useful
-outside RuView's WiFi-CSI context (magnetic-anomaly modeling, NV-physics teaching,
+outside EchoPose's WiFi-CSI context (magnetic-anomaly modeling, NV-physics teaching,
 COTS-sensor noise-floor sanity checks), so it lives in the workspace as a peer leaf.
 Public API: `use nvsim::scene::DipoleSource;`. Placement: `v2/crates/nvsim/`, pure leaf
-crate (no internal RuView deps).
+crate (no internal EchoPose deps).
 
 ### 1.2 Cargo.toml
 
@@ -99,7 +99,7 @@ in a separate PR after Pass 6 ships.
 
 ## Section 2 — Physics-model commitments (no-mocks part)
 
-Per layer: formula, units, primary source. When no primary source applies at RuView
+Per layer: formula, units, primary source. When no primary source applies at EchoPose
 geometry, marked **conjecture** with chosen default.
 
 ### 2.1 `source.rs` — magnetic source synthesis
@@ -114,7 +114,7 @@ geometry, marked **conjecture** with chosen default.
 Sign convention: right-hand rule on current; `m` parallel to coil normal. Units: SI;
 convert to pT at frame-emit time only. Singularity at r→0: clamp `r_min = 1 mm`; below
 that, return `B = 0` and set `flags |= SATURATION_NEAR_FIELD` (conjectural — no
-published guidance for sub-mm dipole at RuView geometry — but deterministic).
+published guidance for sub-mm dipole at EchoPose geometry — but deterministic).
 
 ### 2.2 `propagation.rs` — attenuation through air + materials
 
@@ -229,9 +229,9 @@ Explicit non-goals. Ruling them out is half the value of the plan.
 | Excluded | Reason |
 |---|---|
 | Single-NV imaging / ODMR scanning microscopy | Room-scale, not nm; doc 14 §4.7 |
-| NV-NV entanglement, photonic-crystal cavities | Out of RuView hardware budget |
+| NV-NV entanglement, photonic-crystal cavities | Out of EchoPose hardware budget |
 | Diamond growth / NV creation chemistry | Vendor (Element Six) handles |
-| Cryogenic operation | RuView ships RT; doc 14 §2.2 |
+| Cryogenic operation | EchoPose ships RT; doc 14 §2.2 |
 | Real hardware control (laser, MW, AOM) | Simulator is forward-only |
 | Full Hamiltonian + Lindblad solver | Defer to QuTiP if ever needed; doc 14 §3.1 |
 | Pulsed dynamical-decoupling sequence design | Hardware-firmware concern; doc 14 §4.7 |

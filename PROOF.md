@@ -1,13 +1,13 @@
 # PROOF — reproduce every claim, or find the one we can't yet
 
-This project (RuView / wifi-densepose) has been publicly called "AI slop" and
+This project (EchoPose / wifi-densepose) has been publicly called "AI slop" and
 "fake." This document is the answer: **a skeptic can clone the repo, run one
 script, and have every headline claim either verified on their own machine or
 shown — explicitly — as "CLAIMED, not yet reproduced (here's exactly what it
 needs)."** Nothing below is asserted without a command you can run.
 
 ```bash
-git clone https://github.com/ruvnet/RuView && cd RuView
+git clone https://github.com/ruvnet/EchoPose && cd EchoPose
 bash scripts/prove.sh          # core gate + the anti-slop assertion tests
 bash scripts/prove.sh --full   # also attempt the feature-gated subset
 ```

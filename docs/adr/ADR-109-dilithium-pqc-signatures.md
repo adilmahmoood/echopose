@@ -131,12 +131,12 @@ Status: **rejected**. Same record-now-decrypt-later argument as ADR-108, applied
 1. **PQC for HTTPS / TLS** to the cog distribution servers — Cloudflare / GCS run their own PQC migration on their schedule.
 2. **Owner key rotation policy** — separate future ADR.
 3. **Hardware acceleration for Dilithium verification on ESP32-S3** — if 5-10 ms latency becomes binding, offload to cognitum-v0 fleet manager.
-4. **Cross-signing with external CA** — if RuView ever needs a third-party CA chain, that's a future ADR.
+4. **Cross-signing with external CA** — if EchoPose ever needs a third-party CA chain, that's a future ADR.
 
 ## Bridge to existing ADRs
 
 - **ADR-100 (cog packaging Ed25519 signing)** — directly extended; Ed25519 stays in hybrid mode.
-- **ADR-104 (ruview-mcp + ruview-cli)** — `ruview_cog_install` MCP tool gains signature-policy parameter.
+- **ADR-104 (echopose-mcp + echopose-cli)** — `echopose_cog_install` MCP tool gains signature-policy parameter.
 - **ADR-105 / ADR-106 / ADR-107 / ADR-108** — federation operates on signed cog binaries; ADR-109 ensures the signing layer is quantum-resistant in lockstep with ADR-108's key exchange.
 
 ## Connection to research-loop threads
@@ -156,7 +156,7 @@ Status: **rejected**. Same record-now-decrypt-later argument as ADR-108, applied
 
 ## What this ADR closes
 
-The **provenance side** of the post-quantum migration. Combined with ADR-108 (key exchange), RuView's full cryptographic chain is quantum-resistant by Phase 2 (2027-2028).
+The **provenance side** of the post-quantum migration. Combined with ADR-108 (key exchange), EchoPose's full cryptographic chain is quantum-resistant by Phase 2 (2027-2028).
 
 ADR chain after this tick:
 
@@ -197,6 +197,6 @@ Phase 1 ships ~1 quarter after ADR-108 lands.
 
 ## Closing observation
 
-ADR-109 closes the **last predictable cryptographic gap** in the RuView privacy + provenance chain. The remaining unspecified items (owner key management, cross-signing, hardware acceleration) are operational or contingent on specific future requirements; the architectural foundation is now complete.
+ADR-109 closes the **last predictable cryptographic gap** in the EchoPose privacy + provenance chain. The remaining unspecified items (owner key management, cross-signing, hardware acceleration) are operational or contingent on specific future requirements; the architectural foundation is now complete.
 
-Combined federation + signing implementation budget: **~1,820 LOC**, ~7-week effort across the full chain (ADR-105 → ADR-109). This is the engineering cost of shipping privacy-preserving + quantum-resistant federated RuView.
+Combined federation + signing implementation budget: **~1,820 LOC**, ~7-week effort across the full chain (ADR-105 → ADR-109). This is the engineering cost of shipping privacy-preserving + quantum-resistant federated EchoPose.

@@ -9,11 +9,11 @@ estimate skeletal pose — using only the WiFi signal already in your home.**
 
 No cameras. No wearables. Works through walls and in the dark.
 
-`wifi-densepose` is the Python binding for the [RuView](https://github.com/ruvnet/RuView)
+`wifi-densepose` is the Python binding for the [EchoPose](https://github.com/ruvnet/EchoPose)
 sensing stack: a Rust core that turns the Channel State Information (CSI)
 emitted by ordinary WiFi chips into ambient-intelligence signals. The wheel
 ships compiled DSP for fast offline analysis, plus an opt-in Python client
-for talking to a live RuView sensing-server over WebSocket or MQTT.
+for talking to a live EchoPose sensing-server over WebSocket or MQTT.
 
 ## Features
 
@@ -68,7 +68,7 @@ import asyncio
 from wifi_densepose.client import SensingClient, EdgeVitalsMessage
 
 async def main():
-    async with SensingClient("ws://your-ruview-node:8765/ws/sensing") as c:
+    async with SensingClient("ws://your-echopose-node:8765/ws/sensing") as c:
         async for msg in c.stream():
             if isinstance(msg, EdgeVitalsMessage):
                 print(msg.presence, msg.breathing_rate_bpm, msg.heartrate_bpm)
@@ -80,14 +80,14 @@ asyncio.run(main())
 
 ```python
 from wifi_densepose.client import (
-    RuViewMqttClient, SemanticPrimitive, SemanticPrimitiveListener,
+    EchoPoseMqttClient, SemanticPrimitive, SemanticPrimitiveListener,
 )
 
 listener = SemanticPrimitiveListener()
 listener.on(SemanticPrimitive.BedExit, lambda e: print("bed exit:", e.node_id))
 listener.on(SemanticPrimitive.PossibleDistress, lambda e: alert(e))
 
-client = RuViewMqttClient(broker_host="homeassistant.local")
+client = EchoPoseMqttClient(broker_host="homeassistant.local")
 client.on_message(
     "homeassistant/+/wifi_densepose_+/+/state",
     listener.handle_mqtt_message,
@@ -119,7 +119,7 @@ print(frame.n_subcarriers, frame.mean_amplitude)
 
 Works with any WiFi chip that exposes CSI. Reference setups (ESP-IDF firmware,
 build scripts, witness-verified test bundles) are in the
-[RuView repo](https://github.com/ruvnet/RuView):
+[EchoPose repo](https://github.com/ruvnet/EchoPose):
 
 | Device | Cost | Role |
 |---|---|---|
@@ -133,10 +133,10 @@ to v2 with a migration URL.
 
 ## Links
 
-- **Repository** — https://github.com/ruvnet/RuView
-- **Modernization plan** — [ADR-117](https://github.com/ruvnet/RuView/blob/main/docs/adr/ADR-117-pip-wifi-densepose-modernization.md)
-- **Home Assistant integration** — [ADR-115](https://github.com/ruvnet/RuView/blob/main/docs/adr/ADR-115-home-assistant-integration.md)
-- **Issues** — https://github.com/ruvnet/RuView/issues
+- **Repository** — https://github.com/ruvnet/EchoPose
+- **Modernization plan** — [ADR-117](https://github.com/ruvnet/EchoPose/blob/main/docs/adr/ADR-117-pip-wifi-densepose-modernization.md)
+- **Home Assistant integration** — [ADR-115](https://github.com/ruvnet/EchoPose/blob/main/docs/adr/ADR-115-home-assistant-integration.md)
+- **Issues** — https://github.com/ruvnet/EchoPose/issues
 
 ## License
 

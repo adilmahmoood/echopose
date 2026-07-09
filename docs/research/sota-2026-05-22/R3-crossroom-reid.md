@@ -34,7 +34,7 @@ Three observations:
 
 1. **Cosine K-NN partially mitigates** the environment-shift problem (70% >> 10% chance) because magnitude normalisation removes the additive env component as a *direction*. The remaining 30 pp gap comes from how the env shift rotates the cluster in the high-dim space.
 2. **Explicit MERIDIAN-style env subtraction** (per-room centroid removal) closes the remaining gap. The simulation suggests even **70%-effective** subtraction (realistic for finite labelled examples) is enough.
-3. **The within-room baseline is what an attacker has**, not what the system needs. The same primitive that gives the user "let RuView greet you by name in this room" also gives an attacker "this person walked through 5 different rooms and we tracked them."
+3. **The within-room baseline is what an attacker has**, not what the system needs. The same primitive that gives the user "let EchoPose greet you by name in this room" also gives an attacker "this person walked through 5 different rooms and we tracked them."
 
 ## Why the env-removal approach works
 
@@ -58,7 +58,7 @@ This isn't built. It's the right next step in the AETHER + MERIDIAN line.
 
 ## Privacy framing (the ethical answer)
 
-The same primitive that enables "RuView greets you by name in your bedroom" enables a building-level adversary to **track every individual's movement through every WiFi-CSI-sensing surface**. This is a stronger surveillance primitive than face recognition because:
+The same primitive that enables "EchoPose greets you by name in your bedroom" enables a building-level adversary to **track every individual's movement through every WiFi-CSI-sensing surface**. This is a stronger surveillance primitive than face recognition because:
 
 - WiFi penetrates walls (no line-of-sight needed)
 - Re-ID works without subject cooperation (no "look at the camera")
@@ -67,7 +67,7 @@ The same primitive that enables "RuView greets you by name in your bedroom" enab
 
 The R14 ethical framework (opt-in by default, data stays on-device, override is one tap) applies, but with **additional** constraints specific to re-ID:
 
-1. **No cross-installation linkage.** Per-installation embedding spaces only. Two RuView installs in two different buildings must NOT share embedding spaces.
+1. **No cross-installation linkage.** Per-installation embedding spaces only. Two EchoPose installs in two different buildings must NOT share embedding spaces.
 2. **Embedding storage requires explicit opt-in.** Storing person embeddings persists biometrics; many regulatory regimes treat this as biometric data with stronger consent requirements (GDPR Art 9, BIPA).
 3. **Forgetting must be cryptographically verifiable.** When a user requests deletion, the embedding must be cryptographically destroyed, not just unlabelled. Storing "unlabelled embeddings" still enables future linkage.
 4. **No re-ID across legal entities.** Building A and Building B owned by different entities must NOT exchange embeddings. The data-flow boundaries should be hard-walled.

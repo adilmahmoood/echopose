@@ -37,7 +37,7 @@ fn connect_with_lwt_uses_documented_availability_topic() {
     // construction.
     assert_eq!(
         availability_topic("seed-test"),
-        "ruview/seed-test/bfld/availability",
+        "echopose/seed-test/bfld/availability",
     );
 }
 
@@ -99,8 +99,8 @@ fn placeholder_topicmessage_path_unaffected_by_lwt() {
     // Sanity: TopicMessage and Publish surfaces from the non-mqtt path stay
     // unchanged when the mqtt feature is on; the LWT addition is purely additive.
     let m = TopicMessage {
-        topic: "ruview/x/bfld/presence/state".into(),
+        topic: "echopose/x/bfld/presence/state".into(),
         payload: "true".into(),
     };
-    assert_eq!(m.topic, "ruview/x/bfld/presence/state");
+    assert_eq!(m.topic, "echopose/x/bfld/presence/state");
 }

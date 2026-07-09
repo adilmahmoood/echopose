@@ -9,7 +9,7 @@
 
 ## Context
 
-RuView's firmware grew bottom-up. ADR-018 defined a binary CSI frame, ADR-029
+EchoPose's firmware grew bottom-up. ADR-018 defined a binary CSI frame, ADR-029
 added channel hopping and TDM, ADR-039 added a tiered edge-intelligence
 pipeline, ADR-040 added programmable WASM modules, ADR-060 added per-node
 channel and MAC overrides, ADR-066 added a swarm bridge to a coordinator, and
@@ -24,7 +24,7 @@ This is a problem for three reasons:
 1. **Portability.** Espressif exposes CSI through an official driver API. On
    locked Broadcom and Cypress chips, projects like Nexmon achieve the same
    thing by patching the firmware blob — but only for specific chip and
-   firmware build combinations. Future RuView nodes will likely span both
+   firmware build combinations. Future EchoPose nodes will likely span both
    models plus eventually a custom silicon path. Today, none of the modules
    above can be reused unchanged on any non-ESP32 chip.
 
@@ -54,7 +54,7 @@ get reinvented inline by every new ADR.
 
 ## Decision
 
-Adopt a **5-layer adaptive RF sensing kernel** as the canonical RuView
+Adopt a **5-layer adaptive RF sensing kernel** as the canonical EchoPose
 firmware architecture, and refactor the existing modules to fit underneath
 it. The five layers, top to bottom:
 

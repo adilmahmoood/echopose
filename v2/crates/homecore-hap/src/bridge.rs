@@ -138,7 +138,7 @@ mod tests {
 
     fn make_bridge() -> HapBridge {
         HapBridge::new(HapServiceRecord {
-            instance_name: "RuView Sense".into(),
+            instance_name: "EchoPose Sense".into(),
             port: 51826,
             setup_code: "111-22-333".into(),
             device_id: "AA:BB:CC:DD:EE:FF".into(),

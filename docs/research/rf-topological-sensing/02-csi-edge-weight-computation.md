@@ -1,6 +1,6 @@
 # Computing Edge Weights for RF Sensing Graphs from CSI Measurements
 
-**Research Document 02** | RuView Project | March 2026
+**Research Document 02** | EchoPose Project | March 2026
 
 ## Abstract
 
@@ -201,7 +201,7 @@ weight: $w_{ij} = \frac{1}{K}\sum_k C_{ij}^{\text{ref}}(f_k)$.
 
 ### 2.4 Phase Phasor Coherence
 
-This is the core metric used in the RuView coherence gate. For a window of $W$
+This is the core metric used in the EchoPose coherence gate. For a window of $W$
 phase measurements at subcarrier $k$:
 
 $$
@@ -231,7 +231,7 @@ $$
 $$
 
 This is strictly more robust to LO drift than the direct phasor coherence and
-is the variant used in the RuView coherence gate.
+is the variant used in the EchoPose coherence gate.
 
 ### 2.5 Composite Coherence Score
 
@@ -338,7 +338,7 @@ where $\mathcal{S}_{\lambda}$ is the soft-thresholding operator with threshold
 $\lambda$ and $\mu$ is the step size. ISTA converges in 20-50 iterations for
 typical CSI sparsity levels.
 
-The RuView tomography module uses ISTA with an $\ell_1$ penalty for voxel-space
+The EchoPose tomography module uses ISTA with an $\ell_1$ penalty for voxel-space
 reconstruction. The same solver can be repurposed for per-link multipath
 decomposition by operating on the delay domain rather than the spatial domain.
 
@@ -429,7 +429,7 @@ variance = M2 / (n - 1)
 
 For edge weight computation, Welford statistics on the raw coherence values
 provide both the smoothed weight (running mean) and a confidence bound (running
-variance). The RuView longitudinal module uses Welford statistics for
+variance). The EchoPose longitudinal module uses Welford statistics for
 biomechanics drift detection; the same infrastructure applies here.
 
 **Windowed Welford.** Standard Welford accumulates over all time. For a sliding
@@ -642,7 +642,7 @@ reweighted least squares (IRLS) solution converges in 3-5 iterations.
 
 ### 5.5 Z-Score Anomaly Detection
 
-The RuView coherence module uses Z-score-based gating to classify link quality:
+The EchoPose coherence module uses Z-score-based gating to classify link quality:
 
 $$
 z_{ij}(t) = \frac{\Gamma_{ij}(t) - \mu_{ij}}{\sigma_{ij}}
@@ -920,7 +920,7 @@ decomposition buffers if ESPRIT/MUSIC is run on the aggregator.
 
 ### 7.4 Rust Implementation Mapping
 
-The edge weight computation maps to existing RuView crate structure:
+The edge weight computation maps to existing EchoPose crate structure:
 
 | Component | Crate | Module |
 |-----------|-------|--------|
@@ -1056,4 +1056,4 @@ the specific multipath geometry of each link.
 
 ---
 
-*Document prepared for the RuView project. Last updated March 2026.*
+*Document prepared for the EchoPose project. Last updated March 2026.*

@@ -66,7 +66,7 @@ impl RumqttPublisher {
 
     /// Like [`Self::connect`] but also configures the MQTT Last Will and
     /// Testament so the broker auto-publishes `"offline"` on
-    /// `ruview/<node_id>/bfld/availability` (retained, QoS 1) when the
+    /// `echopose/<node_id>/bfld/availability` (retained, QoS 1) when the
     /// publisher's TCP session drops without a clean DISCONNECT.
     ///
     /// Pairs with [`crate::publish_availability_online`] — call that on first

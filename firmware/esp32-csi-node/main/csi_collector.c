@@ -19,6 +19,7 @@
 #include "c6_sync_espnow.h" /* ADR-110 §A0.11: mesh-aligned epoch for sync packet */
 
 #include <string.h>
+#include "psa/crypto.h"
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "esp_timer.h"
@@ -44,6 +45,10 @@ static bool s_node_id_early_set = false;
  * LoadProhibited panics (observed: Core 0 panic after ~2400 callbacks). */
 static uint8_t s_filter_mac[6] = {0};
 static bool    s_filter_mac_set = false;
+
+/* ADR-032 §2.8: Derived SipHash-2-4 key for CSI frame integrity. */
+static uint8_t s_siphash_key[16] = {0};
+static bool    s_siphash_key_valid = false;
 
 /* ADR-057: Build-time guard — fail early if CSI is not enabled in sdkconfig.
  * Without this, the firmware compiles but crashes at runtime with:
@@ -132,7 +137,15 @@ size_t csi_serialize_frame(const wifi_csi_info_t *info, uint8_t *buf, size_t buf
     uint16_t iq_len = (uint16_t)info->len;
     uint16_t n_subcarriers = iq_len / (2 * n_antennas);
 
-    size_t frame_size = CSI_HEADER_SIZE + iq_len;
+    uint8_t header_len = CSI_HEADER_SIZE;
+    uint32_t magic = CSI_MAGIC;
+
+    if (s_siphash_key_valid && g_nvs_config.sec_level >= 1) {
+        header_len = CSI_AUTHENTICATED_HEADER_SIZE;
+        magic = CSI_AUTHENTICATED_MAGIC;
+    }
+
+    size_t frame_size = header_len + iq_len;
     if (frame_size > buf_len) {
         ESP_LOGW(TAG, "Buffer too small: need %u, have %u", (unsigned)frame_size, (unsigned)buf_len);
         return 0;
@@ -152,7 +165,6 @@ size_t csi_serialize_frame(const wifi_csi_info_t *info, uint8_t *buf, size_t buf
     }
 
     /* Magic (LE) */
-    uint32_t magic = CSI_MAGIC;
     memcpy(&buf[0], &magic, 4);
 
     /* Node ID (captured at init into s_node_id to survive memory corruption
@@ -178,7 +190,7 @@ size_t csi_serialize_frame(const wifi_csi_info_t *info, uint8_t *buf, size_t buf
     /* Noise floor (i8) */
     buf[17] = (uint8_t)(int8_t)info->rx_ctrl.noise_floor;
 
-    /* ADR-110: PPDU type (byte 18) + bandwidth/flags (byte 19).
+    /* PPDU type (byte 18) + bandwidth/flags (byte 19).
      * Previously reserved-zero, now optionally populated when CONFIG_CSI_FRAME_HE_TAGGING.
      * Readers that don't know about the extension see zeros — backward compatible.
      *
@@ -238,7 +250,13 @@ size_t csi_serialize_frame(const wifi_csi_info_t *info, uint8_t *buf, size_t buf
 #endif
 
     /* I/Q data */
-    memcpy(&buf[CSI_HEADER_SIZE], info->buf, iq_len);
+    memcpy(&buf[header_len], info->buf, iq_len);
+
+    /* Compute and append the SipHash-2-4 tag if using authenticated format */
+    if (header_len == CSI_AUTHENTICATED_HEADER_SIZE) {
+        uint64_t tag = siphash24_two_parts(buf, 20, info->buf, iq_len, s_siphash_key);
+        memcpy(&buf[20], &tag, 8);
+    }
 
     return frame_size;
 }
@@ -370,7 +388,7 @@ static void wifi_promiscuous_cb(void *buf, wifi_promiscuous_pkt_type_t type)
     (void)type;
 }
 
-/* ---- RuView#521/#954: connected-STA CSI traffic source (additive) ----
+/* ---- EchoPose#521/#954: connected-STA CSI traffic source (additive) ----
  *
  * The ESP32 CSI engine only produces CSI for received OFDM frames (L-LTF/HT-LTF).
  * On a quiet network — or on a display-enabled build where the #893 MGMT->MGMT+DATA
@@ -450,6 +468,223 @@ void csi_collector_set_node_id(uint8_t node_id)
     }
 }
 
+/* ---- ADR-032 §2.2 & §2.8: SipHash-2-4 and key derivation ---- */
+
+static uint64_t u8to64_le(const uint8_t *p)
+{
+    return ((uint64_t)p[0]) |
+           ((uint64_t)p[1] << 8) |
+           ((uint64_t)p[2] << 16) |
+           ((uint64_t)p[3] << 24) |
+           ((uint64_t)p[4] << 32) |
+           ((uint64_t)p[5] << 40) |
+           ((uint64_t)p[6] << 48) |
+           ((uint64_t)p[7] << 56);
+}
+
+#define ROTL(x, b) (uint64_t)(((x) << (b)) | ((x) >> (64 - (b))))
+
+#define SIPROUND \
+  do { \
+    v0 += v1; v2 += v3; \
+    v1 = ROTL(v1, 13); v3 = ROTL(v3, 16); \
+    v1 ^= v0; v3 ^= v2; \
+    v0 = ROTL(v0, 32); \
+    v2 += v1; v0 += v3; \
+    v1 = ROTL(v1, 17); v3 = ROTL(v3, 21); \
+    v1 ^= v2; v3 ^= v0; \
+    v2 = ROTL(v2, 32); \
+  } while (0)
+
+uint64_t siphash24(const uint8_t *in, size_t inlen, const uint8_t *key)
+{
+    uint64_t k0 = u8to64_le(key);
+    uint64_t k1 = u8to64_le(key + 8);
+
+    uint64_t v0 = 0x736f6d6570736575ULL ^ k0;
+    uint64_t v1 = 0x646f6f676e6f7465ULL ^ k1;
+    uint64_t v2 = 0x6c7967656e657261ULL ^ k0;
+    uint64_t v3 = 0x7465646279746573ULL ^ k1;
+
+    const uint8_t *end = in + (inlen & ~7);
+    const int left = inlen & 7;
+    uint64_t b = ((uint64_t)inlen) << 56;
+
+    for (const uint8_t *ni = in; ni < end; ni += 8) {
+        uint64_t m = u8to64_le(ni);
+        v3 ^= m;
+        SIPROUND;
+        SIPROUND;
+        v0 ^= m;
+    }
+
+    switch (left) {
+        case 7: b |= ((uint64_t)end[6]) << 48; // fallthrough
+        case 6: b |= ((uint64_t)end[5]) << 40; // fallthrough
+        case 5: b |= ((uint64_t)end[4]) << 32; // fallthrough
+        case 4: b |= ((uint64_t)end[3]) << 24; // fallthrough
+        case 3: b |= ((uint64_t)end[2]) << 16; // fallthrough
+        case 2: b |= ((uint64_t)end[1]) << 8;  // fallthrough
+        case 1: b |= ((uint64_t)end[0]);
+        case 0: break;
+    }
+
+    v3 ^= b;
+    SIPROUND;
+    SIPROUND;
+    v0 ^= b;
+    v2 ^= 0xff;
+    SIPROUND;
+    SIPROUND;
+    SIPROUND;
+    SIPROUND;
+    return v0 ^ v1 ^ v2 ^ v3;
+}
+
+uint64_t siphash24_two_parts(const uint8_t *p1, size_t len1,
+                             const uint8_t *p2, size_t len2,
+                             const uint8_t *key)
+{
+    uint64_t k0 = u8to64_le(key);
+    uint64_t k1 = u8to64_le(key + 8);
+
+    uint64_t v0 = 0x736f6d6570736575ULL ^ k0;
+    uint64_t v1 = 0x646f6f676e6f7465ULL ^ k1;
+    uint64_t v2 = 0x6c7967656e657261ULL ^ k0;
+    uint64_t v3 = 0x7465646279746573ULL ^ k1;
+
+    size_t total_len = len1 + len2;
+    uint64_t b = ((uint64_t)total_len) << 56;
+
+    size_t processed = 0;
+    uint64_t m = 0;
+    int m_bytes = 0;
+
+    for (size_t i = 0; i < len1; i++) {
+        m |= ((uint64_t)p1[i]) << (m_bytes * 8);
+        m_bytes++;
+        if (m_bytes == 8) {
+            v3 ^= m;
+            SIPROUND;
+            SIPROUND;
+            v0 ^= m;
+            m = 0;
+            m_bytes = 0;
+        }
+        processed++;
+    }
+    for (size_t i = 0; i < len2; i++) {
+        m |= ((uint64_t)p2[i]) << (m_bytes * 8);
+        m_bytes++;
+        if (m_bytes == 8) {
+            v3 ^= m;
+            SIPROUND;
+            SIPROUND;
+            v0 ^= m;
+            m = 0;
+            m_bytes = 0;
+        }
+        processed++;
+    }
+
+    uint64_t last_block = 0;
+    int remaining = total_len - processed;
+    for (int i = 0; i < remaining; i++) {
+        size_t idx = processed + i;
+        uint8_t val = (idx < len1) ? p1[idx] : p2[idx - len1];
+        last_block |= ((uint64_t)val) << (i * 8);
+    }
+
+    b |= last_block;
+    v3 ^= b;
+    SIPROUND;
+    SIPROUND;
+    v0 ^= b;
+    v2 ^= 0xff;
+    SIPROUND;
+    SIPROUND;
+    SIPROUND;
+    SIPROUND;
+    return v0 ^ v1 ^ v2 ^ v3;
+}
+
+/* Manual HMAC-SHA256 using PSA hash functions to avoid key import overhead. */
+static esp_err_t hmac_sha256_psa(const uint8_t *key, size_t key_len,
+                                 const uint8_t *msg, size_t msg_len,
+                                 uint8_t *out_mac)
+{
+    uint8_t ipad[64];
+    uint8_t opad[64];
+    memset(ipad, 0x36, 64);
+    memset(opad, 0x5c, 64);
+
+    uint8_t key_block[64];
+    memset(key_block, 0, 64);
+    if (key_len > 64) {
+        psa_hash_operation_t op = PSA_HASH_OPERATION_INIT;
+        size_t out_len = 0;
+        if (psa_hash_setup(&op, PSA_ALG_SHA_256) != PSA_SUCCESS ||
+            psa_hash_update(&op, key, key_len) != PSA_SUCCESS ||
+            psa_hash_finish(&op, key_block, 32, &out_len) != PSA_SUCCESS) {
+            return ESP_FAIL;
+        }
+    } else {
+        memcpy(key_block, key, key_len);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        ipad[i] ^= key_block[i];
+        opad[i] ^= key_block[i];
+    }
+
+    uint8_t inner_hash[32];
+    psa_hash_operation_t op_inner = PSA_HASH_OPERATION_INIT;
+    size_t out_len_inner = 0;
+    if (psa_hash_setup(&op_inner, PSA_ALG_SHA_256) != PSA_SUCCESS ||
+        psa_hash_update(&op_inner, ipad, 64) != PSA_SUCCESS ||
+        psa_hash_update(&op_inner, msg, msg_len) != PSA_SUCCESS ||
+        psa_hash_finish(&op_inner, inner_hash, 32, &out_len_inner) != PSA_SUCCESS) {
+        return ESP_FAIL;
+    }
+
+    psa_hash_operation_t op_outer = PSA_HASH_OPERATION_INIT;
+    size_t out_len_outer = 0;
+    if (psa_hash_setup(&op_outer, PSA_ALG_SHA_256) != PSA_SUCCESS ||
+        psa_hash_update(&op_outer, opad, 64) != PSA_SUCCESS ||
+        psa_hash_update(&op_outer, inner_hash, 32) != PSA_SUCCESS ||
+        psa_hash_finish(&op_outer, out_mac, 32, &out_len_outer) != PSA_SUCCESS) {
+        return ESP_FAIL;
+    }
+
+    return ESP_OK;
+}
+
+void csi_collector_init_security(void)
+{
+    // Initialize PSA Crypto library
+    psa_status_t st = psa_crypto_init();
+    if (st != PSA_SUCCESS) {
+        ESP_LOGE(TAG, "Failed to initialize PSA Cryptography: %d", (int)st);
+        return;
+    }
+
+    if (g_nvs_config.mesh_key_valid) {
+        uint8_t hmac_out[32];
+        esp_err_t err = hmac_sha256_psa(g_nvs_config.mesh_key, 16,
+                                        (const uint8_t *)"csi-frame-siphash", 17,
+                                        hmac_out);
+        if (err == ESP_OK) {
+            memcpy(s_siphash_key, hmac_out, 16);
+            s_siphash_key_valid = true;
+            ESP_LOGI(TAG, "Mesh security: derived SipHash key successfully");
+        } else {
+            ESP_LOGE(TAG, "Mesh security: failed to derive SipHash key");
+        }
+    } else {
+        ESP_LOGW(TAG, "Mesh security: no valid mesh key provisioned, running unauthenticated");
+    }
+}
+
 void csi_collector_init(void)
 {
     if (!s_node_id_early_set) {
@@ -512,8 +747,8 @@ void csi_collector_init(void)
     /* Disable WiFi modem sleep — reliable CSI capture needs the radio awake.
      * The ESP-IDF STA default is WIFI_PS_MIN_MODEM, which lets the modem
      * sleep between DTIM beacons; with the MGMT-only promiscuous filter
-     * (RuView#396) that starves the CSI callback and the per-second yield
-     * collapses toward 0 pps (RuView#521). Operators who want battery
+     * (EchoPose#396) that starves the CSI callback and the per-second yield
+     * collapses toward 0 pps (EchoPose#521). Operators who want battery
      * duty-cycling opt back in via power_mgmt_init() (provision.py
      * --duty-cycle <N>), which runs after this and re-enables modem sleep. */
     esp_err_t ps_err = esp_wifi_set_ps(WIFI_PS_NONE);
@@ -530,7 +765,7 @@ void csi_collector_init(void)
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(wifi_promiscuous_cb));
 
-    /* MGMT-only promiscuous filter + active probe injection (RuView#396).
+    /* MGMT-only promiscuous filter + active probe injection (EchoPose#396).
      *
      * DATA frames cause 100-500+ WiFi HW interrupts/sec which crashes Core 0
      * in wDev_ProcessFiq (SPI flash cache race in ESP-IDF WiFi blob).
@@ -542,7 +777,7 @@ void csi_collector_init(void)
     };
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous_filter(&filt));
 
-    ESP_LOGI(TAG, "Promiscuous mode enabled (MGMT-only, RuView#396)");
+    ESP_LOGI(TAG, "Promiscuous mode enabled (MGMT-only, EchoPose#396)");
 
 #if CONFIG_SOC_WIFI_HE_SUPPORT
     /* Wi-Fi 6 targets (e.g. ESP32-C6): wifi_csi_config_t is wifi_csi_acquire_config_t
@@ -593,7 +828,7 @@ void csi_collector_init(void)
     ESP_LOGI(TAG, "CSI collection initialized (node_id=%u, channel=%u)",
              (unsigned)s_node_id, (unsigned)csi_channel);
 
-    /* RuView#521/#954: start the connected-STA traffic source so the CSI engine
+    /* EchoPose#521/#954: start the connected-STA traffic source so the CSI engine
      * receives a guaranteed OFDM unicast floor even when promiscuous capture is
      * starved (display builds / quiet networks). Additive to #396/#893. */
     csi_start_self_ping();
@@ -710,8 +945,8 @@ static void hop_timer_cb(void *arg)
 
 void csi_collector_enable_data_capture(void)
 {
-    /* MGMT-only (RuView#396) starves the CSI callback on display-less boards
-     * (RuView#521/#893): beacons alone are sparse, yield collapses to 0 pps.
+    /* MGMT-only (EchoPose#396) starves the CSI callback on display-less boards
+     * (EchoPose#521/#893): beacons alone are sparse, yield collapses to 0 pps.
      * Without a display there is no QSPI/SPI-flash cache contention with the
      * DATA-frame interrupt load, so capture DATA frames too. */
     wifi_promiscuous_filter_t filt = {
@@ -719,7 +954,7 @@ void csi_collector_enable_data_capture(void)
     };
     esp_err_t err = esp_wifi_set_promiscuous_filter(&filt);
     if (err == ESP_OK) {
-        ESP_LOGI(TAG, "CSI filter upgraded to MGMT+DATA (no display, RuView#893)");
+        ESP_LOGI(TAG, "CSI filter upgraded to MGMT+DATA (no display, EchoPose#893)");
     } else {
         ESP_LOGW(TAG, "Failed to enable DATA-frame CSI capture: %s", esp_err_to_name(err));
     }
@@ -762,16 +997,100 @@ void csi_collector_start_hop_timer(void)
              (unsigned long)s_dwell_ms, (unsigned)s_hop_count);
 }
 
-/* ---- ADR-029: NDP frame injection stub ---- */
+/* ---- ADR-032 §2.3: NDP injection rate limiter (token bucket) ---- */
+
+/** Token bucket state for NDP injection rate limiting. */
+typedef struct {
+    uint32_t tokens;           /**< current token count */
+    uint32_t max_tokens;       /**< bucket capacity */
+    uint32_t refill_interval_us; /**< microseconds per refilled token */
+    int64_t  last_refill_us;   /**< absolute time of last refill (esp_timer) */
+} ndp_rate_limiter_t;
+
+/* Defaults — configurable via NVS keys ndp_max_tokens / ndp_refill_hz */
+#define NDP_RATE_MAX_TOKENS_DEFAULT   20
+#define NDP_RATE_REFILL_HZ_DEFAULT    20
+
+static ndp_rate_limiter_t s_ndp_limiter = {
+    .tokens              = NDP_RATE_MAX_TOKENS_DEFAULT,
+    .max_tokens          = NDP_RATE_MAX_TOKENS_DEFAULT,
+    .refill_interval_us  = 1000000 / NDP_RATE_REFILL_HZ_DEFAULT,
+    .last_refill_us      = 0,
+};
+
+/** Apply NVS overrides to the NDP rate limiter (called once at boot). */
+void csi_collector_configure_ndp_rate_limiter(void)
+{
+    /* NVS keys: ndp_max_tokens (u8), ndp_refill_hz (u8) */
+    if (g_nvs_config.ndp_max_tokens > 0 && g_nvs_config.ndp_max_tokens <= 100) {
+        s_ndp_limiter.max_tokens = g_nvs_config.ndp_max_tokens;
+        s_ndp_limiter.tokens      = g_nvs_config.ndp_max_tokens;
+        ESP_LOGI(TAG, "NDP rate limiter: max_tokens=%u (NVS override)",
+                 (unsigned)g_nvs_config.ndp_max_tokens);
+    }
+    uint8_t refill_hz = NDP_RATE_REFILL_HZ_DEFAULT;
+    if (g_nvs_config.ndp_refill_hz > 0 && g_nvs_config.ndp_refill_hz <= 100) {
+        refill_hz = g_nvs_config.ndp_refill_hz;
+        ESP_LOGI(TAG, "NDP rate limiter: refill_hz=%u (NVS override)",
+                 (unsigned)refill_hz);
+    }
+    s_ndp_limiter.refill_interval_us = 1000000 / refill_hz;
+    s_ndp_limiter.last_refill_us = esp_timer_get_time();
+}
+
+/** Refill the token bucket based on elapsed time. Must be called before
+ *  every token check to enable the burst-and-refill semantics. */
+static void ndp_rate_refill(void)
+{
+    int64_t now = esp_timer_get_time();
+    if (s_ndp_limiter.last_refill_us == 0) {
+        s_ndp_limiter.last_refill_us = now;
+        return;
+    }
+    int64_t elapsed = now - s_ndp_limiter.last_refill_us;
+    if (elapsed < (int64_t)s_ndp_limiter.refill_interval_us) {
+        return;  /* not yet due for a refill */
+    }
+    uint32_t new_tokens = (uint32_t)(elapsed / (int64_t)s_ndp_limiter.refill_interval_us);
+    s_ndp_limiter.last_refill_us += (int64_t)new_tokens * (int64_t)s_ndp_limiter.refill_interval_us;
+    uint32_t sum = s_ndp_limiter.tokens + new_tokens;
+    if (sum > s_ndp_limiter.max_tokens) {
+        sum = s_ndp_limiter.max_tokens;
+    }
+    s_ndp_limiter.tokens = sum;
+}
+
+/** Try to consume one token from the bucket. Returns true if allowed. */
+static bool ndp_rate_try_consume(void)
+{
+    ndp_rate_refill();
+    if (s_ndp_limiter.tokens > 0) {
+        s_ndp_limiter.tokens--;
+        return true;
+    }
+    return false;
+}
+
+/* ---- ADR-029/ADR-032 §2.3: NDP frame injection with rate limiting ---- */
 
 esp_err_t csi_inject_ndp_frame(void)
 {
+    /* Rate limiter gate (ADR-032 §2.3) — reject if bucket is empty. */
+    if (!ndp_rate_try_consume()) {
+        static uint32_t s_ndp_drop_log = 0;
+        s_ndp_drop_log++;
+        if ((s_ndp_drop_log % 100) == 1) {
+            ESP_LOGW(TAG, "NDP rate-limited: %lu drops so far",
+                     (unsigned long)s_ndp_drop_log);
+        }
+        return ESP_ERR_NOT_ALLOWED;
+    }
+
     /*
-     * TODO: Construct a proper 802.11 Null Data Packet frame.
+     * Construct a minimal 802.11 Null Data Packet frame.
      *
      * A real NDP is preamble-only (~24 us airtime, no payload) and is the
-     * sensing-first TX mechanism described in ADR-029. For now we send a
-     * minimal null-data frame as a placeholder so the API is wired up.
+     * sensing-first TX mechanism described in ADR-029.
      *
      * Frame structure (IEEE 802.11 Null Data):
      *   FC (2) | Duration (2) | Addr1 (6) | Addr2 (6) | Addr3 (6) | SeqCtl (2)
@@ -784,12 +1103,8 @@ esp_err_t csi_inject_ndp_frame(void)
     ndp_frame[0] = 0x48;
     ndp_frame[1] = 0x00;
 
-    /* Duration: 0 (let hardware fill) */
-
     /* Addr1 (destination): broadcast */
     memset(&ndp_frame[4], 0xFF, 6);
-
-    /* Addr2 (source): will be overwritten by hardware with own MAC */
 
     /* Addr3 (BSSID): broadcast */
     memset(&ndp_frame[16], 0xFF, 6);

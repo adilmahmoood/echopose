@@ -1,6 +1,6 @@
 # Code Quality and Complexity Analysis Report
 
-**Project:** wifi-densepose (ruview)
+**Project:** wifi-densepose (echopose)
 **Date:** 2026-04-05
 **Analyzer:** QE Code Complexity Analyzer v3
 **Scope:** Full codebase -- Rust, Python, C firmware, TypeScript/React Native

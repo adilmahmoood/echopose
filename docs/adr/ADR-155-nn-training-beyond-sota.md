@@ -5,7 +5,7 @@
 | **Status** | Proposed |
 | **Date** | 2026-06-11 |
 | **Deciders** | ruv |
-| **Codebase target** | `wifi-densepose-train` (`metrics.rs`, `dataset.rs`, `proof.rs`, `rapid_adapt.rs`, `ruview_metrics.rs`, `config.rs`, `ablation.rs`, `subcarrier.rs`, `bin/train.rs`, `bin/verify_training.rs`), `wifi-densepose-nn` (`tensor.rs`, `translator.rs`, `onnx.rs`), benches, docs |
+| **Codebase target** | `wifi-densepose-train` (`metrics.rs`, `dataset.rs`, `proof.rs`, `rapid_adapt.rs`, `echopose_metrics.rs`, `config.rs`, `ablation.rs`, `subcarrier.rs`, `bin/train.rs`, `bin/verify_training.rs`), `wifi-densepose-nn` (`tensor.rs`, `translator.rs`, `onnx.rs`), benches, docs |
 | **Relates to** | ADR-154 (Signal/DSP sweep, Milestone 0), ADR-152 (WiFi-Pose SOTA 2026 intake), ADR-150 (RF Foundation Encoder), ADR-079 (Camera-Supervised Pose), ADR-027 (MERIDIAN), ADR-024 (AETHER) |
 | **Scope** | Milestone 1 of the beyond-SOTA NN/training sweep: the **integrity-critical** fixes that let the training/metrics subsystem substantiate a clean accuracy claim (the unified metric, leak-free validation, honest TTA, rigorous proof), a focused set of **correctness/security** fixes, two **measured** perf wins, the NN SOTA landscape with evidence grades, and a prioritized backlog. **~45 review findings are explicitly deferred (§8)** — nothing is silently dropped. |
 
@@ -24,7 +24,7 @@ We answer that with **evidence, not adjectives**:
 
 ### Build/test constraint (disclosed)
 
-The reportable-metric code (`metrics.rs`, `trainer.rs`, `proof.rs`, `model.rs`, `losses.rs`) is gated behind the `tch-backend` Cargo feature (libtorch FFI). libtorch is **not installed on the development host**, so the project's standard gate is `cargo test --workspace --no-default-features` (no tch). The canonical-metric *logic* is therefore validated two ways: (1) the non-tch reachable surface (`compute_pck`/`compute_oks` free functions, `dataset.rs` split, `rapid_adapt.rs`, `ruview_metrics.rs`) runs under the workspace test suite with new regression tests; (2) the `tch`-gated accumulator/trainer/proof changes are routed through those same canonical functions, so the metric definition is identical whether or not tch is present. This limitation is disclosed rather than hidden.
+The reportable-metric code (`metrics.rs`, `trainer.rs`, `proof.rs`, `model.rs`, `losses.rs`) is gated behind the `tch-backend` Cargo feature (libtorch FFI). libtorch is **not installed on the development host**, so the project's standard gate is `cargo test --workspace --no-default-features` (no tch). The canonical-metric *logic* is therefore validated two ways: (1) the non-tch reachable surface (`compute_pck`/`compute_oks` free functions, `dataset.rs` split, `rapid_adapt.rs`, `echopose_metrics.rs`) runs under the workspace test suite with new regression tests; (2) the `tch`-gated accumulator/trainer/proof changes are routed through those same canonical functions, so the metric definition is identical whether or not tch is present. This limitation is disclosed rather than hidden.
 
 ---
 
@@ -40,7 +40,7 @@ The gap review found **four** PCK and **three** OKS implementations that disagre
 | PCK-4 | `training_bench.rs` | **raw threshold** (no torso) | 0.0 | — |
 | OKS-1 | `metrics.rs:443` `compute_oks` | — | — | caller `s` (`1.0` ⇒ fake Gold) |
 | OKS-2 | `metrics.rs:994` `compute_oks_v2` | — | — | `sqrt(area)` (could be 0) |
-| OKS-3 | `ruview_metrics.rs:642` | — | — | caller `s` (`1.0` ⇒ fake Gold) |
+| OKS-3 | `echopose_metrics.rs:642` | — | — | caller `s` (`1.0` ⇒ fake Gold) |
 
 Two of these are not merely inconsistent, they are **wrong in a claim-inflating direction**:
 
@@ -120,7 +120,7 @@ Each fix ships a test that would have caught the bug (all in the non-tch, worksp
 | `subcarrier.rs` panic on non-contiguous input | `train/subcarrier.rs` | graceful path / typed error on strided input | non-contiguous-input test |
 | `ablation.rs` `latency_percentiles` `partial_cmp().unwrap()` NaN panic | `train/ablation.rs` | `total_cmp` / NaN-guarded compare | NaN-input no-panic test |
 | `onnx.rs` unchecked `-1` dim cast | `nn/onnx.rs` | reject negative/zero output dims with `NnError` | guarded-dim test |
-| `ruview_metrics` `compute_single_oks` `s=1.0` fake-Gold + unguarded `[j]<17` | `train/ruview_metrics.rs` | derive scale from GT extent when none supplied; reject `s≤0`; bound the loop to array extents | `oks_rejects_nonpositive_scale`, `oks_does_not_panic_on_short_arrays`, `oks_not_perfect_for_wrong_pose_with_derived_scale` |
+| `echopose_metrics` `compute_single_oks` `s=1.0` fake-Gold + unguarded `[j]<17` | `train/echopose_metrics.rs` | derive scale from GT extent when none supplied; reject `s≤0`; bound the loop to array extents | `oks_rejects_nonpositive_scale`, `oks_does_not_panic_on_short_arrays`, `oks_not_perfect_for_wrong_pose_with_derived_scale` |
 
 `rf_encoder.rs` was inspected and found to contain **no checkpoint-deserialization assert**: its `assert_eq!`s in `LinearHead::new` / `ContrastiveBatcher::new` are documented construction-time API contracts on *programmer-supplied* vector lengths, not adversarial-input panics — the described bug does not exist there. Any genuine checkpoint-load assert lives in the tch-gated `proof.rs`/`trainer.rs` path and is deferred (§8) as unverifiable without libtorch. Test pass counts: nn `--no-default-features` **35 passed**, nn `--features onnx onnx::tests` **3 passed**, train `--no-default-features` lib **176 passed**.
 
@@ -174,7 +174,7 @@ The native-conv naive-loop rewrite was **deferred** (§8) as out of scope for a 
 - `bin/train.rs` — prefer real subject-disjoint split; synthetic path relabelled `run_smoke_test` ("DO NOT REPORT").
 - `proof.rs` + `bin/verify_training.rs` — `MIN_LOSS_DECREASE` margin; no-hash ⇒ SKIP-not-PASS; sub-margin ⇒ FAIL-not-SKIP; new tests.
 - `rapid_adapt.rs` — fake gradient removed; finite-difference gradient of the real objective; honesty docs + tests.
-- `ruview_metrics.rs` — OKS scale derived from GT extent (no `s=1.0`); `s≤0` rejected; OKS loop bounded; tests.
+- `echopose_metrics.rs` — OKS scale derived from GT extent (no `s=1.0`); `s≤0` rejected; OKS loop bounded; tests.
 - `config.rs` / `ablation.rs` / `subcarrier.rs` / `nn/tensor.rs` / `nn/translator.rs` / `nn/onnx.rs` — Tier-2 fixes (§3) + Tier-3 perf (§4).
 - `training_bench.rs`, `sensing-server/training_api.rs` — divergent local PCK kernels annotated "DO NOT USE for reported metrics"; the sensing-server torso-height PCK unification is a **deferred** backlog item (separate service + tch boundary).
 
@@ -206,7 +206,7 @@ Mirroring the ADR-154 M3 cleanup discipline, M2 closed the **host-verifiable (no
 | # | Finding (location) | Action | Pin/characterization test |
 |---|---|---|---|
 | 1 | `metrics_core.rs` — `0.5` vis / `1e-6` extent / `0.07` OKS-fallback sigma | de-magic → `VISIBILITY_THRESHOLD` / `MIN_REFERENCE_EXTENT` / `OKS_FALLBACK_SIGMA` | `metrics_core_consts_unchanged_from_literals`; `visibility_threshold_boundary_is_inclusive`; `degenerate_extent_below_floor_is_unscoreable` |
-| 2 | `ruview_metrics.rs` — `17` / `0.5` / `0.2` / `1e-3` / `1e-6` | de-magic → `NUM_KEYPOINTS` / `VISIBILITY_THRESHOLD` / `PCK_THRESHOLD` / `MIN_BBOX_DIAG` / `MIN_DURATION_MINUTES` | `ruview_metrics_consts_unchanged_from_literals`; `tracking_zero_duration_does_not_divide_by_zero`; `oks_short_array_is_bounded_at_keypoint_count` |
+| 2 | `echopose_metrics.rs` — `17` / `0.5` / `0.2` / `1e-3` / `1e-6` | de-magic → `NUM_KEYPOINTS` / `VISIBILITY_THRESHOLD` / `PCK_THRESHOLD` / `MIN_BBOX_DIAG` / `MIN_DURATION_MINUTES` | `echopose_metrics_consts_unchanged_from_literals`; `tracking_zero_duration_does_not_divide_by_zero`; `oks_short_array_is_bounded_at_keypoint_count` |
 | 3 | `subcarrier.rs` — sparse-interp `0.15`/`1e-4`/`0.1`/`1e-8`/`1e-5`/`500` | de-magic → 6 `SPARSE_*` consts | `sparse_interp_consts_unchanged_from_literals`; `compute_interp_weights_single_target_is_index_zero`; `sparse_interp_single_target_is_finite` |
 | 4 | `eval.rs` — `1e-10` division guard (×3) | de-magic → `MIN_POSITIVE_MPJPE` | `eval_min_positive_mpjpe_unchanged_from_literal`; `domain_gap_infinite_when_in_domain_perfect_but_cross_nonzero`; `domain_gap_unity_when_everything_perfect` |
 | 5 | `domain.rs` — `1e-5` LayerNorm eps | de-magic → `LAYER_NORM_EPS` | `layer_norm_eps_unchanged_from_literal` (n=0/zero-var boundary already covered) |

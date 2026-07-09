@@ -29,9 +29,9 @@ fn topics_for(class: PrivacyClass) -> Vec<String> {
 // --- topic shape ---------------------------------------------------------
 
 #[test]
-fn topic_format_is_ruview_node_bfld_entity_state() {
-    let t = TopicMessage::ruview_topic("seed-42", "presence");
-    assert_eq!(t, "ruview/seed-42/bfld/presence/state");
+fn topic_format_is_echopose_node_bfld_entity_state() {
+    let t = TopicMessage::echopose_topic("seed-42", "presence");
+    assert_eq!(t, "echopose/seed-42/bfld/presence/state");
 }
 
 #[test]
@@ -39,12 +39,12 @@ fn anonymous_class_publishes_six_topics_with_zone() {
     let topics = topics_for(PrivacyClass::Anonymous);
     assert_eq!(topics.len(), 6, "got {topics:?}");
     let expected: Vec<&str> = vec![
-        "ruview/seed-01/bfld/presence/state",
-        "ruview/seed-01/bfld/motion/state",
-        "ruview/seed-01/bfld/person_count/state",
-        "ruview/seed-01/bfld/confidence/state",
-        "ruview/seed-01/bfld/zone_activity/state",
-        "ruview/seed-01/bfld/identity_risk/state",
+        "echopose/seed-01/bfld/presence/state",
+        "echopose/seed-01/bfld/motion/state",
+        "echopose/seed-01/bfld/person_count/state",
+        "echopose/seed-01/bfld/confidence/state",
+        "echopose/seed-01/bfld/zone_activity/state",
+        "echopose/seed-01/bfld/identity_risk/state",
     ];
     for t in &expected {
         assert!(topics.contains(&t.to_string()), "missing topic {t}");

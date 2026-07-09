@@ -95,7 +95,7 @@ curl -X POST http://169.254.42.1/api/v1/pair -H "Content-Type: application/json"
 
 ```bash
 # Happiness mode with Seed bridge
-python examples/ruview_live.py \
+python examples/echopose_live.py \
   --mode happiness \
   --csi COM5 \
   --seed http://10.1.10.236 \
@@ -203,4 +203,4 @@ This system is designed to be privacy-preserving by construction:
 - [ADR-066](../../docs/adr/ADR-066-esp32-swarm-seed-coordinator.md) — ESP32 swarm with Seed coordinator
 - [exo_happiness_score.rs](../../v2/crates/wifi-densepose-wasm-edge/src/exo_happiness_score.rs) — WASM edge module (Rust)
 - [swarm_bridge.c](../../firmware/esp32-csi-node/main/swarm_bridge.c) — ESP32 firmware swarm bridge
-- [ruview_live.py](../ruview_live.py) — RuView Live dashboard with `--mode happiness`
+- [echopose_live.py](../echopose_live.py) — EchoPose Live dashboard with `--mode happiness`

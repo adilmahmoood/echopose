@@ -1,6 +1,6 @@
 [package]
 name = "wifi-densepose-engine"
-description = "RuView streaming-engine integration layer — composes the ADR-135..146 building blocks into one trust-traceable pipeline cycle"
+description = "EchoPose streaming-engine integration layer — composes the ADR-135..146 building blocks into one trust-traceable pipeline cycle"
 version = "0.3.0"
 edition.workspace = true
 authors.workspace = true

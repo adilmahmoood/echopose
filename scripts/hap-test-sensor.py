@@ -3,20 +3,20 @@
 hap-test-sensor.py — ADR-125 §2.1.a smoke test.
 
 Stands up a single HomeKit Accessory Protocol (HAP-1.1) bridge with one
-child MotionSensor named "RuView Test Motion". Once paired in the Apple
+child MotionSensor named "EchoPose Test Motion". Once paired in the Apple
 Home app, the HomePod (acting as Home Hub) sees state changes when
-TOGGLE_FILE (default /tmp/ruview-motion) is touched / removed.
+TOGGLE_FILE (default /tmp/echopose-motion) is touched / removed.
 
 Usage:
     python3 hap-test-sensor.py
 
-Pair from iPhone: Home app -> Add Accessory -> More Options -> "RuView Test Bridge".
-The setup code is printed on stdout AND written to ~/.ruview-hap/setup-code.txt.
+Pair from iPhone: Home app -> Add Accessory -> More Options -> "EchoPose Test Bridge".
+The setup code is printed on stdout AND written to ~/.echopose-hap/setup-code.txt.
 
-Trigger motion:  touch /tmp/ruview-motion
-Clear motion:    rm   /tmp/ruview-motion
+Trigger motion:  touch /tmp/echopose-motion
+Clear motion:    rm   /tmp/echopose-motion
 
-State persists across restarts in ~/.ruview-hap/accessory.state.
+State persists across restarts in ~/.echopose-hap/accessory.state.
 """
 
 from pathlib import Path
@@ -30,14 +30,14 @@ from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
 from pyhap.const import CATEGORY_SENSOR, CATEGORY_BRIDGE
 
-STATE_DIR = Path(os.path.expanduser("~/.ruview-hap"))
+STATE_DIR = Path(os.path.expanduser("~/.echopose-hap"))
 STATE_DIR.mkdir(exist_ok=True)
 STATE_FILE = STATE_DIR / "accessory.state"
 SETUP_CODE_FILE = STATE_DIR / "setup-code.txt"
 
 # Legacy single-bool toggle (iter 1-3 contract). Still honored for
 # backwards-compat with the original c6-presence-watcher.py path.
-TOGGLE_FILE = Path(os.environ.get("RUVIEW_MOTION_TOGGLE", "/tmp/ruview-motion"))
+TOGGLE_FILE = Path(os.environ.get("ECHOPOSE_MOTION_TOGGLE", "/tmp/echopose-motion"))
 
 # New JSON-state IPC contract (iter 4+). When present, takes precedence
 # over the legacy toggle file. Schema:
@@ -47,7 +47,7 @@ TOGGLE_FILE = Path(os.environ.get("RUVIEW_MOTION_TOGGLE", "/tmp/ruview-motion"))
 #     "anomaly": bool,       # BFLD anomaly drift gate fired (class-3 only)
 #     "ts": float,           # unix epoch when the watcher last wrote
 #   }
-STATE_JSON = Path(os.environ.get("RUVIEW_STATE_JSON", "/tmp/ruview-state.json"))
+STATE_JSON = Path(os.environ.get("ECHOPOSE_STATE_JSON", "/tmp/echopose-state.json"))
 
 
 def _read_state_json():
@@ -62,7 +62,7 @@ def _read_state_json():
         return None
 
 
-class RuViewMotion(Accessory):
+class EchoPoseMotion(Accessory):
     """Three-service HomeKit accessory per ADR-125 §2.1.c.
 
     Same accessory carries:
@@ -128,14 +128,14 @@ class RuViewMotion(Accessory):
 def main() -> int:
     driver = AccessoryDriver(port=51826, persist_file=str(STATE_FILE))
 
-    bridge = Bridge(driver, "RuView Test Bridge")
+    bridge = Bridge(driver, "EchoPose Test Bridge")
     bridge.category = CATEGORY_BRIDGE
-    bridge.add_accessory(RuViewMotion(driver, "RuView Test Motion"))
+    bridge.add_accessory(EchoPoseMotion(driver, "EchoPose Test Motion"))
     driver.add_accessory(accessory=bridge)
 
     setup_code = driver.state.pincode.decode() if hasattr(driver.state.pincode, "decode") else driver.state.pincode
     SETUP_CODE_FILE.write_text(str(setup_code) + "\n")
-    print(f"[hap-test] HAP bridge advertising as 'RuView Test Bridge'")
+    print(f"[hap-test] HAP bridge advertising as 'EchoPose Test Bridge'")
     print(f"[hap-test] iPhone pair flow: Home app -> Add Accessory -> More Options")
     print(f"[hap-test] Setup code (also in {SETUP_CODE_FILE}):  {setup_code}")
     print(f"[hap-test] State sources:")

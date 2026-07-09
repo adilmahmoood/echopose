@@ -393,3 +393,18 @@ class ServiceOrchestrator:
             yield self
         finally:
             await self.shutdown()
+
+
+_orchestrator = None
+
+def get_service_orchestrator(settings: Optional[Settings] = None) -> ServiceOrchestrator:
+    """Get the global service orchestrator instance."""
+    global _orchestrator
+    if _orchestrator is None:
+        if settings is None:
+            from src.config.settings import get_settings
+            settings = get_settings()
+        _orchestrator = ServiceOrchestrator(settings)
+    elif settings is not None:
+        _orchestrator = ServiceOrchestrator(settings)
+    return _orchestrator

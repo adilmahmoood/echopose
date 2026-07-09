@@ -9,7 +9,7 @@ AA's credibility rests on a stranger being able to reproduce a score and see tha
 
 ## The open scorer
 
-The scoring engine is a pure-Rust, GPU-free binary: `aa_score_runner` in `wifi-densepose-train`. It runs the real `ruview_metrics` pose-acceptance harness on a fixed fixture and emits a cross-platform-stable SHA-256 **determinism proof**.
+The scoring engine is a pure-Rust, GPU-free binary: `aa_score_runner` in `wifi-densepose-train`. It runs the real `echopose_metrics` pose-acceptance harness on a fixed fixture and emits a cross-platform-stable SHA-256 **determinism proof**.
 
 ### Reproduce the determinism hash locally
 
@@ -50,7 +50,7 @@ The expected hash is committed at [`fixtures/expected_score.sha256`](fixtures/ex
 
 ### What happens if the scoring maths changes
 
-Any edit to `ruview_metrics.rs`, `ablation.rs`, or `aa_score_runner.rs` moves the hash and **fails the CI gate** (`.github/workflows/aether-arena-harness.yml`) until the maintainer regenerates and reviews:
+Any edit to `echopose_metrics.rs`, `ablation.rs`, or `aa_score_runner.rs` moves the hash and **fails the CI gate** (`.github/workflows/aether-arena-harness.yml`) until the maintainer regenerates and reviews:
 
 ```bash
 cargo run -p wifi-densepose-train --bin aa_score_runner --no-default-features -- --generate-hash \

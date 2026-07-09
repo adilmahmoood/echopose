@@ -1590,7 +1590,7 @@ impl AdjacencyMatrix {
 | 028   | ESP32 capability audit                 | Hardware constraints and TDM       |
 | 029   | RuvSense multistatic sensing           | Multi-link fusion architecture     |
 | 030   | RuvSense persistent field model        | Baseline calibration approach      |
-| 031   | RuView sensing-first RF mode           | UI integration pattern             |
+| 031   | EchoPose sensing-first RF mode           | UI integration pattern             |
 | 044   | RF Topological Sensing (this doc)      | Architecture decision              |
 
 ## Appendix C: Open Questions

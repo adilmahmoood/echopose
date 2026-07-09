@@ -3,27 +3,27 @@
 ## SOTA Research Document — Quantum Sensing Series (14/—)
 
 **Date**: 2026-04-25
-**Domain**: NV-Diamond Magnetometry × Sensor Simulation × RuView Pipeline Integration
+**Domain**: NV-Diamond Magnetometry × Sensor Simulation × EchoPose Pipeline Integration
 **Status**: Research Survey + Crate Proposal
 **Branch**: `research/nv-diamond-sensor-simulator` (no commits, no production code)
-**Prior**: `13-nv-diamond-neural-magnetometry.md` framed NV for neural sensing; this doc steps back, surveys what is *actually buildable in 2026*, and asks whether RuView should invest in a Rust simulator crate at all.
+**Prior**: `13-nv-diamond-neural-magnetometry.md` framed NV for neural sensing; this doc steps back, surveys what is *actually buildable in 2026*, and asks whether EchoPose should invest in a Rust simulator crate at all.
 
 ---
 
 ## 1. Why this document exists
 
 `13-nv-diamond-neural-magnetometry.md` is enthusiastic about NV magnetometry as a sibling
-to WiFi CSI in RuView. That doc projects fT-grade ensemble sensors and helmet-scale
+to WiFi CSI in EchoPose. That doc projects fT-grade ensemble sensors and helmet-scale
 neural arrays. This doc is more skeptical: it asks what NV-diamond can do *today* with
 COTS components, what kind of simulator would be useful, and whether the build is justified
-given that RuView's primary modality (WiFi-CSI on ESP32-S3) is mature, well-tested, and
+given that EchoPose's primary modality (WiFi-CSI on ESP32-S3) is mature, well-tested, and
 shipping.
 
 The doc is structured for a build/skip decision:
 
 1. SOTA of NV-diamond hardware (commercial + academic)
 2. SOTA of NV-diamond simulators (what is open, what is missing)
-3. Concrete crate proposal *if* RuView decides to build
+3. Concrete crate proposal *if* EchoPose decides to build
 4. Open questions that materially change the answer
 
 ---
@@ -34,7 +34,7 @@ The doc is structured for a build/skip decision:
 
 The NV-magnetometry COTS market is small and mostly aimed at scanning-probe microscopy
 or NMR enhancement, not the room-scale "sensor at distance" use case that would matter
-for RuView.
+for EchoPose.
 
 | Vendor | Product | Sensitivity (vendor claim) | Bandwidth | Form factor | Notes |
 |---|---|---|---|---|---|
@@ -57,7 +57,7 @@ The Element Six **DNV-B1** is the most concrete COTS reference point. It is a cr
 sized board with onboard 532 nm pump, microwave drive, and Si photodiode readout.
 Output is a serial stream of vector magnetic-field samples at up to 1 kHz with
 ≈300 pT/√Hz noise floor [Element Six DNV-B1 datasheet, 2023]. Cost: ≈$8K–$15K,
-unsuitable for RuView's $200–$500/sensor target.
+unsuitable for EchoPose's $200–$500/sensor target.
 
 ### 2.2 Academic SOTA at room temperature, ensemble, COTS-ish
 
@@ -94,7 +94,7 @@ table-top (not cryogenic, not vacuum) optics:
 | RF-band detection (GHz) via NV-AC | nT/√Hz, 1–10 MHz BW | narrow band | various |
 
 The fT-floor numbers in `13-...md` are real *as published claims at specific frequencies
-in shielded conditions* but should not be projected onto a $200–$500 deployable RuView
+in shielded conditions* but should not be projected onto a $200–$500 deployable EchoPose
 sensor.
 
 ### 2.3 NV-diamond vs OPM (the real comparison anchor)
@@ -111,7 +111,7 @@ for biomagnetic sensing. **QuSpin QZFM** is the dominant product:
 **OPM beats NV-diamond on pure sensitivity by 1–2 orders of magnitude** at sub-kHz, at
 similar cost-per-sensor. NV-diamond's distinctive value lives elsewhere:
 
-| Axis | NV-Diamond | OPM | Winner for RuView |
+| Axis | NV-Diamond | OPM | Winner for EchoPose |
 |---|---|---|---|
 | DC–100 Hz sensitivity | pT/√Hz | fT/√Hz | OPM |
 | Vector readout (no rotation) | Yes (4 NV axes) | No | NV |
@@ -134,7 +134,7 @@ RF capability — none of which `13-...md` actually exploited.
 
 These simulate the NV electronic state under microwave + optical drive and reproduce
 ODMR contrast, Rabi nutation, T1/T2 decay. They are *backend* tools — they would sit
-inside `sensor.rs` of a RuView simulator, not be the simulator themselves.
+inside `sensor.rs` of a EchoPose simulator, not be the simulator themselves.
 
 - **QuTiP** [Johansson et al., Comp. Phys. Comm. 184, 1234 (2013)] — Python toolbox for
   open quantum systems. The standard tool for NV simulation; nearly every NV paper's
@@ -151,13 +151,13 @@ inside `sensor.rs` of a RuView simulator, not be the simulator themselves.
 **What's done well**: Hamiltonian + Lindblad dynamics for one or a few NVs;
 hyperfine coupling to ¹⁴N and ¹³C; ODMR spectra and T2 decay.
 
-**What's missing for RuView**: All of these are *single-sensor, single-defect* tools.
+**What's missing for EchoPose**: All of these are *single-sensor, single-defect* tools.
 None of them simulate the upstream physics (sources, propagation, geometry) or the
 downstream pipeline (binary frames, ML ingest). And none are in Rust.
 
 ### 3.2 Magnetic-field synthesis level (sparse, application-specific)
 
-This is the layer that would matter most for RuView but is the least developed:
+This is the layer that would matter most for EchoPose but is the least developed:
 
 - **Magpylib** [Ortner & Bandeira, SoftwareX 11, 100466 (2020)] — Python library for
   analytical magnetic-field computation from permanent magnets, current loops, dipoles.
@@ -165,7 +165,7 @@ This is the layer that would matter most for RuView but is the least developed:
   simulator. Pure Python; ~1k LOC core; no Rust port; no lossy-medium propagation.
 - **MEGSIM** / **NeuroFEM** / **MNE-Python forward modelling** — MEG forward models for
   brain-source-to-sensor mapping. Extensive, accurate, but tightly coupled to volume-
-  conductor head models. Overkill for room-scale RuView sensing.
+  conductor head models. Overkill for room-scale EchoPose sensing.
 - **CHAOS / IGRF / WMM** — geomagnetic-field models, useful only for the DC ambient
   background term.
 
@@ -184,19 +184,19 @@ work:
   imaging simulator, but for microscopy (single biological sample on diamond surface).
 - **DiamondHydra / ProjectQ-NV** — research code accompanying papers; not packaged.
 
-This gap is the strongest argument *for* RuView building one.
+This gap is the strongest argument *for* EchoPose building one.
 
 ---
 
-## 4. RuView NV-Diamond Sensor Simulator — Proposal
+## 4. EchoPose NV-Diamond Sensor Simulator — Proposal
 
 ### 4.1 Use-case scoping (the part that has to be honest)
 
 `13-...md` proposed neural sensing as the primary use case. Re-evaluating against
 SOTA hardware noise floors and OPM as competitor, the honest ranking of plausible
-RuView use cases is:
+EchoPose use cases is:
 
-| Use case | Realistic with COTS NV in 2026? | Better answered by | RuView fit |
+| Use case | Realistic with COTS NV in 2026? | Better answered by | EchoPose fit |
 |---|---|---|---|
 | Cortical neural fT signals | No (OPM wins, requires shielded room either way) | OPM helmet (Cerca) | Weak |
 | Cardiac MCG (~50 pT QRS, surface) | **Marginal** with pT-floor sensor at <5 cm standoff | OPM | Plausible |
@@ -207,10 +207,10 @@ RuView use cases is:
 | Biomagnetic vital signs through wall | No (drywall is dielectric — fine — but dipole 1/r³ kills SNR by ~3 m) | Skip | Skip |
 | Indoor magnetic mapping for SLAM | Yes — DC-field gradients, mature | Smartphone IMU | Mature elsewhere |
 
-**The honest reframing**: NV-diamond's RuView niche is **passive magnetic anomaly
+**The honest reframing**: NV-diamond's EchoPose niche is **passive magnetic anomaly
 detection** for ferrous-object presence, motion, and eddy-current signatures —
 *complementing* WiFi-CSI's pose estimation rather than replacing or duplicating it.
-Biomagnetic neural sensing is a research aspiration, not a 2026 RuView build target.
+Biomagnetic neural sensing is a research aspiration, not a 2026 EchoPose build target.
 
 This narrowed scope changes the simulator's specifications dramatically: pT–nT noise
 floor is sufficient (no fT regime needed), DC–10 kHz bandwidth is adequate, and
@@ -298,8 +298,8 @@ Sibling placement: `v2/crates/wifi-densepose-magsim/` next to `wifi-densepose-si
 
 ### 4.7 Out of scope (explicit non-goals)
 
-- Single-NV imaging (nm-scale microscopy). Not RuView's geometry.
-- NV-NV entanglement protocols. Not RuView's hardware budget.
+- Single-NV imaging (nm-scale microscopy). Not EchoPose's geometry.
+- NV-NV entanglement protocols. Not EchoPose's hardware budget.
 - Full Hamiltonian + Lindblad solver. Defer to QuTiP via offline pre-computed
   noise spectra if ever needed.
 - Diamond growth simulation. Material-science problem; vendor-handled.
@@ -313,7 +313,7 @@ Sibling placement: `v2/crates/wifi-densepose-magsim/` next to `wifi-densepose-si
 
 ### Build arguments
 1. There is a real *gap* in open-source end-to-end NV-pipeline simulators (Sec 3.3).
-2. Magsim slots cleanly into RuView's existing patterns (proof bundle, frame layout,
+2. Magsim slots cleanly into EchoPose's existing patterns (proof bundle, frame layout,
    per-crate physics layers, witness verification).
 3. The narrowed scope (ferrous-object anomaly detection, not neural fT) is *achievable
    with COTS sensitivity floors* — the simulator would actually map onto purchasable
@@ -324,13 +324,13 @@ Sibling placement: `v2/crates/wifi-densepose-magsim/` next to `wifi-densepose-si
 
 ### Skip arguments
 1. **OPM wins on sensitivity at similar cost** for any biomagnetic use case. If the
-   eventual goal is biomag, RuView should simulate OPM, not NV.
+   eventual goal is biomag, EchoPose should simulate OPM, not NV.
 2. **No paired training data**. Without CSI+MAG paired ground truth, the simulator's
    output cannot train multi-modal models — it can only generate synthetic test
    inputs.
 3. **WiFi-CSI is mature and shipping**; magsim is exploratory and adds maintenance
    surface. The 15-crate workspace is already large for a small team.
-4. **The hardware decision precedes the simulator**. If RuView is not committing to
+4. **The hardware decision precedes the simulator**. If EchoPose is not committing to
    buying/integrating an NV sensor (DNV-B1 at $8K–$15K, or building one from Element
    Six diamonds at $1K–$10K + benchtop optics), simulating one is academic.
 
@@ -339,10 +339,10 @@ Sibling placement: `v2/crates/wifi-densepose-magsim/` next to `wifi-densepose-si
 **Lean toward "skip for now, revisit when there is a concrete hardware procurement
 or `mat` use case driving it."** The strongest single reason: NV-diamond's distinctive
 advantages (vector readout, broad bandwidth, unshielded operation) are *not* the axes
-RuView most needs from a magnetic sensor — for biomag, OPM is better; for ferrous-
+EchoPose most needs from a magnetic sensor — for biomag, OPM is better; for ferrous-
 object detection, even a fluxgate or AMR might suffice and would be cheaper. Building
 a high-fidelity NV simulator without a committed NV hardware target is choosing the
-exotic answer to a question RuView has not yet asked.
+exotic answer to a question EchoPose has not yet asked.
 
 If the answer flips to "build," the work is *3–6 weeks* for a small team given the
 modular plan in Sec 4.4 and the existing proof-bundle/witness-verification scaffolding.
@@ -351,16 +351,16 @@ modular plan in Sec 4.4 and the existing proof-bundle/witness-verification scaff
 
 ## 6. Open questions that would change the verdict
 
-### 6.1 Is COTS NV noise floor competitive with OPM at RuView's sensor budget?
+### 6.1 Is COTS NV noise floor competitive with OPM at EchoPose's sensor budget?
 
 **Answer (with primary sources)**: No, at the $200–$500/sensor target. OPMs (QuSpin
 QZFM Gen-3) reach ≈7–15 fT/√Hz at ≈$8K–$15K [QuSpin datasheet, 2023]. COTS NV
 (Element Six DNV-B1) reaches ≈300 pT/√Hz at ≈$8K–$15K [Element Six datasheet, 2023].
-Both are 20–60× over RuView's per-sensor budget, and OPM is ~10⁴× more sensitive
+Both are 20–60× over EchoPose's per-sensor budget, and OPM is ~10⁴× more sensitive
 in the biomagnetic band.
 
 **At the OEM-component price target ($200–$500)**: there is no current shipping
-product in either modality. No primary source found. Conjecture: RuView would have
+product in either modality. No primary source found. Conjecture: EchoPose would have
 to *build* the sensor, not buy it, at this price point — a much bigger commitment
 than building a simulator.
 
@@ -374,7 +374,7 @@ flux-concentrator-equipped sensor**.
 SNR ≈ 0.05–0.5, below detection threshold. **No.**
 
 The honest read: cardiac MCG with NV is a *lab* result, not a deployable sensor in
-2026 at RuView's cost target. No primary source for $500-budget NV cardiac sensing
+2026 at EchoPose's cost target. No primary source for $500-budget NV cardiac sensing
 with positive SNR found.
 
 ### 6.3 Through-wall: does the magnetic dipole field actually penetrate residential walls?
@@ -384,16 +384,16 @@ fields. No primary source needed; dielectrics have μ ≈ μ₀.
 
 **Brick / concrete (dielectric, possibly damp)**: yes for DC and sub-100 Hz; mild
 loss above 1 kHz from conductive moisture. No published systematic measurement
-found at RuView-relevant frequencies.
+found at EchoPose-relevant frequencies.
 
 **Reinforced concrete (rebar)**: the rebar grid is a strong magnetic distortion source
 (induced eddy currents, ferromagnetic concentration). Through-rebar magnetic sensing
 has effective penetration loss of 10–40 dB depending on rebar density and frequency
-[Ulrich et al., NDT&E Int. 35, 137 (2002), for civil-engineering NDT — not RuView-
+[Ulrich et al., NDT&E Int. 35, 137 (2002), for civil-engineering NDT — not EchoPose-
 specific]. **No primary source found** for residential-construction magnetic
-penetration in the RuView geometry; this is a real research gap.
+penetration in the EchoPose geometry; this is a real research gap.
 
-The dipole 1/r³ attenuation dominates more than wall absorption for RuView room
+The dipole 1/r³ attenuation dominates more than wall absorption for EchoPose room
 scales (1–10 m). Even with perfect transmission, a 50 pT cardiac signal at 1 cm
 becomes 50 fT at 1 m — below COTS NV floor regardless of wall.
 
@@ -424,7 +424,7 @@ What I searched for and did not find a primary source for:
 - A "QuantumDiamond" commercial entity (the prompt cited it; I could only locate
   academic groups using the phrase, not a commercial vendor).
 - Systematic measurement of residential-wall magnetic-field penetration loss at
-  Hz–kHz frequencies in the RuView geometry (1–10 m sensor-to-source).
+  Hz–kHz frequencies in the EchoPose geometry (1–10 m sensor-to-source).
 - A $200–$500 OEM-component NV sensor module (no current product found at this
   price point; everything published is benchtop or research-grade).
 - A shipping NV-diamond simulator that goes source → propagation → ODMR → digital
@@ -455,7 +455,7 @@ investing in the simulator could pay off (no incumbent) *or* could be premature
 - Element Six DNV-B1 datasheet (2023). Material vendor publication.
 - QuSpin QZFM Gen-3 datasheet (2023). Vendor publication.
 - Ulrich, R. K. *et al.* on rebar magnetic NDT: *NDT&E Int.* **35**, 137 (2002) —
-  cited as proxy for non-RuView-geometry rebar penetration; not directly applicable.
+  cited as proxy for non-EchoPose-geometry rebar penetration; not directly applicable.
 
 Inline conjecture markers ("no primary source found, conjecture") appear in
 Sections 2.1, 6.1, 6.2, and 6.3 where claims could not be grounded.
@@ -464,6 +464,6 @@ Sections 2.1, 6.1, 6.2, and 6.3 where claims could not be grounded.
 
 *This document is part of the Quantum Sensing research series. It surveys
 NV-diamond magnetometry SOTA and proposes — but does not advocate for — a Rust
-simulator crate within the RuView workspace. The build/skip recommendation
+simulator crate within the EchoPose workspace. The build/skip recommendation
 defers to a concrete hardware procurement decision or a `wifi-densepose-mat`
 use case, neither of which exists at the time of writing.*

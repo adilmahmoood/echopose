@@ -1,6 +1,6 @@
 //! ADR-262 **P3** — the live RuField surface.
 //!
-//! This is the data-path wiring that turns RuView's governed sensing cycle into
+//! This is the data-path wiring that turns EchoPose's governed sensing cycle into
 //! signed RuField [`FieldEvent`]s on two **additive** network endpoints:
 //!
 //! - `GET /api/field`  — the most recent surfaced `FieldEvent`(s) as JSON;
@@ -20,14 +20,14 @@
 //!
 //! ## Honesty (ADR-262 §0 / §6)
 //!
-//! This wires **real** RuView sensing into RuField events on a live endpoint,
+//! This wires **real** EchoPose sensing into RuField events on a live endpoint,
 //! but: (a) it is the **single-link CSI** sensing with its existing caveats —
 //! there is **no validated room-coordinate accuracy** (`field_localize` says so;
 //! positions are "strongest field peak", not triangulation); (b) the signing
 //! key is a **dedicated dev/sensing key** pending the ADR-262 §8 Q1 ownership
 //! decision (reusing the `cog-ha-matter` Ed25519 key is the **deferred P2**
 //! call — P3 deliberately uses a standalone key so it does not pre-empt that);
-//! (c) **no accuracy is claimed.** The win is narrowly: "RuView's live sensing
+//! (c) **no accuracy is claimed.** The win is narrowly: "EchoPose's live sensing
 //! now speaks RuField on `/ws/field`."
 
 use std::collections::VecDeque;
@@ -45,7 +45,7 @@ use tokio::sync::{broadcast, RwLock};
 // Re-export the bridge input types `main.rs` needs to build a snapshot, so the
 // server-side call site depends only on `rufield_surface` (the server seam).
 pub use wifi_densepose_rufield::{
-    network_egress_allowed, snapshot_to_field_event, FieldEvent, RuViewPrivacyClass,
+    network_egress_allowed, snapshot_to_field_event, FieldEvent, EchoPosePrivacyClass,
     SensingClass, SensingFeatures, SensingSnapshot, Signer, SignalField,
 };
 
@@ -67,7 +67,7 @@ pub const SIGNING_SEED_ENV: &str = "WDP_RUFIELD_SIGNING_SEED";
 /// Deterministic dev signing seed used when [`SIGNING_SEED_ENV`] is unset. This
 /// is a **dev/sensing key**, intentionally standalone (ADR-262 §8 Q1 — the
 /// `cog-ha-matter` key reuse is the deferred P2 decision, not pre-empted here).
-const DEV_SIGNING_SEED: &[u8; 32] = b"adr262-ruview-rufield-dev-seed!!";
+const DEV_SIGNING_SEED: &[u8; 32] = b"adr262-echopose-rufield-dev-seed!!";
 
 /// The live RuField surface state held in `AppStateInner` (ADR-262 P3).
 ///
@@ -236,7 +236,7 @@ pub fn build_snapshot(
     features: SensingFeatures,
     classification: SensingClass,
     signal_field: Option<SignalField>,
-    trust_class: RuViewPrivacyClass,
+    trust_class: EchoPosePrivacyClass,
     demoted: bool,
     identity_bound: bool,
 ) -> SensingSnapshot {
@@ -252,8 +252,8 @@ pub fn build_snapshot(
     }
 }
 
-/// Map RuView's live governed-engine `bfld::PrivacyClass` (the `effective_class`
-/// on `TrustedOutput`) onto the bridge's [`RuViewPrivacyClass`] input.
+/// Map EchoPose's live governed-engine `bfld::PrivacyClass` (the `effective_class`
+/// on `TrustedOutput`) onto the bridge's [`EchoPosePrivacyClass`] input.
 ///
 /// This is a **lossless, same-meaning** re-encoding of the four byte-level
 /// classes — both enums are `Raw/Derived/Anonymous/Restricted` in the same
@@ -262,13 +262,13 @@ pub fn build_snapshot(
 /// anti-corruption layer, ADR-262 §5.4). The information-content privacy
 /// mapping (the §3.3 correctness item) happens *inside* the bridge.
 #[must_use]
-pub fn ruview_class_from_bfld(class: wifi_densepose_bfld::PrivacyClass) -> RuViewPrivacyClass {
+pub fn echopose_class_from_bfld(class: wifi_densepose_bfld::PrivacyClass) -> EchoPosePrivacyClass {
     use wifi_densepose_bfld::PrivacyClass as B;
     match class {
-        B::Raw => RuViewPrivacyClass::Raw,
-        B::Derived => RuViewPrivacyClass::Derived,
-        B::Anonymous => RuViewPrivacyClass::Anonymous,
-        B::Restricted => RuViewPrivacyClass::Restricted,
+        B::Raw => EchoPosePrivacyClass::Raw,
+        B::Derived => EchoPosePrivacyClass::Derived,
+        B::Anonymous => EchoPosePrivacyClass::Anonymous,
+        B::Restricted => EchoPosePrivacyClass::Restricted,
     }
 }
 
@@ -384,7 +384,7 @@ mod tests {
             features(),
             present_class(),
             None,
-            RuViewPrivacyClass::Anonymous, // → P2, network-allowed
+            EchoPosePrivacyClass::Anonymous, // → P2, network-allowed
             false,
             false,
         );
@@ -406,7 +406,7 @@ mod tests {
                 features(),
                 present_class(),
                 None,
-                RuViewPrivacyClass::Derived,
+                EchoPosePrivacyClass::Derived,
                 false,
                 identity_bound,
             );
@@ -428,7 +428,7 @@ mod tests {
                 features(),
                 present_class(),
                 None,
-                RuViewPrivacyClass::Anonymous,
+                EchoPosePrivacyClass::Anonymous,
                 false,
                 false,
             );

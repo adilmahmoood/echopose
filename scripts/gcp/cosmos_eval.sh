@@ -4,7 +4,7 @@
 #
 # Flow:
 #   1. Start OccWorld sensing server on remote (generates control tensors)
-#   2. Rsync RuView scripts + any local control tensors to instance
+#   2. Rsync EchoPose scripts + any local control tensors to instance
 #   3. Run Cosmos-Transfer2.5 inference with depth+seg control signals
 #   4. Download generated video and decoded trajectory priors
 #   5. Benchmark inference time (A100 actual vs RTX 5080 estimate)
@@ -52,7 +52,7 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=20 -o BatchMode=yes"
 LOCAL_SCRIPTS_DIR="$(cd "$(dirname "$0")/../.." && pwd)/scripts"
 OUTPUT_DIR="./out/cosmos-results"
 REMOTE_RESULTS="~/cosmos-results"
-REMOTE_SCRIPTS="~/ruview-scripts"
+REMOTE_SCRIPTS="~/echopose-scripts"
 REMOTE_CONTROL="~/control-tensors"
 COSMOS_MODEL_DIR="/opt/models/cosmos-transfer2.5-2b"
 
@@ -88,13 +88,13 @@ fi
 log "Model weights verified ($MODEL_EXISTS files in $COSMOS_MODEL_DIR)"
 
 # ── Rsync scripts to remote ───────────────────────────────────────────────────
-log "Rsyncing RuView scripts → $REMOTE:$REMOTE_SCRIPTS ..."
+log "Rsyncing EchoPose scripts → $REMOTE:$REMOTE_SCRIPTS ..."
 ssh $SSH_OPTS "$REMOTE" "mkdir -p $REMOTE_SCRIPTS $REMOTE_CONTROL $REMOTE_RESULTS"
 rsync -avz \
   -e "ssh $SSH_OPTS" \
   --include="occworld_retrain.py" \
   --include="occworld_server.py" \
-  --include="ruview_occ_dataset.py" \
+  --include="echopose_occ_dataset.py" \
   --exclude="gcp/" \
   --exclude="*.sh" \
   "$LOCAL_SCRIPTS_DIR/" \
@@ -123,10 +123,10 @@ set -euo pipefail
 source /opt/conda/etc/profile.d/conda.sh
 conda activate occworld 2>/dev/null || conda activate cosmos
 
-export PYTHONPATH="$PYTHONPATH:$HOME/ruview-scripts"
+export PYTHONPATH="$PYTHONPATH:$HOME/echopose-scripts"
 
 echo "[server] Starting OccWorld server in background ..."
-nohup python3 ~/ruview-scripts/occworld_server.py \
+nohup python3 ~/echopose-scripts/occworld_server.py \
   --port 8080 \
   --snapshot-dir ~/control-tensors/snapshots \
   >> ~/occworld-server.log 2>&1 &
@@ -146,7 +146,7 @@ REMOTE_SERVER
 fi
 
 # ── Stage 2: Generate control tensors (depth + seg) ──────────────────────────
-log "=== Stage 2: Generating RuView depth+seg control tensors ==="
+log "=== Stage 2: Generating EchoPose depth+seg control tensors ==="
 CONTROL_START=$(date +%s)
 
 ssh $SSH_OPTS "$REMOTE" bash << 'REMOTE_CONTROL_GEN'
@@ -154,15 +154,15 @@ set -euo pipefail
 source /opt/conda/etc/profile.d/conda.sh
 conda activate occworld 2>/dev/null || conda activate cosmos
 
-export PYTHONPATH="$PYTHONPATH:$HOME/ruview-scripts"
+export PYTHONPATH="$PYTHONPATH:$HOME/echopose-scripts"
 mkdir -p ~/control-tensors/depth ~/control-tensors/seg
 
 echo "[control] $(date): generating control tensors from snapshots ..."
 
-# Use ruview_occ_dataset to export depth + seg maps from WorldGraph snapshots
+# Use echopose_occ_dataset to export depth + seg maps from WorldGraph snapshots
 SNAPSHOT_DIR=~/control-tensors/snapshots
 if [[ -d "$SNAPSHOT_DIR" ]] && [[ $(find "$SNAPSHOT_DIR" -name "*.json" | wc -l) -gt 0 ]]; then
-  python3 ~/ruview-scripts/ruview_occ_dataset.py \
+  python3 ~/echopose-scripts/echopose_occ_dataset.py \
     --snapshots "$SNAPSHOT_DIR" \
     --export-depth ~/control-tensors/depth \
     --export-seg   ~/control-tensors/seg \
@@ -238,7 +238,7 @@ elif [[ -f "$COSMOS_DIR/generate.py" ]]; then
     --checkpoint "$COSMOS_MODEL" \
     --control-depth "$DEPTH_DIR" \
     --control-seg   "$SEG_DIR" \
-    --output        "$OUTPUT_DIR/ruview_generated.mp4" \
+    --output        "$OUTPUT_DIR/echopose_generated.mp4" \
     --frames 16 \
     2>&1 | tee "$OUTPUT_DIR/inference.log"
 else

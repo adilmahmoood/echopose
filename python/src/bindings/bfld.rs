@@ -18,7 +18,7 @@
 //! 2. Parse the compressed feedback into a numpy Complex64 ndarray
 //!    `[Nr × Nc × Nsc]` using your favourite Python BFR parser
 //! 3. Construct `BfldFrame.from_compressed_feedback(...)` to hand the
-//!    matrix to RuView
+//!    matrix to EchoPose
 //!
 //! Tomorrow (post-v2.0): `wifi-densepose-bfld` does steps 1+2 for you.
 

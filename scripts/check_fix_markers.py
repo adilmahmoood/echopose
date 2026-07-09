@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix-marker regression guard for RuView.
+"""Fix-marker regression guard for EchoPose.
 
 Reads ``scripts/fix-markers.json`` and asserts that every previously-shipped
 fix is still present in the codebase:
@@ -20,7 +20,7 @@ Usage::
     python scripts/check_fix_markers.py            # check everything (CI)
     python scripts/check_fix_markers.py --list     # list all markers
     python scripts/check_fix_markers.py --json      # machine-readable result
-    python scripts/check_fix_markers.py --only RuView#396 RuView#521
+    python scripts/check_fix_markers.py --only EchoPose#396 EchoPose#521
 
 Exit codes: 0 = all markers OK, 1 = one or more regressions, 2 = bad manifest.
 """

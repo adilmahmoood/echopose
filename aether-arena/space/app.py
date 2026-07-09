@@ -2,7 +2,7 @@
 
 Hugging Face Space (Gradio) — the public face of the benchmark (ADR-149).
 This Space is the presentation + submission layer; the heavy scoring runs in the
-pinned RuView harness (CI / scorer container), and results land in the append-only,
+pinned EchoPose harness (CI / scorer container), and results land in the append-only,
 hash-chained **witness ledger** shown here.
 
 Benchmark-first: the board starts EMPTY. No seeded or hand-entered numbers — every
@@ -59,11 +59,11 @@ ABOUT = """
 **AetherArena** is the official, project-agnostic **Spatial-Intelligence Benchmark** —
 camera-free pose, presence, occupancy, tracking, and vitals from RF/WiFi (and, over
 time, mmWave / UWB / radar / multimodal). It is **not** a single-vendor board: any
-team, framework, or modality enters, and every entrant — including the RuView baseline
+team, framework, or modality enters, and every entrant — including the EchoPose baseline
 that donated the seed scorer — is scored by the identical, open, pinned harness.
 
-The scorer reuses RuView's released `wifi-densepose-train` acceptance harness
-(`ruview_metrics` + ablation). You submit a **model, not predictions**; it is scored
+The scorer reuses EchoPose's released `wifi-densepose-train` acceptance harness
+(`echopose_metrics` + ablation). You submit a **model, not predictions**; it is scored
 against a **private** MM-Fi held-out split; one **witness** row (inputs hash + proof
 hash + harness version) is appended to a **hash-chained, tamper-evident ledger**.
 
@@ -80,13 +80,13 @@ deployment frontier and is treated as the flagship hard benchmark.
 Spec: ADR-149. v0 ranks **pose, presence, edge-latency, determinism**. Tracking &
 vitals activate when their ground truth lands; **privacy-leakage** is gated until the
 membership-inference attacker ships. Source + the open scorer:
-https://github.com/ruvnet/RuView/tree/main/aether-arena
+https://github.com/ruvnet/EchoPose/tree/main/aether-arena
 """
 
 SUBMIT = """
 ### Submit a model
 
-1. Write a manifest — [`schema/aa-submission.toml`](https://github.com/ruvnet/RuView/blob/main/aether-arena/schema/aa-submission.toml):
+1. Write a manifest — [`schema/aa-submission.toml`](https://github.com/ruvnet/EchoPose/blob/main/aether-arena/schema/aa-submission.toml):
    declare your model ref, category, the ADR-145 feature set (F0 CSI … F3 BFLD), and the tensor I/O contract.
 2. Provide your model artifact (`.safetensors` / `.rvf` / LoRA adapter).
 3. It moves through `submitted → validated → quarantined → smoke_scored → full_scored → published`,
@@ -102,7 +102,7 @@ VERIFY = """
 The scorer is open and reproducible. Reproduce the determinism proof + repeatability locally:
 
 ```bash
-git clone https://github.com/ruvnet/RuView && cd RuView/v2
+git clone https://github.com/ruvnet/EchoPose && cd EchoPose/v2
 # determinism gate (same as CI):
 cargo run -q -p wifi-densepose-train --bin aa_score_runner --no-default-features
 # repeatability — N runs, one identical proof hash:
@@ -126,7 +126,7 @@ with gr.Blocks(title="AetherArena — Spatial-Intelligence Benchmark") as demo:
         "**Why it exists:** WiFi/RF-sensing results are reported with inconsistent splits, metrics, and no "
         "auditability — so numbers aren't comparable. AetherArena fixes the *measurement*: one protocol, one "
         "metric, one signed ledger, one-command reproduction. The benchmark is the product; the leaderboard is "
-        "just the scoreboard. (Reference implementation seeded by RuView, ADR-149.)"
+        "just the scoreboard. (Reference implementation seeded by EchoPose, ADR-149.)"
     )
     chain = gr.Markdown(verify_chain())
 

@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-bfld` (new module `mode.rs` + `attestation.rs`; extends `lib.rs` `PrivacyClass`, `sink.rs`, `privacy_gate.rs`, `identity_risk.rs`, `emitter.rs`, `ha_discovery.rs`) |
-| **Relates to** | ADR-010 (Witness Chains), ADR-118 (BFLD), ADR-120 (Privacy Class + Hash Rotation), ADR-121 (Identity-Risk Scoring), ADR-122 (RuView HA/Matter Exposure), ADR-136 (Streaming Engine), ADR-139 (WorldGraph), ADR-140 (Semantic State Record), ADR-143 (RF SLAM v2) |
+| **Relates to** | ADR-010 (Witness Chains), ADR-118 (BFLD), ADR-120 (Privacy Class + Hash Rotation), ADR-121 (Identity-Risk Scoring), ADR-122 (EchoPose HA/Matter Exposure), ADR-136 (Streaming Engine), ADR-139 (WorldGraph), ADR-140 (Semantic State Record), ADR-143 (RF SLAM v2) |
 
 ---
 
@@ -400,7 +400,7 @@ impl PrivacyAttestationProof {
 
 The active mode and proof hash are surfaced as a **read-only diagnostic** so an operator, regulator, or the cognitum-v0 dashboard can see the live privacy posture without touching the sensing entities. This extends `ha_discovery.rs` and `mqtt_topics.rs`, both of which already class-gate every entity.
 
-- A new discovery payload is rendered by `render_discovery_payloads()` (`ha_discovery.rs:61`) for a `sensor` with `entity_category = "diagnostic"`, unique-id `<node>_bfld_privacy_mode`, state topic `ruview/<node>/bfld/privacy_mode/state`. Its state is a compact JSON object `{"mode":"care_with_consent","class":"derived","proof":"blake3:<16hex>","actions":["drop_raw","reduce_resolution"]}`.
+- A new discovery payload is rendered by `render_discovery_payloads()` (`ha_discovery.rs:61`) for a `sensor` with `entity_category = "diagnostic"`, unique-id `<node>_bfld_privacy_mode`, state topic `echopose/<node>/bfld/privacy_mode/state`. Its state is a compact JSON object `{"mode":"care_with_consent","class":"derived","proof":"blake3:<16hex>","actions":["drop_raw","reduce_resolution"]}`.
 - The entity is published at every class `>= Anonymous` (same gate as the existing five diagnostic sensors) **and** additionally at class `Raw`/`Derived` on the LAN-only research surface — because a research/care deployment most needs to display its own attestation. The class gate for the *public* tree (`mqtt_topics.rs:111`) is unchanged; the diagnostic mode entity is added to the local diagnostic surface regardless of class so the proof is always inspectable on-node.
 - It is strictly read-only: the entity has no `command_topic`. Mode changes are an operator/config action (TOML + restart, §2.7), never an MQTT write — consistent with the "no `promote`" posture of `privacy_gate.rs`.
 
@@ -586,7 +586,7 @@ Per ADR-028/ADR-010, three rows are added to the witness log:
 - `docs/adr/ADR-118-bfld-beamforming-feedback-layer-for-detection.md`
 - `docs/adr/ADR-120-bfld-privacy-class-and-hash-rotation.md`
 - `docs/adr/ADR-121-bfld-identity-risk-scoring.md`
-- `docs/adr/ADR-122-bfld-ruview-ha-matter-exposure.md`
+- `docs/adr/ADR-122-bfld-echopose-ha-matter-exposure.md`
 
 
 ---

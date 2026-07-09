@@ -60,7 +60,7 @@ serialized to any outbound channel. This is enforced in two ways:
    — it exists only as a private field in `extractor.rs` and is dropped after
    feature extraction completes.
 2. The MQTT emitter (`mqtt.rs`) has no code path that serializes a BFI matrix.
-   The `ruview/<node_id>/bfld/raw/state` topic is disabled by default and, when
+   The `echopose/<node_id>/bfld/raw/state` topic is disabled by default and, when
    enabled, publishes only a metadata summary (subcarrier count, timestamp, SNR range),
    not the angle matrices.
 
@@ -99,9 +99,9 @@ with a secret key, not from access-control rules.
 
 ---
 
-## 4. Relationship to RuView's Ambient Intelligence Positioning
+## 4. Relationship to EchoPose's Ambient Intelligence Positioning
 
-The project memory records RuView's positioning as "ambient intelligence platform, not
+The project memory records EchoPose's positioning as "ambient intelligence platform, not
 sensor; packaging (HA, Docker, mDNS, blueprints) is the bottleneck." This framing is
 load-bearing for BFLD's design.
 

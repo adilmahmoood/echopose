@@ -19,7 +19,7 @@ Discovery payload (presence/heart_rate/fall) generation completed earlier in the
 
 ## What this means
 
-At a full **1 Hz publish rate per node**, the entire ADR-115 hot path — rate-limit decisions, privacy filter, semantic inference across all 10 primitives, plus serialised state encoding — costs roughly **1 µs per node per tick** on commodity hardware. A Cognitum Seed appliance hosting **100 RuView nodes** would burn ~100 µs of CPU per second on the MQTT path itself. That's a 0.01% load floor.
+At a full **1 Hz publish rate per node**, the entire ADR-115 hot path — rate-limit decisions, privacy filter, semantic inference across all 10 primitives, plus serialised state encoding — costs roughly **1 µs per node per tick** on commodity hardware. A Cognitum Seed appliance hosting **100 EchoPose nodes** would burn ~100 µs of CPU per second on the MQTT path itself. That's a 0.01% load floor.
 
 Memory: every primitive's FSM is a few dozen bytes of state. 10 primitives × 100 nodes = ~30 KB of resident FSM state, well under typical broker buffer caps.
 
@@ -30,7 +30,7 @@ The user-supplied `--mqtt-rate-*` flags are the throttle, not the publisher. The
 Bench numbers are captured into the witness bundle when generated with:
 
 ```bash
-RUVIEW_RUN_BENCH=1 bash scripts/witness-adr-115.sh
+ECHOPOSE_RUN_BENCH=1 bash scripts/witness-adr-115.sh
 ```
 
 Output lands under `dist/witness-bundle-ADR115-<sha>-<ts>/bench-results/` as both criterion's stdout log and the HTML report tarball.

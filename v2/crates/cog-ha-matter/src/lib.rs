@@ -4,7 +4,7 @@
 //! `wifi-densepose-sensing-server::mqtt` publisher. It adds the
 //! Seed-native surfaces ADR-115's `--mqtt` flag can't easily reach:
 //!
-//! 1. **mDNS service advertisement** — `_ruview-ha._tcp` so HA discovers
+//! 1. **mDNS service advertisement** — `_echopose-ha._tcp` so HA discovers
 //!    the cog automatically (no manual broker host/port config).
 //! 2. **Optional embedded MQTT broker** — for Seeds running without an
 //!    external mosquitto. Defaults to off; the cog can either embed
@@ -36,7 +36,7 @@ pub mod witness_signing;
 pub const COG_ID: &str = "ha-matter";
 
 /// mDNS service type advertised when the cog starts.
-pub const MDNS_SERVICE_TYPE: &str = "_ruview-ha._tcp";
+pub const MDNS_SERVICE_TYPE: &str = "_echopose-ha._tcp";
 
 /// Default port for the cog's local HTTP control surface (`/health`,
 /// `/api/v1/cog/status`). Distinct from the MQTT broker port.

@@ -7,8 +7,8 @@
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-MIGRATE** |
 | **Crate** | `v2/crates/homecore-migrate` |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master — series map row "ADR-134 HOMECORE-MIGRATE"), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-132](ADR-132-homecore-recorder-history-semantic-search.md) (HOMECORE-RECORDER — P2 side-by-side export target) |
-| **Tracking issue** | [#800](https://github.com/ruvnet/RuView/pull/800) (HOMECORE intake) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master — series map row "ADR-134 HOMECORE-MIGRATE"), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-132](ADR-132-homecore-recorder-history-semantic-search.md) (HOMECORE-RECORDER — P2 side-by-side export target) |
+| **Tracking issue** | [#800](https://github.com/ruvnet/EchoPose/pull/800) (HOMECORE intake) |
 
 > **Number-collision resolution (2026-06-12).** The HOMECORE series in ADR-126 §4 planned
 > "ADR-134 = HOMECORE-MIGRATE", and the `homecore-migrate` crate cites "ADR-134" throughout.
@@ -141,7 +141,7 @@ converts the entity registry; full conversion of the remaining artifacts is defe
   `src/storage.rs`, `src/storage_format/`, `src/entity_registry.rs`,
   `src/device_registry.rs`, `src/config_entries.rs`, `src/secrets.rs`,
   `src/automations.rs`, `src/cli.rs`, `src/main.rs`.
-- [ADR-126](ADR-126-ruview-native-ha-port-master.md) — HOMECORE master (series map: HOMECORE-MIGRATE).
+- [ADR-126](ADR-126-echopose-native-ha-port-master.md) — HOMECORE master (series map: HOMECORE-MIGRATE).
 - [ADR-132](ADR-132-homecore-recorder-history-semantic-search.md) — HOMECORE-RECORDER (P2 side-by-side export target).
 - [ADR-134](ADR-134-csi-to-cir-time-domain-multipath.md) — First-Class CIR Support (the *unrelated* decision the crate was mistakenly citing).
 - [ADR-164](ADR-164-adr-corpus-gap-analysis.md) — gap analysis that surfaced this collision (Gap G3).

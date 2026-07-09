@@ -129,11 +129,11 @@ fn bootstrap_pattern_publishes_discovery_then_state_through_shared_publisher() {
         "6 discovery + 5 state messages should be in the log",
     );
 
-    // First 6 are discovery (homeassistant/...), next 5 are state (ruview/...).
+    // First 6 are discovery (homeassistant/...), next 5 are state (echopose/...).
     for msg in log.published.iter().take(6) {
         assert!(msg.topic.starts_with("homeassistant/"), "got {}", msg.topic);
     }
     for msg in log.published.iter().skip(6) {
-        assert!(msg.topic.starts_with("ruview/"), "got {}", msg.topic);
+        assert!(msg.topic.starts_with("echopose/"), "got {}", msg.topic);
     }
 }

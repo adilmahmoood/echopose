@@ -1,4 +1,4 @@
-# ADR-047: RuView Observatory — Immersive Three.js WiFi Sensing Visualization
+# ADR-047: EchoPose Observatory — Immersive Three.js WiFi Sensing Visualization
 
 ## Status
 
@@ -76,7 +76,7 @@ EffectComposer chain: RenderPass → UnrealBloomPass → custom VignetteShader
 - **VignetteShader:** warm shadow shift, edge chromatic aberration, film grain
 - **Adaptive quality:** Auto-degrades when FPS < 25, restores when FPS > 55
 
-### RuView Foundation Color Palette
+### EchoPose Foundation Color Palette
 
 | Role | Color | Hex |
 |------|-------|-----|

@@ -131,7 +131,7 @@ fn live_broker_anonymous_event_roundtrips_all_six_topics() {
     };
 
     let node_id = unique_client_id("seed");
-    let filter = format!("ruview/{node_id}/bfld/+/state");
+    let filter = format!("echopose/{node_id}/bfld/+/state");
 
     // Subscriber first so it's ready before the publisher sends.
     let (incoming_rx, suback_rx) = spawn_subscriber(&host, port, &filter);
@@ -176,7 +176,7 @@ fn live_broker_anonymous_event_roundtrips_all_six_topics() {
         assert!(
             topics
                 .iter()
-                .any(|t| t == &format!("ruview/{node_id}/bfld/{entity}/state").as_str()),
+                .any(|t| t == &format!("echopose/{node_id}/bfld/{entity}/state").as_str()),
             "missing entity {entity} in delivered topics {topics:?}",
         );
     }
@@ -190,7 +190,7 @@ fn live_broker_restricted_event_omits_identity_risk() {
     };
 
     let node_id = unique_client_id("seed-r");
-    let filter = format!("ruview/{node_id}/bfld/+/state");
+    let filter = format!("echopose/{node_id}/bfld/+/state");
 
     let (incoming_rx, suback_rx) = spawn_subscriber(&host, port, &filter);
     suback_rx

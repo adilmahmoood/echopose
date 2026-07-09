@@ -1,4 +1,4 @@
-# ADR-150: RuView RF Foundation Encoder — pose-preserving, subject/room/device-invariant CSI embedding
+# ADR-150: EchoPose RF Foundation Encoder — pose-preserving, subject/room/device-invariant CSI embedding
 
 | Field | Value |
 |-------|-------|
@@ -12,7 +12,7 @@
 
 ## 1. Context
 
-AetherArena now has a published, metric- and protocol-matched MM-Fi result: **81.63% torso-PCK@20 in-domain (random_split), exceeding MultiFormer's 72.25%** ([#876](https://github.com/ruvnet/RuView/issues/876)). But the **leakage-free cross-subject** number collapses to **~11.6% torso-PCK** (27% under the looser bbox metric). That gap is the real deployment frontier — homes, elder care, festivals, unseen bodies.
+AetherArena now has a published, metric- and protocol-matched MM-Fi result: **81.63% torso-PCK@20 in-domain (random_split), exceeding MultiFormer's 72.25%** ([#876](https://github.com/ruvnet/EchoPose/issues/876)). But the **leakage-free cross-subject** number collapses to **~11.6% torso-PCK** (27% under the looser bbox metric). That gap is the real deployment frontier — homes, elder care, festivals, unseen bodies.
 
 Naïve fixes already tested and **failed**: a subject-adversarial (DANN) embedding did not move cross-subject (baseline 27.26% → DANN 27.54% bbox; torso 11.57%). Bigger capacity *hurt* (transformer cross-subject 24.8% < conv 27.3%) — extra parameters overfit seen subjects.
 
@@ -30,7 +30,7 @@ The frontier objective is **not** `same-subject = positive`. It is:
 
 ## 2. Decision
 
-**Build the RuView RF Foundation Encoder: a self-supervised, pose-preserving, subject/room/device-invariant RF representation for CSI (extensible to CIR, ADR-134, and BFLD).** Positioned as a **platform primitive**, not a benchmark trick.
+**Build the EchoPose RF Foundation Encoder: a self-supervised, pose-preserving, subject/room/device-invariant RF representation for CSI (extensible to CIR, ADR-134, and BFLD).** Positioned as a **platform primitive**, not a benchmark trick.
 
 ### 2.1 What the embedding must keep / remove
 
@@ -72,9 +72,9 @@ embedding ≈ pose + motion + channel-coherence
 embedding ≠ subject-identity + static-room-signature + device-artifact
 ```
 
-### 2.4 The RuView differentiator — auditable RF perception that knows when it's wrong
+### 2.4 The EchoPose differentiator — auditable RF perception that knows when it's wrong
 
-The coherence head gates pose confidence by **channel coherence**: when multipath structure changes (mincut / spectral coherence drop), the model flags low RF integrity instead of hallucinating a pose. This is the **anti-hallucination** component most WiFi-pose papers lack, and it turns RuView from a model into sensing infrastructure. (Ties to ADR-135 coherence gate.)
+The coherence head gates pose confidence by **channel coherence**: when multipath structure changes (mincut / spectral coherence drop), the model flags low RF integrity instead of hallucinating a pose. This is the **anti-hallucination** component most WiFi-pose papers lack, and it turns EchoPose from a model into sensing infrastructure. (Ties to ADR-135 coherence gate.)
 
 ## 3. Experiment plan — three variants, frozen-decoder test
 
@@ -195,7 +195,7 @@ K=200 frames/subject by accuracy *and* adapter size:
 | full finetune | 76.2% | 2.32 M | 2.3 MB |
 
 **A ~11 KB LoRA adapter recovers +8.9 pts (→72.5%, ≈ prior SOTA) at 0.5 % the model size.** This is
-the concrete mechanism for the **RuView calibration service** the project wanted: ship the shared
+the concrete mechanism for the **EchoPose calibration service** the project wanted: ship the shared
 base once; each room contributes a 30-second labeled calibration → a **~11 KB per-room LoRA adapter**
 → SOTA-level cross-subject pose, thousands of rooms on one base. Accuracy/size knob:
 LoRA 11 KB @ 72.5 % → frozen-trunk 207 KB @ 73.5 % → full 2.3 MB @ 76.2 %. **Net for this ADR:** the

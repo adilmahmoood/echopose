@@ -14,7 +14,7 @@
 implements a **leading-order linear-readout proxy** for NV-ensemble
 magnetometry per Barry et al. *Rev. Mod. Phys.* 92, 015004 (2020) §III.A.
 That paper validates the proxy as adequate for ensemble magnetometers in
-the **linear regime** — which is the CW-ODMR regime RuView's actual
+the **linear regime** — which is the CW-ODMR regime EchoPose's actual
 use case operates in. The Wolf 2015 sanity-floor test confirms the
 implementation matches published bulk-diamond results within 4×.
 
@@ -28,7 +28,7 @@ What the proxy does *not* model:
 - **Coherent control**: Ramsey-style phase-accumulation experiments,
   spin-echo magnetometry.
 
-For RuView's CW-ODMR ensemble use case (ferrous-anomaly detection,
+For EchoPose's CW-ODMR ensemble use case (ferrous-anomaly detection,
 metallic-object screening), none of these matter — Barry 2020 §III.A is
 explicit that the linear-readout proxy is adequate. For *future* use cases
 that involve pulsed protocols (e.g., AC-magnetometry via Hahn echo to push
@@ -77,7 +77,7 @@ remains Proposed indefinitely.
   validation against a published QuTiP reference script. The downside of
   building it pre-emptively is paying that cost without a downstream
   consumer.
-- **No current downstream consumer.** RuView's MAT (Mass Casualty
+- **No current downstream consumer.** EchoPose's MAT (Mass Casualty
   Assessment) consumer needs CW-ODMR ferrous anomaly detection, not
   pulsed protocols. ADR-066 swarm-bridge (proposed) is similarly
   CW-amplitude-only.

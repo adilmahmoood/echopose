@@ -1,6 +1,6 @@
 //! Opt-in bearer-token auth for the sensing-server HTTP API (#443).
 //!
-//! When the `RUVIEW_API_TOKEN` environment variable is set, every request
+//! When the `ECHOPOSE_API_TOKEN` environment variable is set, every request
 //! whose path begins with `/api/v1/` must carry a matching
 //! `Authorization: Bearer <token>` header, otherwise the server responds with
 //! `401 Unauthorized`. When the env var is unset (or empty), the middleware is
@@ -29,7 +29,7 @@ use axum::{
 };
 
 /// Environment variable that gates the middleware. Unset / empty ⇒ auth off.
-pub const API_TOKEN_ENV: &str = "RUVIEW_API_TOKEN";
+pub const API_TOKEN_ENV: &str = "ECHOPOSE_API_TOKEN";
 
 /// Path prefix the middleware protects when auth is enabled.
 pub const PROTECTED_PREFIX: &str = "/api/v1/";
@@ -119,7 +119,7 @@ pub async fn require_bearer(
     } else {
         (
             StatusCode::UNAUTHORIZED,
-            "missing or invalid bearer token (set Authorization: Bearer <RUVIEW_API_TOKEN>)\n",
+            "missing or invalid bearer token (set Authorization: Bearer <ECHOPOSE_API_TOKEN>)\n",
         )
             .into_response()
     }
@@ -381,7 +381,7 @@ mod tests {
     #[test]
     fn protected_prefix_and_env_constants_are_stable() {
         // These are documented in the issue body and the README; keep them locked.
-        assert_eq!(API_TOKEN_ENV, "RUVIEW_API_TOKEN");
+        assert_eq!(API_TOKEN_ENV, "ECHOPOSE_API_TOKEN");
         assert_eq!(PROTECTED_PREFIX, "/api/v1/");
     }
 }

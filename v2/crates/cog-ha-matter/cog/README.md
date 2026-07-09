@@ -12,7 +12,7 @@ and [ADR-116 — HA-Matter Seed Cog](../../../../docs/adr/ADR-116-cog-ha-matter-
 Wraps the ADR-115 HA-DISCO + HA-MIND MQTT publisher as a Seed-installable
 artifact with:
 
-- mDNS auto-discovery (`_ruview-ha._tcp`)
+- mDNS auto-discovery (`_echopose-ha._tcp`)
 - Ed25519-signed witness chain for tamper-evident audit logs
 - Privacy-mode flag (only semantic primitives, no biometrics)
 - One-flag deferral to v0.7 for the embedded broker / v0.8 for the Matter Bridge

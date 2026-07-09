@@ -109,8 +109,8 @@ impl Default for CsiPipelineState {
 
 fn detect_pose_model_metadata() -> Option<PoseModelMetadata> {
     let paths = [
-        "/tmp/ruview-firmware/wiflow-v1.json",
-        "~/.local/share/ruview/wiflow-v1.json",
+        "/tmp/echopose-firmware/wiflow-v1.json",
+        "~/.local/share/echopose/wiflow-v1.json",
     ];
     for p in &paths {
         let expanded = p.replace('~', &std::env::var("HOME").unwrap_or_default());

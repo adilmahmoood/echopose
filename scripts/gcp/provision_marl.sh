@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Provision GCP L4 instance for ruview-swarm MARL training (ADR-148 M4).
+# Provision GCP L4 instance for echopose-swarm MARL training (ADR-148 M4).
 #
 # RIGHT-SIZING RATIONALE:
 #   The MARL policy is a 64→128→64 MLP (~12K params). GPU matmul is NOT the
@@ -20,7 +20,7 @@ set -euo pipefail
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 PROJECT="cognitum-20260110"
-INSTANCE_NAME="ruview-marl-$(date +%Y%m%d)"
+INSTANCE_NAME="echopose-marl-$(date +%Y%m%d)"
 MACHINE_TYPE="g2-standard-16"
 PRIMARY_ZONE="us-central1-a"
 FALLBACK_ZONE="us-east1-b"
@@ -76,7 +76,7 @@ trap 'rm -f "$STARTUP_SCRIPT_FILE"' EXIT
 cat > "$STARTUP_SCRIPT_FILE" << 'STARTUP_EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-LOGFILE="/var/log/ruview-marl-startup.log"
+LOGFILE="/var/log/echopose-marl-startup.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "[startup] $(date): beginning MARL environment setup"
@@ -86,7 +86,7 @@ apt-get update -qq
 apt-get install -y -qq git rsync wget curl htop nvtop screen tmux \
   build-essential pkg-config libssl-dev
 
-# ── 2. Rust toolchain (for cargo build of ruview-swarm) ────────────────────────
+# ── 2. Rust toolchain (for cargo build of echopose-swarm) ────────────────────────
 TARGET_USER="$(logname 2>/dev/null || echo user)"
 TARGET_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
 if [[ ! -d "$TARGET_HOME/.cargo" ]]; then
@@ -101,7 +101,7 @@ nvidia-smi || echo "[startup] WARNING: nvidia-smi not available yet"
 
 # ── 4. Checkpoint dirs + repo sync placeholder ─────────────────────────────────
 # Actual crate sync is done by run_marl_train.sh via rsync before the build.
-sudo -u "$TARGET_USER" mkdir -p "$TARGET_HOME/ruview-swarm" \
+sudo -u "$TARGET_USER" mkdir -p "$TARGET_HOME/echopose-swarm" \
   "$TARGET_HOME/marl-checkpoints"
 
 echo "[startup] $(date): setup complete — instance ready for MARL training"
@@ -190,7 +190,7 @@ log "  IP      : $INSTANCE_IP"
 log "  SSH     : gcloud compute ssh $INSTANCE_NAME --project=$PROJECT --zone=$ZONE"
 log "  SSH IP  : ssh $(gcloud config get-value account 2>/dev/null)@$INSTANCE_IP"
 log ""
-log "Startup script is running in background (/var/log/ruview-marl-startup.log)."
+log "Startup script is running in background (/var/log/echopose-marl-startup.log)."
 log "Wait 2-3 min for the Rust toolchain install before running run_marl_train.sh."
 log ""
 log "Next step:"

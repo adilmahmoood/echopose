@@ -1,7 +1,7 @@
 """ADR-117 P4 — Pure-Python client layer.
 
 This sub-package is the **client-facing** half of `wifi-densepose`:
-end users who only want to *consume* live RuView telemetry (rather than
+end users who only want to *consume* live EchoPose telemetry (rather than
 running DSP locally) get a tight, opt-in client extra:
 
 ```
@@ -17,8 +17,8 @@ default install.
 
 - `ws` — `SensingClient`: asyncio WebSocket client for the
   sensing-server `/ws/sensing` endpoint (ADR-115 §1)
-- `mqtt` — `RuViewMqttClient`: paho-mqtt v2 wrapper for
-  `ruview/<node>/raw/+` + `homeassistant/+/wifi_densepose_<node>/+/+`
+- `mqtt` — `EchoPoseMqttClient`: paho-mqtt v2 wrapper for
+  `echopose/<node>/raw/+` + `homeassistant/+/wifi_densepose_<node>/+/+`
   topics (ADR-115 §3)
 - `primitives` — `SemanticPrimitiveListener`: typed view over the
   10 HA-MIND semantic primitives (ADR-115 §3.12)
@@ -57,7 +57,7 @@ __all__ = [
     "PoseDataMessage",
     "ConnectionEstablishedMessage",
     # mqtt — re-exported lazily; see module docstring
-    "RuViewMqttClient",
+    "EchoPoseMqttClient",
     # ha — pure stdlib
     "HaDiscoveryPayload",
     "HaEntity",
@@ -72,7 +72,7 @@ __all__ = [
 def __getattr__(name: str):
     """Lazy re-exports for the modules that pull in optional extras.
 
-    `SensingClient` needs `websockets`; `RuViewMqttClient` needs
+    `SensingClient` needs `websockets`; `EchoPoseMqttClient` needs
     `paho-mqtt`. Importing those at package init would make
     `wifi_densepose.client` unusable without the extras installed
     — defeating the point of an *optional* extra. We defer the import
@@ -87,7 +87,7 @@ def __getattr__(name: str):
     }:
         from wifi_densepose.client import ws as _ws
         return getattr(_ws, name)
-    if name == "RuViewMqttClient":
-        from wifi_densepose.client.mqtt import RuViewMqttClient as _R
+    if name == "EchoPoseMqttClient":
+        from wifi_densepose.client.mqtt import EchoPoseMqttClient as _R
         return _R
     raise AttributeError(f"module 'wifi_densepose.client' has no attribute {name!r}")

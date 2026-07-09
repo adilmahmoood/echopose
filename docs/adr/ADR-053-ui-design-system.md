@@ -9,13 +9,13 @@
 
 ## Context
 
-RuView Desktop (ADR-052) needs a UI design system that communicates precision and control — befitting a hardware management control plane for embedded sensing infrastructure. The interface must handle dense data (CSI heatmaps, node registries, log streams, mesh topologies) without feeling overwhelming, while remaining usable by both engineers and field operators.
+EchoPose Desktop (ADR-052) needs a UI design system that communicates precision and control — befitting a hardware management control plane for embedded sensing infrastructure. The interface must handle dense data (CSI heatmaps, node registries, log streams, mesh topologies) without feeling overwhelming, while remaining usable by both engineers and field operators.
 
 Two design inspirations:
 
 1. **Data-first professional tools** — Dense information displays where data speaks for itself. Clean typography, structured layouts, and deliberate use of color for status. The interface shows what matters and hides what doesn't. Think: network monitoring dashboards, embedded systems IDEs, infrastructure control panels.
 
-2. **Unity Editor** — Dockable panel system, inspector/hierarchy/scene separation, property grids, dark professional theme, and dense-but-organized data display. Unity's UI is purpose-built for managing complex real-time systems — exactly what RuView needs.
+2. **Unity Editor** — Dockable panel system, inspector/hierarchy/scene separation, property grids, dark professional theme, and dense-but-organized data display. Unity's UI is purpose-built for managing complex real-time systems — exactly what EchoPose needs.
 
 The combination yields a professional control panel for WiFi sensing infrastructure. Data is organized into scannable panels with clear hierarchy. Status is communicated through consistent color coding. The layout adapts from high-level overview down to individual node details through progressive disclosure.
 
@@ -239,7 +239,7 @@ Minimal and purposeful:
 
 ### Branding
 
-- **Splash screen**: rUv logo + "RuView Desktop" + version, 1.5s duration
+- **Splash screen**: rUv logo + "EchoPose Desktop" + version, 1.5s duration
 - **Status bar**: "Powered by rUv" in `--text-muted`, left-aligned
 - **About dialog**: rUv logo, version, license, links to GitHub and docs
 - **App icon**: Stylized WiFi signal + human silhouette in rUv purple (#7c3aed)

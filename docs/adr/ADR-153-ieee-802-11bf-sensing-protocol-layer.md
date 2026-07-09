@@ -16,16 +16,16 @@ measurement setup, measurement instance, feedback/reporting, and
 sensing-by-proxy (SBP) procedures (ADR-152 F4, evidence grade MEASURED).
 
 No commodity silicon implements the standard yet — ESP32 parts included.
-ADR-152 §2.4 therefore decided "track silicon; no code now", with RuView's
+ADR-152 §2.4 therefore decided "track silicon; no code now", with EchoPose's
 opportunistic CSI extraction remaining the mechanism. That left a gap: when
-silicon does land, RuView would have no typed model of the standard's
+silicon does land, EchoPose would have no typed model of the standard's
 procedures to bind to, and the integration would start from zero.
 
 ADR-152 §2.4 originally classified 802.11bf as a hardware watch item with no
 implementation work until commodity silicon exposes standardized sensing
 measurements. This ADR amends that clause: OTA binding remains deferred, but
 a pure Rust protocol model, session FSM, transport seam, and opportunistic
-CSI bridge will be implemented now so RuView consumers can target a stable
+CSI bridge will be implemented now so EchoPose consumers can target a stable
 standardized sensing interface before silicon arrives.
 
 The user directed (2026-06-10) that this **forward-compatibility protocol
@@ -39,7 +39,7 @@ Implement an `ieee80211bf` **forward-compatibility protocol model** in
 no OTA path):
 
 > This module is not a certified 802.11bf implementation. It models the
-> public procedure shape needed by RuView and RuvSense, while intentionally
+> public procedure shape needed by EchoPose and RuvSense, while intentionally
 > avoiding OTA frame binding until chipset support and vendor APIs exist.
 
 1. **`types.rs`** — typed structures for the standard's sensing procedures
@@ -129,7 +129,7 @@ without hardware.
 ### Non-Goals
 
 This ADR does not claim IEEE 802.11bf conformance, certification, or OTA
-interoperability. It creates a typed protocol compatibility layer so RuView
+interoperability. It creates a typed protocol compatibility layer so EchoPose
 can consume standardized sensing reports when commodity silicon exposes
 them. Vendor-specific frame exchange, firmware hooks, trigger-frame
 sounding, and certification test vectors remain future ADRs.
@@ -137,7 +137,7 @@ sounding, and certification test vectors remain future ADRs.
 ## Consequences
 
 ### Positive
-- RuView can adopt standardized WLAN sensing the day any chipset exposes
+- EchoPose can adopt standardized WLAN sensing the day any chipset exposes
   802.11bf measurements — the data model, session FSM, and transport seam
   already exist and are tested.
 - The `OpportunisticCsiBridge` gives current ESP32 nodes a standardized-shape

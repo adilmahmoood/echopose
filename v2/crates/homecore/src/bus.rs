@@ -79,12 +79,12 @@ mod tests {
         let bus = EventBus::new();
         let mut rx = bus.subscribe_domain();
         bus.fire_domain(DomainEvent::new(
-            "ruview_csi_frame",
+            "echopose_csi_frame",
             serde_json::json!({"frame_id": 42}),
             Context::new(),
         ));
         let event = rx.recv().await.unwrap();
-        assert_eq!(event.event_type, "ruview_csi_frame");
+        assert_eq!(event.event_type, "echopose_csi_frame");
         assert_eq!(event.event_data["frame_id"], 42);
     }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# prove.sh — one-command reproduction harness for RuView / wifi-densepose.
+# prove.sh — one-command reproduction harness for EchoPose / wifi-densepose.
 #
 # Mission: this project has been publicly accused of being "AI slop / fake."
 # The answer is reproducibility. Clone the repo, run THIS script, and every
@@ -25,7 +25,7 @@ FAIL(){ echo "  [FAIL] $1"; fail=$((fail+1)); }
 SKIP(){ echo "  [CLAIMED — not reproduced here] $1"; skip=$((skip+1)); }
 hr(){ echo "------------------------------------------------------------"; }
 
-echo "RuView / wifi-densepose — PROOF harness"
+echo "EchoPose / wifi-densepose — PROOF harness"
 echo "repo: $ROOT"
 echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 hr

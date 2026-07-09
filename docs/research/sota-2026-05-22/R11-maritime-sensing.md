@@ -102,7 +102,7 @@ At 2.4 GHz λ = 12.5 cm, so any slot wider than 6.25 cm is effectively transpare
 ## What this DOES enable
 
 - A **physically honest** maritime sensing roadmap that doesn't promise through-bulkhead capability that doesn't exist.
-- Clear product categories where ESP32 + RuView stack adds value: man-overboard surface detection, through-seam vitals, container tamper detection.
+- Clear product categories where ESP32 + EchoPose stack adds value: man-overboard surface detection, through-seam vitals, container tamper detection.
 - A predictive-maintenance angle (hatch-seal degradation) that has no current sensor alternative.
 
 ## What this DOES NOT enable

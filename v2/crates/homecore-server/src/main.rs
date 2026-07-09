@@ -91,7 +91,7 @@ struct Cli {
     no_recorder: bool,
 
     /// Skip the boot-time entity seeding (10 demo entities including
-    /// 4 RuView-derived sensors). Use this when wiring real
+    /// 4 EchoPose-derived sensors). Use this when wiring real
     /// integrations that will populate the state machine themselves.
     #[arg(long)]
     no_seed_entities: bool,
@@ -327,7 +327,7 @@ fn seed_default_entities(hc: &HomeCore) {
     let entities: Vec<(&str, &str, serde_json::Value)> = vec![
         ("sensor.living_room_presence", "false", serde_json::json!({
             "friendly_name": "Living Room Presence", "device_class": "occupancy",
-            "source": "RuView ESP32-C6 BFLD"
+            "source": "EchoPose ESP32-C6 BFLD"
         })),
         ("sensor.living_room_motion_score", "0.0", serde_json::json!({
             "friendly_name": "Living Room Motion Score", "unit_of_measurement": "score",

@@ -1,17 +1,17 @@
 //! Matter bridge-tree assembly (ADR-115 §3.11.2).
 //!
-//! Given a list of RuView nodes and the `EntityKind`s enabled for
+//! Given a list of EchoPose nodes and the `EntityKind`s enabled for
 //! each, produce the Matter endpoint tree the SDK will materialise:
 //!
 //! ```text
 //! Endpoint 0 (root: BridgedDevicesAggregator)
-//!   Endpoint 1 (BridgedNode for ruview-node-0)
+//!   Endpoint 1 (BridgedNode for echopose-node-0)
 //!     Endpoint 2 (OccupancySensor for presence + PersonCount attr)
 //!     Endpoint 3 (OccupancySensor for zone_kitchen)
 //!     Endpoint 4 (OccupancySensor for SomeoneSleeping)
 //!     Endpoint 5 (GenericSwitch for FallDetected)
 //!     …
-//!   Endpoint N (BridgedNode for ruview-node-1)
+//!   Endpoint N (BridgedNode for echopose-node-1)
 //!     …
 //! ```
 //!
@@ -40,7 +40,7 @@ pub struct Endpoint {
     pub source_entity: Option<EntityKind>,
 }
 
-/// One RuView node's slice of the bridge tree.
+/// One EchoPose node's slice of the bridge tree.
 #[derive(Debug, Clone)]
 pub struct NodeBranch {
     pub node_id: String,
@@ -63,7 +63,7 @@ pub fn build_bridge_tree(nodes: &[(String, String, Vec<EntityKind>)]) -> BridgeT
     let root = Endpoint {
         endpoint_id: 0,
         device_type: DEVICE_TYPE_AGGREGATOR,
-        label: "RuView Bridge".into(),
+        label: "EchoPose Bridge".into(),
         clusters: vec![super::clusters::CLUSTER_BASIC_INFORMATION],
         vendor_attrs: vec![],
         source_entity: None,

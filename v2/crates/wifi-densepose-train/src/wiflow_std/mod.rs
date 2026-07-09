@@ -13,13 +13,13 @@
 //! corruption-free; published claim 97.25%). The *shipped* upstream checkpoint
 //! was REFUTED (0.08% PCK@20 — keypoint-convention mismatch), and the released
 //! dataset/code required repairs before training converged. Cite this port as
-//! "~96% PCK@20 (our reproduction)" — **not comparable** to RuView's
+//! "~96% PCK@20 (our reproduction)" — **not comparable** to EchoPose's
 //! 17-keypoint ESP32 numbers (different hardware, subjects, split, skeleton).
 //!
 //! ## Name collision
 //!
 //! WiFlow-STD (this module) is the *external* DY2434 architecture. It is
-//! **distinct from RuView's internal WiFlow** camera-free pose pipeline; the
+//! **distinct from EchoPose's internal WiFlow** camera-free pose pipeline; the
 //! `_std` suffix (Spatio-Temporal Decoupling) disambiguates the two.
 //!
 //! ## Architecture

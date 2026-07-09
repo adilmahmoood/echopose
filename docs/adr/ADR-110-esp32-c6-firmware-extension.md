@@ -6,9 +6,9 @@
 | **Date** | 2026-05-22 (created) · 2026-05-23 (last revision — P10 + sprint summary) |
 | **Deciders** | ruv |
 | **Codename** | **C6-SOTA** |
-| **Relates to** | ADR-018 (CSI binary frame format), ADR-028 (ESP32 capability audit), ADR-029 (RuvSense multistatic), ADR-030 (RuvSense persistent field model), ADR-031 (RuView sensing-first), ADR-061 (QEMU CI), ADR-081 (adaptive CSI mesh kernel), ADR-097 (rvCSI adoption) |
-| **Tracking issue** | [ruvnet/RuView#762](https://github.com/ruvnet/RuView/issues/762) |
-| **Firmware releases** | [v0.6.7](https://github.com/ruvnet/RuView/releases/tag/v0.6.7-esp32) · [v0.6.8](https://github.com/ruvnet/RuView/releases/tag/v0.6.8-esp32) · [v0.6.9](https://github.com/ruvnet/RuView/releases/tag/v0.6.9-esp32) · [v0.7.0](https://github.com/ruvnet/RuView/releases/tag/v0.7.0-esp32) |
+| **Relates to** | ADR-018 (CSI binary frame format), ADR-028 (ESP32 capability audit), ADR-029 (RuvSense multistatic), ADR-030 (RuvSense persistent field model), ADR-031 (EchoPose sensing-first), ADR-061 (QEMU CI), ADR-081 (adaptive CSI mesh kernel), ADR-097 (rvCSI adoption) |
+| **Tracking issue** | [ruvnet/EchoPose#762](https://github.com/ruvnet/EchoPose/issues/762) |
+| **Firmware releases** | [v0.6.7](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.7-esp32) · [v0.6.8](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.8-esp32) · [v0.6.9](https://github.com/ruvnet/EchoPose/releases/tag/v0.6.9-esp32) · [v0.7.0](https://github.com/ruvnet/EchoPose/releases/tag/v0.7.0-esp32) |
 | **Witness** | [`docs/WITNESS-LOG-110.md`](../WITNESS-LOG-110.md) — 13 §A0 entries (§A0.1 → §A0.13), 1 §A.1-A.12 dual-soak, 4 §B blocker entries, 5 §C bug fixes, 1 §D-workaround |
 
 ---

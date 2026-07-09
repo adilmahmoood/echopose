@@ -23,7 +23,7 @@ Per-round bandwidth (4-seed installation):
 
 R3 (last tick) said: "re-ID is the primitive that makes empathic appliances ship". R4 says: "federation is the protocol that makes re-ID training privacy-compliant." Together they trace the full pipeline from physics (R6) → embeddings (R3) → personalised features (R14) → trained how (R4) → defended how (R7).
 
-The protocol is the deliverable. ADR-105 specifies it; ruview-fed crate implementation (~500 LOC) is the next-quarter work.
+The protocol is the deliverable. ADR-105 specifies it; echopose-fed crate implementation (~500 LOC) is the next-quarter work.
 
 ## Composes with every prior thread
 
@@ -38,7 +38,7 @@ The protocol is the deliverable. ADR-105 specifies it; ruview-fed crate implemen
 - Cross-installation federation explicitly **deferred** to a future ADR (legal + DP work needed)
 - Member inference defence → ADR-106 with formal DP-SGD
 - The 500 LOC + 2-week-effort estimates assume AgentDB / microlora / mincut crates are stable
-- Krum byzantine bound: f < (K-2)/2 — practical f ≤ 4 for typical RuView installs
+- Krum byzantine bound: f < (K-2)/2 — practical f ≤ 4 for typical EchoPose installs
 
 ## Coordination
 

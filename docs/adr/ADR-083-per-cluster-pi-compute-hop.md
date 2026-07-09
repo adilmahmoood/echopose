@@ -58,7 +58,7 @@ the 5-layer kernel. Everything new lives at the cluster boundary.
 
 ## Decision
 
-Adopt **a per-cluster Pi hop** as the canonical RuView mid-scale
+Adopt **a per-cluster Pi hop** as the canonical EchoPose mid-scale
 deployment shape. A "cluster" is **3–6 ESP32-S3 sensor nodes within
 WiFi mesh range of one Pi**.
 

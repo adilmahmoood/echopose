@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-signal` (`ruvsense/field_model.rs`, new `ruvsense/rf_slam.rs`); `wifi-densepose-mat` (`tracking/kalman.rs`, `localization/triangulation.rs`); `wifi-densepose-geo`; `wifi-densepose-ruvector` (`mat/triangulation.rs`) |
-| **Relates to** | ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-042 (Coherent Human Channel Imaging), ADR-134 (First-Class CIR Support), ADR-136 (RuView Streaming Engine), ADR-138 (LinkGroup / ArrayCoordinator), ADR-139 (WorldGraph), ADR-141 (BFLD Privacy Control Plane), ADR-142 (Evolution Tracker / Temporal VoxelMap) |
+| **Relates to** | ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-042 (Coherent Human Channel Imaging), ADR-134 (First-Class CIR Support), ADR-136 (EchoPose Streaming Engine), ADR-138 (LinkGroup / ArrayCoordinator), ADR-139 (WorldGraph), ADR-141 (BFLD Privacy Control Plane), ADR-142 (Evolution Tracker / Temporal VoxelMap) |
 
 ---
 

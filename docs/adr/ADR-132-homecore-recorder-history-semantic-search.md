@@ -7,8 +7,8 @@
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-RECORDER** |
 | **Crate** | `v2/crates/homecore-recorder` |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master — series map row ADR-132), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE state machine), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (ruvector/SENSE-BRIDGE), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API query surface, downstream) |
-| **Tracking issue** | [#800](https://github.com/ruvnet/RuView/pull/800) (HOMECORE intake) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master — series map row ADR-132), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE state machine), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (ruvector/SENSE-BRIDGE), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API query surface, downstream) |
+| **Tracking issue** | [#800](https://github.com/ruvnet/EchoPose/pull/800) (HOMECORE intake) |
 
 > **Documented retroactively (2026-06-12).** The `homecore-recorder` crate shipped under
 > the ADR-126 series map (which planned an "ADR-132 HOMECORE-RECORDER") but the standalone
@@ -160,7 +160,7 @@ correctness, fail-closed write integrity, semantic-store NaN poisoning, and PII 
 
 - Crate: `v2/crates/homecore-recorder/` — `Cargo.toml`, `README.md`, `src/lib.rs`,
   `src/db.rs`, `src/schema.rs`, `src/dedup.rs`, `src/listener.rs`, `src/semantic.rs`.
-- [ADR-126](ADR-126-ruview-native-ha-port-master.md) — HOMECORE master (series map: ADR-132 = HOMECORE-RECORDER).
+- [ADR-126](ADR-126-echopose-native-ha-port-master.md) — HOMECORE master (series map: ADR-132 = HOMECORE-RECORDER).
 - [ADR-165](ADR-165-homecore-migrate-from-home-assistant.md) — HOMECORE-MIGRATE (reads HA `.storage`; P2 exports a side-by-side recorder DB).
 - [ADR-164](ADR-164-adr-corpus-gap-analysis.md) — gap analysis that surfaced this missing ADR (Gap G3).
 - [Home Assistant Recorder integration](https://www.home-assistant.io/integrations/recorder/).

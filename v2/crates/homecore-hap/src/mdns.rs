@@ -11,7 +11,7 @@ use crate::error::HapError;
 /// Service record advertised over mDNS for HAP discovery.
 #[derive(Debug, Clone)]
 pub struct HapServiceRecord {
-    /// Service instance name shown in Apple Home ("RuView Sense").
+    /// Service instance name shown in Apple Home ("EchoPose Sense").
     pub instance_name: String,
     /// TCP port the HAP server listens on (default 51826).
     pub port: u16,
@@ -68,7 +68,7 @@ mod tests {
     async fn null_advertiser_is_noop() {
         let adv = NullAdvertiser;
         let rec = HapServiceRecord {
-            instance_name: "RuView Sense".into(),
+            instance_name: "EchoPose Sense".into(),
             port: 51826,
             setup_code: "111-22-333".into(),
             device_id: "AA:BB:CC:DD:EE:FF".into(),

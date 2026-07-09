@@ -12,42 +12,42 @@
 | Objective | Description | Primary branch |
 |-----------|-------------|---------------|
 | **A** | Keep the cron research loop productive — curate PROGRESS.md between ticks | (main, via PR) |
-| **B** | Build `ruview` MCP server + CLI (`tools/ruview-mcp/`, `tools/ruview-cli/`) | `feat/ruview-mcp-cli` |
-| **C** | Write ADR-104: ruview MCP/CLI distribution decision record | (same branch as B) |
+| **B** | Build `echopose` MCP server + CLI (`tools/echopose-mcp/`, `tools/echopose-cli/`) | `feat/echopose-mcp-cli` |
+| **C** | Write ADR-104: echopose MCP/CLI distribution decision record | (same branch as B) |
 
 ---
 
 ## Milestones
 
-### M1 — Scaffold `tools/ruview-mcp/` + `tools/ruview-cli/`
+### M1 — Scaffold `tools/echopose-mcp/` + `tools/echopose-cli/`
 **Target:** +1h (by ~21:00 ET)
 **Status:** `COMPLETE` — merged as PR #705 (squash commit `5a6c585aa`)
-**Branch:** `feat/ruview-mcp-cli-pr` (deleted after merge)
+**Branch:** `feat/echopose-mcp-cli-pr` (deleted after merge)
 
 Deliverables:
-- `tools/ruview-mcp/package.json` — `@ruv/ruview-mcp`, TypeScript, `@modelcontextprotocol/sdk`
-- `tools/ruview-mcp/src/index.ts` — minimal MCP server with 5 tool stubs
-- `tools/ruview-mcp/src/tools/` — one file per tool
-- `tools/ruview-cli/package.json` — `@ruv/ruview-cli` + `ruview` bin
-- `tools/ruview-cli/src/index.ts` — 4-verb CLI stub via yargs/commander
+- `tools/echopose-mcp/package.json` — `@ruv/echopose-mcp`, TypeScript, `@modelcontextprotocol/sdk`
+- `tools/echopose-mcp/src/index.ts` — minimal MCP server with 5 tool stubs
+- `tools/echopose-mcp/src/tools/` — one file per tool
+- `tools/echopose-cli/package.json` — `@ruv/echopose-cli` + `echopose` bin
+- `tools/echopose-cli/src/index.ts` — 4-verb CLI stub via yargs/commander
 - `tsconfig.json` for both packages
-- Shared `tools/ruview-shared/` for HTTP client + types
+- Shared `tools/echopose-shared/` for HTTP client + types
 
 Completion criteria: `npm run build` succeeds in both packages, MCP server can be registered with `claude mcp add`.
 
 ---
 
-### M2 — Wire `ruview_pose_infer` + `ruview_count_infer`
+### M2 — Wire `echopose_pose_infer` + `echopose_count_infer`
 **Target:** +3h (by ~23:00 ET)
 **Status:** `COMPLETE` — merged in PR #705 squash (same commit as M1 scaffold)
 
 Wire inference via subprocess to cog binaries (`cog-pose-estimation`, `cog-person-count`). MCP tools and CLI subcommands both delegate to the cog binary's `health` + a synthetic-frame run.
 
-Completion criteria met: `ruview_pose_infer` returns finite keypoint array (17 COCO keypoints, confidence-gated); `ruview_count_infer` returns `{count, confidence, count_p95_low, count_p95_high}`.
+Completion criteria met: `echopose_pose_infer` returns finite keypoint array (17 COCO keypoints, confidence-gated); `echopose_count_infer` returns `{count, confidence, count_p95_low, count_p95_high}`.
 
 ---
 
-### M3 — Wire `ruview_csi_latest` + `ruview_registry_list`
+### M3 — Wire `echopose_csi_latest` + `echopose_registry_list`
 **Target:** +5h (by ~01:00 ET)
 **Status:** `COMPLETE` — merged as PR #708 (squash commit `ac04ec3df` → main `2a2f16a38`)
 
@@ -58,21 +58,21 @@ Completion criteria met: `ruview_pose_infer` returns finite keypoint array (17 C
 
 ---
 
-### M4 — Wire `ruview_train_count`
+### M4 — Wire `echopose_train_count`
 **Target:** +7h (by ~03:00 ET)
-**Status:** `COMPLETE` — implemented in PR #705 + #708; `ruview_train_count` spawns detached cargo process, returns `{job_id, status:"queued"}` via UUID; log streamed to `~/.ruview/jobs/<id>.log` using fd-based detach (Windows-compatible).
+**Status:** `COMPLETE` — implemented in PR #705 + #708; `echopose_train_count` spawns detached cargo process, returns `{job_id, status:"queued"}` via UUID; log streamed to `~/.echopose/jobs/<id>.log` using fd-based detach (Windows-compatible).
 
 Completion criteria met: returns `{job_id, status: "queued"}` within 200 ms (detached subprocess, no blocking).
 
 ---
 
-### M5 — ADR-104: ruview MCP/CLI distribution
+### M5 — ADR-104: echopose MCP/CLI distribution
 **Target:** +8h (by ~04:00 ET)
 **Status:** `COMPLETE` — ADR-104 written and merged in PR #705 (Session 1)
 
-Full ADR covering: problem, design (5 MCP tools + 5 CLI subcommands + library mapping), security (6-row threat table), packaging (npm `@ruv/ruview-mcp` + `@ruv/ruview-cli`), distribution, failure modes, acceptance gates.
+Full ADR covering: problem, design (5 MCP tools + 5 CLI subcommands + library mapping), security (6-row threat table), packaging (npm `@ruv/echopose-mcp` + `@ruv/echopose-cli`), distribution, failure modes, acceptance gates.
 
-Completion criteria: ADR file at `docs/adr/ADR-104-ruview-mcp-cli-distribution.md`, merged to main.
+Completion criteria: ADR file at `docs/adr/ADR-104-echopose-mcp-cli-distribution.md`, merged to main.
 
 ---
 
@@ -94,9 +94,9 @@ Completion criteria: ADR file at `docs/adr/ADR-104-ruview-mcp-cli-distribution.m
 
 | Item | PR | Main commit | Status |
 |------|----|-------------|--------|
-| `tools/ruview-mcp/` scaffold (6 tools, TypeScript ESM, MCP SDK) | #705 | `5a6c585aa` | Shipped |
-| `tools/ruview-cli/` scaffold (6 subcommands, Yargs) | #705 | `5a6c585aa` | Shipped |
-| ADR-104 (ruview MCP/CLI distribution, 6-row threat table) | #705 | `5a6c585aa` | Shipped |
+| `tools/echopose-mcp/` scaffold (6 tools, TypeScript ESM, MCP SDK) | #705 | `5a6c585aa` | Shipped |
+| `tools/echopose-cli/` scaffold (6 subcommands, Yargs) | #705 | `5a6c585aa` | Shipped |
+| ADR-104 (echopose MCP/CLI distribution, 6-row threat table) | #705 | `5a6c585aa` | Shipped |
 | M2: pose_infer + count_infer wired via cog health subprocess | #705 | `5a6c585aa` | Shipped |
 | M3: csi-latest schema validation (validate.ts, schema_version 2 pin) | #708 | `2a2f16a38` | Shipped |
 | M3: validate.test.ts (10 tests) | #708 | `2a2f16a38` | Shipped |
@@ -108,10 +108,10 @@ Completion criteria: ADR file at `docs/adr/ADR-104-ruview-mcp-cli-distribution.m
 
 | Item | Reason | Next step |
 |------|--------|-----------|
-| `ruview_csi_latest` with real running sensing-server (live E2E test) | sensing-server not running in CI; graceful WARN path tested instead | Run against `cognitum-v0` when fleet is available |
+| `echopose_csi_latest` with real running sensing-server (live E2E test) | sensing-server not running in CI; graceful WARN path tested instead | Run against `cognitum-v0` when fleet is available |
 | `csi tail` streaming CLI mode | Requires SSE or polling loop — scope beyond 12h horizon | M3+1 sprint |
 | Real CSI window inference via `window_path` (`cog run --input`) | `window_path` parameter wired in schema but inference via `cog run` not implemented | M3+1 sprint |
-| `ruview_registry_list` live response (real edge registry) | graceful WARN path tested; no edge registry in local CI | Run against `cognitum-v0:9000/edge` |
+| `echopose_registry_list` live response (real edge registry) | graceful WARN path tested; no edge registry in local CI | Run against `cognitum-v0:9000/edge` |
 | npm publish to registry | `private: true` during development per user preference | User triggers: `npm publish --access public` in each package dir |
 
 ### npm publish commands (when ready)
@@ -119,13 +119,13 @@ Completion criteria: ADR file at `docs/adr/ADR-104-ruview-mcp-cli-distribution.m
 ```bash
 # 1. Remove private:true from package.json in each package
 # 2. Ensure you are logged in: npm whoami
-cd tools/ruview-mcp
+cd tools/echopose-mcp
 npm run build
-npm publish --access public   # publishes @ruv/ruview-mcp
+npm publish --access public   # publishes @ruv/echopose-mcp
 
-cd ../ruview-cli
+cd ../echopose-cli
 npm run build
-npm publish --access public   # publishes @ruv/ruview-cli
+npm publish --access public   # publishes @ruv/echopose-cli
 ```
 
 Both packages are scoped under `@ruv/`. Publishing requires `npm login` with an account
@@ -134,8 +134,8 @@ that has write access to the `@ruv` scope, or a token in `~/.npmrc`.
 ### Horizon verdict
 
 All 7 milestones complete. The 12-hour autonomous run produced:
-- A fully wired MCP server (`@ruv/ruview-mcp`) with 6 tools, schema validation, fail-open pattern, 16 passing tests.
-- A matching CLI (`@ruv/ruview-cli`) with 6 subcommands.
+- A fully wired MCP server (`@ruv/echopose-mcp`) with 6 tools, schema validation, fail-open pattern, 16 passing tests.
+- A matching CLI (`@ruv/echopose-cli`) with 6 subcommands.
 - ADR-104 documenting the distribution decision with security threat table.
 - PROGRESS.md kept current with cron research artifacts R7 + R8 cross-links.
 
@@ -176,10 +176,10 @@ Current cross-links identified at session start:
 **Started:** Initial read of PROGRESS.md, ADR-100/101/102/103, R5 saliency note.
 **Accomplished:**
 - HORIZON.md initialized.
-- `tools/ruview-mcp/` and `tools/ruview-cli/` scaffolded with TypeScript, MCP SDK, Yargs.
+- `tools/echopose-mcp/` and `tools/echopose-cli/` scaffolded with TypeScript, MCP SDK, Yargs.
 - 6 MCP tools defined (stubs): csi_latest, pose_infer, count_infer, registry_list, train_count, job_status.
 - 6 CLI subcommands defined: csi tail, pose infer, count infer, cogs list, train count, job status.
-- `docs/adr/ADR-104-ruview-mcp-cli-distribution.md` written (full depth, 6-row threat table).
+- `docs/adr/ADR-104-echopose-mcp-cli-distribution.md` written (full depth, 6-row threat table).
 - 6/6 smoke tests pass.
 - PR #705 created and merged.
 - PROGRESS.md updated: R7 and R8 cross-links added (cron produced these results in parallel).
@@ -188,15 +188,15 @@ Current cross-links identified at session start:
 
 ### Session 2 — 2026-05-22 (M2 recovery + M3 + M4 + M6 complete)
 
-**Started:** Context resumed from prior session summary. Branch `feat/ruview-mcp-m3-m4` active from main at `6b3589684`.
+**Started:** Context resumed from prior session summary. Branch `feat/echopose-mcp-m3-m4` active from main at `6b3589684`.
 **Accomplished:**
 - **M3 complete:** `validate.ts` written (validateCsiWindow 56×20 + validateSensingLatestResponse schema_version 2 pin). `csi-latest.ts` updated to call validator and return structured mismatch error with `raw_response`. `subcarriers` field now dynamic (not hardcoded 56).
 - **validate.test.ts:** 10 tests covering valid window, null, wrong subcarrier count, wrong frame count, missing ts, valid response, schema_version 3, missing captured_at, null response, window error propagation prefix.
 - **16/16 tests passing** — `tools.test.ts` (6) + `validate.test.ts` (10). Build clean.
 - **PR #708 created and merged** to main (squash, branch deleted). Main now at `2a2f16a38`.
-- **M4 formally closed:** `ruview_train_count` (spawns detached cargo process, UUID job_id, log via fd, <200ms) was implemented in the prior session; milestone retroactively marked COMPLETE.
+- **M4 formally closed:** `echopose_train_count` (spawns detached cargo process, UUID job_id, log via fd, <200ms) was implemented in the prior session; milestone retroactively marked COMPLETE.
 - **M5 formally closed:** ADR-104 was merged in Session 1 (PR #705); milestone retroactively marked COMPLETE.
-- **M6 formally closed:** 16 passing tests satisfy "npm test passes in tools/ruview-mcp/" criterion.
+- **M6 formally closed:** 16 passing tests satisfy "npm test passes in tools/echopose-mcp/" criterion.
 - **HORIZON.md updated:** drift table, milestone statuses M2–M6 all COMPLETE.
 **Remaining:** M7 — final summary + handoff note (write final section, exact npm publish commands).
 **Blockers:** None. All 6 milestones M1–M6 complete ahead of the 08:00 ET auto-stop deadline.

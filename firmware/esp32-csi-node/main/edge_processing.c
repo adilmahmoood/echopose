@@ -216,7 +216,7 @@ static float estimate_bpm_zero_crossing(const float *history, uint16_t len,
 }
 
 /**
- * Autocorrelation periodicity estimator (RuView #954/#985/#987 follow-up).
+ * Autocorrelation periodicity estimator (EchoPose #954/#985/#987 follow-up).
  *
  * Zero-crossing HR estimation parked at ~45 BPM for two reasons: (1) it used a
  * stale fixed sample rate (10 Hz) after #985's self-ping raised the real CSI

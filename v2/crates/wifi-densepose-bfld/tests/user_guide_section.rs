@@ -66,9 +66,9 @@ fn user_guide_bfld_section_lists_three_operator_blueprints() {
 #[test]
 fn user_guide_bfld_section_documents_mqtt_topic_tree() {
     for topic in [
-        "ruview/<node_id>/bfld/availability",
-        "ruview/<node_id>/bfld/presence/state",
-        "ruview/<node_id>/bfld/identity_risk/state",
+        "echopose/<node_id>/bfld/availability",
+        "echopose/<node_id>/bfld/presence/state",
+        "echopose/<node_id>/bfld/identity_risk/state",
     ] {
         assert!(USER_GUIDE.contains(topic), "user-guide missing topic {topic}");
     }

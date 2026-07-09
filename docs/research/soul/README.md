@@ -10,7 +10,7 @@
 
 A Soul Signature is a fused multi-modal biometric identity vector derived entirely
 from passive electromagnetic measurement of a person inside a room equipped with
-WiFi-DensePose / RuView sensing nodes. No wearable, no camera, no explicit
+WiFi-DensePose / EchoPose sensing nodes. No wearable, no camera, no explicit
 scan-time consent moment is required for recognition once a person has enrolled.
 
 The word "soul" is deliberate product framing for a scientifically defensible concept:

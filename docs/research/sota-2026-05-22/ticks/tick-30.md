@@ -80,6 +80,6 @@ LOC: +270 on top of ADR-100. Combined chain budget: **~1,820 LOC**.
 - ADR-108: PQC key exchange (Kyber-768)
 - **ADR-109**: PQC signatures (Dilithium-3)
 
-Combined ~1,820 LOC, ~7-week engineering. This is what shipping privacy-preserving + quantum-resistant federated RuView costs.
+Combined ~1,820 LOC, ~7-week engineering. This is what shipping privacy-preserving + quantum-resistant federated EchoPose costs.
 
 ~1.9h to cron stop.

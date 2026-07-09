@@ -1,10 +1,10 @@
-"""ADR-117 P4 — paho-mqtt v2 wrapper for RuView MQTT topics.
+"""ADR-117 P4 — paho-mqtt v2 wrapper for EchoPose MQTT topics.
 
 Subscribes to the topic namespaces defined in ADR-115:
 
-- `ruview/<node>/raw/edge_vitals` — opt-in firehose of the WS edge_vitals
-- `ruview/<node>/raw/pose` — opt-in firehose of pose data
-- `ruview/<node>/raw/sensing_update` — opt-in firehose of every sensing update
+- `echopose/<node>/raw/edge_vitals` — opt-in firehose of the WS edge_vitals
+- `echopose/<node>/raw/pose` — opt-in firehose of pose data
+- `echopose/<node>/raw/sensing_update` — opt-in firehose of every sensing update
 - `homeassistant/+/wifi_densepose_<node>/+/config` — HA discovery payloads
 - `homeassistant/+/wifi_densepose_<node>/+/state` — HA state payloads
 
@@ -14,13 +14,13 @@ API explicitly. v1's deprecated callback signatures will not work.
 Example:
 
 ```python
-from wifi_densepose.client import RuViewMqttClient
+from wifi_densepose.client import EchoPoseMqttClient
 
 def on_edge_vitals(topic, payload):
     print(topic, payload["breathing_rate_bpm"])
 
-client = RuViewMqttClient(broker_host="localhost", broker_port=1883)
-client.on_message("ruview/+/raw/edge_vitals", on_edge_vitals)
+client = EchoPoseMqttClient(broker_host="localhost", broker_port=1883)
+client.on_message("echopose/+/raw/edge_vitals", on_edge_vitals)
 client.start()
 # ... runs in a background thread; call client.stop() to disconnect
 ```
@@ -53,7 +53,7 @@ MessageHandler = Callable[[str, Any], None]
 content is valid JSON, otherwise the raw bytes are passed through."""
 
 
-class RuViewMqttClient:
+class EchoPoseMqttClient:
     """Wrapper around paho-mqtt v2 with per-topic-pattern callbacks.
 
     Per the rumqttc lesson [[feedback_mqtt_integration_test_patterns]]:
@@ -77,7 +77,7 @@ class RuViewMqttClient:
     ) -> None:
         if not _PAHO_AVAILABLE:
             raise ImportError(
-                "RuViewMqttClient requires the `paho-mqtt` package. Install with "
+                "EchoPoseMqttClient requires the `paho-mqtt` package. Install with "
                 "`pip install \"wifi-densepose[client]\"` to enable the client extras."
             )
         self.broker_host = broker_host

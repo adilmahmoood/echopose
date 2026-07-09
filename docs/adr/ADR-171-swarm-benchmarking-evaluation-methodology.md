@@ -5,7 +5,7 @@
 | Status     | Accepted (peer-reviewed 2026-05-30)                                                     |
 | Date       | 2026-05-30                                                                              |
 | Deciders   | ruv                                                                                     |
-| Relates to | ADR-148 (ruview-swarm), ADR-147 (OccWorld), ADR-146 (RF encoder), ADR-028 (witness)    |
+| Relates to | ADR-148 (echopose-swarm), ADR-147 (OccWorld), ADR-146 (RF encoder), ADR-028 (witness)    |
 
 > Companion to ADR-148. ADR-148 shipped the swarm and 5 criterion micro-benchmarks
 > plus a `SotaComparison` against Wi2SAR. This ADR defines **how we evaluate the swarm
@@ -16,7 +16,7 @@
 
 ## 1. Context
 
-ADR-148's `ruview-swarm` reports performance via five `criterion` micro-benchmarks and a
+ADR-148's `echopose-swarm` reports performance via five `criterion` micro-benchmarks and a
 single `SotaComparison` (localization 1.732 m vs Wi2SAR 5 m; coverage ~223 s vs 810 s).
 These numbers are **internally valid but insufficient as scientific claims**:
 
@@ -58,7 +58,7 @@ the sensing-modality difference (RSS bearing vs CSI multi-view fusion).
 CSI-based, multi-view SAR system.** This is a research niche; comparison is paper-to-paper.
 The adjacent options and their fit:
 
-| Benchmark / Leaderboard | Domain | Live submission? | Fit for ruview-swarm |
+| Benchmark / Leaderboard | Domain | Live submission? | Fit for echopose-swarm |
 |-------------------------|--------|------------------|----------------------|
 | **Wi2SAR** (arxiv 2604.09115) | Drone WiFi SAR | No (paper) | **Direct baseline** — paper-to-paper only; RSS bearing ≠ CSI fusion |
 | **MARL4DRP** (Springer 2023) | Drone routing MARL | No | Closest drone-MARL benchmark; would need a routing→coverage adapter |

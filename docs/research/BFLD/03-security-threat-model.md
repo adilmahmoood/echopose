@@ -72,7 +72,7 @@ compromised to produce unusually high-resolution BFI, BFLD's identity_risk_score
 will correctly detect the elevated separability and flag the frames at higher risk.
 The system is self-normalizing to the quality of what is captured.
 
-### A6 — Supply-Chain Compromise of RuView Node
+### A6 — Supply-Chain Compromise of EchoPose Node
 
 **Capability**: Modified BFLD binary with the privacy gate removed or with an
 exfiltration path added.
@@ -142,7 +142,7 @@ Attacker Goal: Confirm person X visited site A and site B on the same day
 ```
 Attacker Goal: Infer when a known person is present by monitoring risk score changes
 |
-+-- Prerequisite: Read access to MQTT topic ruview/<node_id>/bfld/identity_risk/state
++-- Prerequisite: Read access to MQTT topic echopose/<node_id>/bfld/identity_risk/state
 |
 +-- Step 1: Baseline: collect identity_risk_score during known-empty periods
 |
@@ -166,11 +166,11 @@ Attacker Goal: Discover what BFLD data is published and harvest it
 |
 +-- Step 1: Connect to broker without TLS (if TLS not configured)
 |
-+-- Step 2: Subscribe to ruview/# wildcard
++-- Step 2: Subscribe to echopose/# wildcard
 |
 +-- Mitigation: Default mosquitto ACL denies wildcard subscription to anonymous clients.
 +-- Mitigation: TLS + client certificates recommended for all BFLD deployments.
-+-- Mitigation: ruview/<node_id>/bfld/raw/state is disabled by default.
++-- Mitigation: echopose/<node_id>/bfld/raw/state is disabled by default.
 ```
 
 ### AT-5: Matter Cluster Abuse

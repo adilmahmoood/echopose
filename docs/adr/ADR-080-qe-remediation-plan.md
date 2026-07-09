@@ -3,7 +3,7 @@
 - **Status:** Proposed — P0 security findings #1–#3 **RESOLVED** on the shipped Rust sensing-server boundary (2026-06-13; closes ADR-164 G11)
 - **Date:** 2026-04-06
 - **Source:** [QE Analysis Gist (2026-04-05)](https://gist.github.com/proffesor-for-testing/a6b84d7a4e26b7bbef0cf12f932925b7)
-- **Full Reports:** [proffesor-for-testing/RuView `qe-reports` branch](https://github.com/proffesor-for-testing/RuView/tree/qe-reports/docs/qe-reports)
+- **Full Reports:** [proffesor-for-testing/EchoPose `qe-reports` branch](https://github.com/proffesor-for-testing/EchoPose/tree/qe-reports/docs/qe-reports)
 
 ## Context
 

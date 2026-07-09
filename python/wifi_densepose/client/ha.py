@@ -142,7 +142,7 @@ class HABlueprintHelper:
     """Aggregates HA discovery payloads observed on the bus and offers
     structured queries against them.
 
-    Intended use: subscribe a RuViewMqttClient to
+    Intended use: subscribe a EchoPoseMqttClient to
     `homeassistant/+/wifi_densepose_+/+/config`, feed every message
     into `add_payload()`, then ask the helper "what entities does
     node X expose?" or "what binary_sensors are presence-class?".

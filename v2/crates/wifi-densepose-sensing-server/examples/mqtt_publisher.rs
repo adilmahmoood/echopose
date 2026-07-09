@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let builder = OwnedDiscoveryBuilder {
         discovery_prefix: cfg.discovery_prefix.clone(),
         node_id: "example_node".into(),
-        node_friendly_name: Some("Example RuView Node".into()),
+        node_friendly_name: Some("Example EchoPose Node".into()),
         sw_version: env!("CARGO_PKG_VERSION").into(),
         model: "ESP32-S3 CSI node (example)".into(),
         via_device: None,

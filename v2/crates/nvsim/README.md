@@ -31,7 +31,7 @@ flagged in code; every random number comes from a seeded ChaCha20 PRNG.
 | **Sensor researcher** evaluating a new pipeline | Replay a synthetic trace through your own DSP and check it against a published-physics ground truth before buying hardware |
 | **DSP / ML engineer** building anomaly detectors | Generate magnetic-anomaly traces with a known answer key — useful for regression replay, deterministic CI, and "did my detector regress?" gates |
 | **Educator** teaching magnetometry / NV physics | Run real Biot-Savart, Lorentzian ODMR, and 4-axis projection in Rust without standing up a Python+QuTiP environment |
-| **RuView pipeline contributor** | Get a binary `MagFrame` shape (`0xC51A_6E70`) you can plumb into existing observability, with optional ruvector trace compression behind a feature flag |
+| **EchoPose pipeline contributor** | Get a binary `MagFrame` shape (`0xC51A_6E70`) you can plumb into existing observability, with optional ruvector trace compression behind a feature flag |
 | **Auditor / compliance reviewer** | Re-run the included determinism check (`same scene + seed → byte-identical proof bundle`) and verify the simulator's output across machines without re-running the whole pipeline |
 
 ## Capabilities (what's shipping today)
@@ -98,7 +98,7 @@ cargo test  -p nvsim --no-default-features      # currently 34 passing
 ```
 
 `nvsim` is a standalone leaf crate. It depends only on `serde`, `thiserror`,
-`tracing`, `rand`, and `rand_chacha`. RuView ecosystem integrations
+`tracing`, `rand`, and `rand_chacha`. EchoPose ecosystem integrations
 (`wifi-densepose-core` frame alignment, `ruvector-core` trace compression)
 land behind feature flags after the core simulator is shipping. None are
 required to use this crate.
@@ -196,7 +196,7 @@ Per `15-nvsim-implementation-plan.md` §6:
 - Single-NV imaging / ODMR scanning microscopy — `nvsim` is room-scale, not nm.
 - Full Lindblad solver, NV-NV entanglement, photonic-crystal cavities — escalate to QuTiP if needed.
 - Diamond growth / NV creation chemistry — vendor (Element Six, Adamas) handles.
-- Cryogenic operation — RuView ships room-temperature; `nvsim` follows.
+- Cryogenic operation — EchoPose ships room-temperature; `nvsim` follows.
 - Real hardware control (laser drivers, microwave sources, AOM) — `nvsim` is forward-only.
 - Pulsed dynamical-decoupling sequences — defer to dedicated tooling.
 - fT-floor sensitivity claims — out of COTS reach in 2026; `nvsim` commits to a pT-floor honestly.

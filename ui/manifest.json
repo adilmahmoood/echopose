@@ -1,6 +1,6 @@
 {
-  "name": "RuView - WiFi DensePose",
-  "short_name": "RuView",
+  "name": "EchoPose - WiFi DensePose",
+  "short_name": "EchoPose",
   "description": "WiFi-based human pose estimation, vital sign detection, and presence sensing through walls",
   "start_url": "/",
   "display": "standalone",

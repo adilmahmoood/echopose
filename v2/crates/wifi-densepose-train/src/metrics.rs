@@ -25,7 +25,7 @@
 //!   returning 0.0 when the area is degenerate.
 //!
 //! `Trainer::evaluate`, `eval.rs`, `proof.rs`, the WiFlow-STD bench and
-//! `ruview_metrics` all route through these two functions.
+//! `echopose_metrics` all route through these two functions.
 //!
 //! ## Deprecated / non-canonical (DO NOT USE for reported metrics)
 //!
@@ -35,7 +35,7 @@
 //!
 //! - [`compute_pck_v2`] / [`compute_oks_v2`] / [`MetricsAccumulatorV2`]
 //!   (hip↔hip torso but pixel-space, scale-from-area — folded into canonical).
-//! - `ruview_metrics`' bbox-diagonal PCK + its private OKS.
+//! - `echopose_metrics`' bbox-diagonal PCK + its private OKS.
 //!
 //! # No mock data
 //!

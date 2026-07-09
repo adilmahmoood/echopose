@@ -1,23 +1,23 @@
-# ADR-264: `@ruvnet/rvagent` MCP Server + `@ruv/ruview-cli` — Deep Review + Optimization Strategy
+# ADR-264: `@ruvnet/rvagent` MCP Server + `@ruv/echopose-cli` — Deep Review + Optimization Strategy
 
 | Field | Value |
 |-------|-------|
-| **Status** | Accepted — **implemented** (O1–O9, `@ruvnet/rvagent@0.2.0`): `exports` fixed (types-first, no phantom `.cjs`), map-free tarball (127,704 B unpacked / 46 files / 0 maps — MEASURED, `npm pack --dry-run`, from 188 kB), Streamable HTTP **wired** behind `RVAGENT_HTTP_PORT` with per-session transports + 1 MiB body cap + port-aware origin gate, underscore tool names with dotted router aliases, single Zod validation gate with generated JSON Schemas, fd-leak fixed + persisted job records + bounded log tails, probing `detectCogBinary`, package.json-sourced version, `ruview-cli` bin renamed. 99/99 jest tests (MEASURED); both transports smoke-tested live |
+| **Status** | Accepted — **implemented** (O1–O9, `@ruvnet/rvagent@0.2.0`): `exports` fixed (types-first, no phantom `.cjs`), map-free tarball (127,704 B unpacked / 46 files / 0 maps — MEASURED, `npm pack --dry-run`, from 188 kB), Streamable HTTP **wired** behind `RVAGENT_HTTP_PORT` with per-session transports + 1 MiB body cap + port-aware origin gate, underscore tool names with dotted router aliases, single Zod validation gate with generated JSON Schemas, fd-leak fixed + persisted job records + bounded log tails, probing `detectCogBinary`, package.json-sourced version, `echopose-cli` bin renamed. 99/99 jest tests (MEASURED); both transports smoke-tested live |
 | **Date** | 2026-07-02 |
 | **Deciders** | ruv |
-| **Codename** | **RUVIEW-NPM-REVIEW-2** |
+| **Codename** | **ECHOPOSE-NPM-REVIEW-2** |
 | **Supersedes / amends** | none (reviews the ADR-104/ADR-124 artifacts; feeds ADR-265 distribution strategy) |
 
 ## Context
 
-Two TypeScript npm packages expose RuView sensing to agents and shells:
+Two TypeScript npm packages expose EchoPose sensing to agents and shells:
 
-- **`@ruvnet/rvagent@0.1.0`** (`tools/ruview-mcp/`) — SENSE-BRIDGE, the MCP
+- **`@ruvnet/rvagent@0.1.0`** (`tools/echopose-mcp/`) — SENSE-BRIDGE, the MCP
   server over the sensing-server HTTP API + cog binaries: 12 tools
   (csi/pose/count/registry/train/job + ADR-124 BFLD/presence/vitals). Published
   (188 kB unpacked — MEASURED, `npm view @ruvnet/rvagent`). Deps:
   `@modelcontextprotocol/sdk` + `zod`.
-- **`@ruv/ruview-cli@0.0.1`** (`tools/ruview-cli/`) — `private: true` yargs CLI
+- **`@ruv/echopose-cli@0.0.1`** (`tools/echopose-cli/`) — `private: true` yargs CLI
   mirroring the same capabilities; intentionally duplicates `http.ts`/`cog.ts`/
   `config.ts` (~150 lines) to stay standalone.
 
@@ -44,7 +44,7 @@ The 0.1.0 tarball ships **44 `.map` files = 62,698 B** against 78,209 B of
 actual `.js` (MEASURED, extracted registry tarball). `src/` is not published, so
 every `sourceMappingURL` points at `../src/*.ts` that consumers do not have —
 the maps can never resolve. Also `files` lists `CHANGELOG.md`, which does not
-exist in `tools/ruview-mcp/` (npm silently skips it), so the advertised file set
+exist in `tools/echopose-mcp/` (npm silently skips it), so the advertised file set
 is partly fictional.
 
 ### F3 (MEDIUM, honesty): the package description claims a transport it does not start
@@ -58,8 +58,8 @@ CLAIMED capability presented as shipped. Either wire it (`--http` /
 
 ### F4 (MEDIUM, interop + inconsistency): two tool-naming conventions, one of them dot-based
 
-Six tools use `ruview_snake_case`; six (ADR-124 additions) use
-`ruview.dotted.names`. Same interop caveat as ADR-263 F9 (host tool-name
+Six tools use `echopose_snake_case`; six (ADR-124 additions) use
+`echopose.dotted.names`. Same interop caveat as ADR-263 F9 (host tool-name
 regexes commonly `^[a-zA-Z0-9_-]{1,64}$`), plus the split convention makes the
 tool surface look like two products. Standardize on underscores and accept the
 dotted forms as aliases for one deprecation cycle.
@@ -81,9 +81,9 @@ SDK's peer range allows).
 `trainCount` opens `logFdOut`/`logFdErr` with `openSync` and never closes them
 in the parent — the spawned cargo child inherits duplicates, but the parent's
 descriptors stay open for the MCP server's lifetime: 2 leaked fds per training
-job. `jobRegistry` is an in-memory `Map`, so `ruview_job_status` after a server
+job. `jobRegistry` is an in-memory `Map`, so `echopose_job_status` after a server
 restart reports "not found" for a training run that is still burning GPU (the
-source comments acknowledge this; the fix — persist `~/.ruview/jobs/<id>.json`,
+source comments acknowledge this; the fix — persist `~/.echopose/jobs/<id>.json`,
 already the documented layout — is small). Also `jobStatus` re-`import`s
 `node:fs` on every poll and reads the entire log to return 20 lines.
 
@@ -109,10 +109,10 @@ happens. Either probe with `existsSync` or delete the array.
 
 `PACKAGE_VERSION = "0.1.0"` (index.ts) duplicates package.json;
 `@types/express` is unused (`http-transport` uses `node:http`); `@types/jest@30`
-against `jest@29`; `ruview-cli` hardcodes `.version("0.0.1")`. And
-`@ruv/ruview-cli` claims the **`ruview`** bin name, which collides with
-`@ruvnet/ruview`'s bin (ADR-182) if both are ever installed globally —
-ADR-263/265 give the `ruview` name to the harness; the CLI must rename or fold.
+against `jest@29`; `echopose-cli` hardcodes `.version("0.0.1")`. And
+`@ruv/echopose-cli` claims the **`echopose`** bin name, which collides with
+`@ruvnet/echopose`'s bin (ADR-182) if both are ever installed globally —
+ADR-263/265 give the `echopose` name to the harness; the CLI must rename or fold.
 
 ## Decision
 
@@ -128,7 +128,7 @@ ADR-263/265 give the `ruview` name to the harness; the CLI must rename or fold.
   keyed by `mcp-session-id`, 1 MiB body cap, origin matching that honors ports
   (compare `URL.origin` prefixes or document exact origins). Until then, change
   the description to "stdio MCP server (Streamable HTTP scaffold, unwired)".
-- **O4 (F4):** rename dotted tools to underscore (`ruview_bfld_last_scan`, …),
+- **O4 (F4):** rename dotted tools to underscore (`echopose_bfld_last_scan`, …),
   keep dotted aliases in the call router for one release, note it in the README.
 - **O5 (F5):** single validation gate: the registry maps name → Zod schema →
   typed handler; advertised `inputSchema` generated from Zod at build time.
@@ -141,9 +141,9 @@ ADR-263/265 give the `ruview` name to the harness; the CLI must rename or fold.
   align `@types/jest` with jest 29 (or move to `node:test` like the harness and
   drop the jest toolchain entirely — it is the heaviest devDep in both
   packages).
-- **O9 (F9, scope):** fold `@ruv/ruview-cli` into `rvagent` as a second bin
+- **O9 (F9, scope):** fold `@ruv/echopose-cli` into `rvagent` as a second bin
   (`rvagent-cli`) sharing `http/cog/config`, or keep it private-forever and say
-  so in its README. Its `ruview` bin name is surrendered to `@ruvnet/ruview`
+  so in its README. Its `echopose` bin name is surrendered to `@ruvnet/echopose`
   either way.
 
 ## Consequences

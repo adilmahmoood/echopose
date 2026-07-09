@@ -119,12 +119,12 @@ The Seed's built-in drift detection compares incoming vectors against a rolling 
 - **Trend window:** Last 20 vectors (~10 minutes at 30s intervals).
 - **Alert routing:** Seed webhook notifies hotel management system when happiness trend is declining.
 
-### 5. RuView Live Dashboard Update
+### 5. EchoPose Live Dashboard Update
 
-`ruview_live.py` gains a `--seed` flag:
+`echopose_live.py` gains a `--seed` flag:
 
 ```bash
-python ruview_live.py --port COM5 --seed 169.254.42.1 --mode happiness
+python echopose_live.py --port COM5 --seed 169.254.42.1 --mode happiness
 ```
 
 This mode displays:
@@ -169,7 +169,7 @@ This mode displays:
                               v
                     +------------------+
                     | Hotel Management |
-                    | System / RuView  |
+                    | System / EchoPose  |
                     | Live Dashboard   |
                     +------------------+
 ```

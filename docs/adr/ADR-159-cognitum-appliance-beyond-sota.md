@@ -8,7 +8,7 @@
 ## Context
 
 This ADR records the beyond-SOTA sweep over the Cognitum appliance cluster
-(`cog-person-count`, `cog-pose-estimation`, `cog-ha-matter`, `ruview-swarm`),
+(`cog-person-count`, `cog-pose-estimation`, `cog-ha-matter`, `echopose-swarm`),
 executed under the project's **prove-everything / anti-"AI-slop"** directive: the
 claim surface every cog presents (manifests, descriptions, runtime events,
 broadcast fields) must match what the code and the shipped weights actually do.
@@ -52,7 +52,7 @@ Grading vocabulary follows ADR-152 / ADR-158:
 | CSI pose estimation (`cog-pose-estimation`) | **DATA-GATED** | Real Candle encoder + 17-keypoint head; field accuracy honestly weak (PCK@50 = 18.5%, disclosed in the manifest). The default-install gate bug (A1) is fixed so it actually emits frames. |
 | Signed cog manifests (Ed25519 + SHA-256) | **NO-ACTION (already-SOTA)** | On-disk manifests are real, signed, SHA-pinned, and honest about accuracy. The CLI now emits them verbatim (A4). |
 | HA bridge (`cog-ha-matter`) MQTT + witness | **NO-ACTION (already-SOTA)** | Real Ed25519 hash-chain witness, mDNS, embedded broker. Matter commissioning is honestly deferred to v0.8 (TLS off, LAN-only) — description softened to stop claiming Matter (honest-absence). |
-| Drone-swarm MARL (`ruview-swarm`) | **DATA-GATED / honest** | `candle_ppo.rs` is real autodiff PPO; it is **untrained at runtime** (random init) by design — the swarm must be trained before deploy, which the code does not hide. |
+| Drone-swarm MARL (`echopose-swarm`) | **DATA-GATED / honest** | `candle_ppo.rs` is real autodiff PPO; it is **untrained at runtime** (random init) by design — the swarm must be trained before deploy, which the code does not hide. |
 | ASTM F3411 Remote ID | **MEASURED (A3)** | Basic ID message is real; the Location/Vector message is honestly *not* implemented (NED metres are no longer mislabelled as WGS84 lat/lon). |
 
 ## Decision — Fixes Landed (MEASURED)
@@ -185,7 +185,7 @@ Audited and found genuinely correct; cited as positives, not edited:
   Ed25519 hash-chained witness log. Already-SOTA.
 - **`cog-person-count` fusion** (`fusion.rs`) — real Bayesian product-of-experts
   multi-node fusion (Stoer-Wagner-bounded clip), not a heuristic. Already-SOTA.
-- **`ruview-swarm` PPO** (`marl/candle_ppo.rs`) — real Candle autodiff PPO with a
+- **`echopose-swarm` PPO** (`marl/candle_ppo.rs`) — real Candle autodiff PPO with a
   genuine policy-gradient update; its `randn` uses (init, action sampling,
   exploration) are all legitimate, not fake-output substitutes. Untrained at
   runtime by design (the swarm must be trained before deploy), which the code
@@ -224,10 +224,10 @@ Audited and found genuinely correct; cited as positives, not edited:
 
 ```bash
 cd v2
-cargo test -p cog-person-count -p cog-pose-estimation -p cog-ha-matter -p ruview-swarm \
+cargo test -p cog-person-count -p cog-pose-estimation -p cog-ha-matter -p echopose-swarm \
   --no-default-features
-# ruview-swarm train path compiles (PPO autodiff)
-cargo check -p ruview-swarm --features train
+# echopose-swarm train path compiles (PPO autodiff)
+cargo check -p echopose-swarm --features train
 # A4 end-to-end — real signed manifest, non-null binary_sha256
 cargo run -q -p cog-person-count --no-default-features -- manifest
 ```
@@ -236,7 +236,7 @@ Result at time of writing (all 0 failed):
 - `cog-person-count` — **19 passed** (lib 10 incl. 3 manifest; smoke 9)
 - `cog-pose-estimation` — **8 passed** (smoke)
 - `cog-ha-matter` — **64 passed** (unchanged; description-only edit)
-- `ruview-swarm` — **117 passed** (default features); `--features train` compiles clean.
+- `echopose-swarm` — **117 passed** (default features); `--features train` compiles clean.
 
 Scope was limited to the four named crates. NO-ACTION positives (witness chain,
 fusion, PPO + randn audit) were verified by inspection and left untouched.

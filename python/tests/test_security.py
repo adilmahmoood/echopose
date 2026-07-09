@@ -20,7 +20,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from wifi_densepose.client import RuViewMqttClient, SemanticPrimitiveListener
+from wifi_densepose.client import EchoPoseMqttClient, SemanticPrimitiveListener
 from wifi_densepose.client.ha import (
     HABlueprintHelper,
     parse_discovery_payload,
@@ -121,10 +121,10 @@ def test_topic_matcher_edge_cases(pattern: str, topic: str, expected: bool) -> N
 
 def test_mqtt_password_never_in_repr() -> None:
     """A user's broker password must NOT leak through __repr__ or
-    __str__. Currently RuViewMqttClient doesn't define repr — that's
+    __str__. Currently EchoPoseMqttClient doesn't define repr — that's
     the safest default (uses object identity). Lock that down so a
     future "let's add a friendly repr" change doesn't expose creds."""
-    c = RuViewMqttClient(
+    c = EchoPoseMqttClient(
         broker_host="broker.example.com",
         username="alice",
         password="super-secret-token-do-not-leak",
@@ -139,7 +139,7 @@ def test_mqtt_password_never_stored_in_plain_attribute() -> None:
     """The plaintext password must not be stored on the client
     instance — paho-mqtt internalises it into `_client._username_pw`
     which we never expose. Audit by walking the public dict."""
-    c = RuViewMqttClient(password="dont-leak-me")
+    c = EchoPoseMqttClient(password="dont-leak-me")
     for k, v in vars(c).items():
         if isinstance(v, str):
             assert "dont-leak-me" not in v, f"password leaked via attribute {k!r}"
@@ -168,7 +168,7 @@ def test_ha_helper_drops_invalid_topic_silently() -> None:
     topics so a misconfigured broker doesn't bring down the client."""
     h = HABlueprintHelper()
     assert h.add_payload("garbage", {"x": 1}) is False
-    assert h.add_payload("ruview/aa/raw/edge_vitals", {"x": 1}) is False
+    assert h.add_payload("echopose/aa/raw/edge_vitals", {"x": 1}) is False
     assert len(h) == 0
 
 
@@ -234,7 +234,7 @@ def test_public_surface_is_stable() -> None:
 def test_client_public_surface_is_stable() -> None:
     import wifi_densepose.client as c
     for name in c.__all__:
-        # Lazy re-exports for SensingClient + RuViewMqttClient need to
+        # Lazy re-exports for SensingClient + EchoPoseMqttClient need to
         # be resolvable too — touch them to exercise __getattr__.
         _ = getattr(c, name)
 
@@ -246,7 +246,7 @@ def test_mqtt_handler_exception_isolation_with_multiple_handlers() -> None:
     """Earlier test covered one crashing handler; this version makes
     sure a crashing handler in the *middle* of a list of registered
     handlers doesn't prevent later handlers from firing."""
-    c = RuViewMqttClient()
+    c = EchoPoseMqttClient()
     received_before: list[str] = []
     received_after: list[str] = []
     c.on_message("a/+", lambda t, p: received_before.append(t))

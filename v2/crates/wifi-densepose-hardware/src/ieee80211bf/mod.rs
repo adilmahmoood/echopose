@@ -12,14 +12,14 @@
 //! **No commodity silicon — ESP32 parts included — implements the standard
 //! yet.** ADR-152 §2.4 originally decided "track silicon; no code now";
 //! ADR-153 amends that clause: build the typed protocol surface now, so
-//! RuView can adopt standardized sensing the day any chipset exposes it.
+//! EchoPose can adopt standardized sensing the day any chipset exposes it.
 //! This layer is simulation-tested forward compatibility — the OTA binding
 //! lands when silicon does. Today's opportunistic CSI extraction (ADR-018 /
 //! ADR-028) remains the backend, mapped onto the standardized report path by
 //! [`transport::OpportunisticCsiBridge`].
 //!
 //! > This module is not a certified 802.11bf implementation. It models the
-//! > public procedure shape needed by RuView and RuvSense, while intentionally
+//! > public procedure shape needed by EchoPose and RuvSense, while intentionally
 //! > avoiding OTA frame binding until chipset support and vendor APIs exist.
 //!
 //! # Layout

@@ -9,7 +9,7 @@
 | **Status** | Proposed (v0 design) |
 | **Date** | 2026-05-12 |
 | **Owner** | ruv |
-| **Relates to** | [ADR-095](../adr/ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI platform), [ADR-012](../adr/ADR-012-esp32-csi-sensor-mesh.md) (ESP32 mesh), [ADR-013](../adr/ADR-013-feature-level-sensing-commodity-gear.md) (feature-level sensing), [ADR-014](../adr/ADR-014-sota-signal-processing.md) (SOTA signal processing), [ADR-016](../adr/ADR-016-ruvector-integration.md) (RuVector integration), [ADR-024](../adr/ADR-024-contrastive-csi-embedding-model.md) (AETHER embeddings), [ADR-031](../adr/ADR-031-ruview-sensing-first-rf-mode.md) (RuView sensing-first RF mode), [ADR-040](../adr/ADR-040-wasm-programmable-sensing.md) (WASM programmable sensing) |
+| **Relates to** | [ADR-095](../adr/ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI platform), [ADR-012](../adr/ADR-012-esp32-csi-sensor-mesh.md) (ESP32 mesh), [ADR-013](../adr/ADR-013-feature-level-sensing-commodity-gear.md) (feature-level sensing), [ADR-014](../adr/ADR-014-sota-signal-processing.md) (SOTA signal processing), [ADR-016](../adr/ADR-016-ruvector-integration.md) (RuVector integration), [ADR-024](../adr/ADR-024-contrastive-csi-embedding-model.md) (AETHER embeddings), [ADR-031](../adr/ADR-031-echopose-sensing-first-rf-mode.md) (EchoPose sensing-first RF mode), [ADR-040](../adr/ADR-040-wasm-programmable-sensing.md) (WASM programmable sensing) |
 | **Domain model** | [rvCSI Domain Model](../ddd/rvcsi-domain-model.md) |
 
 ---
@@ -18,7 +18,7 @@
 
 rvCSI is a **Rust-first, TypeScript-accessible, hardware-abstracted Channel State Information (CSI) platform** for WiFi-based spatial sensing.
 
-The goal is to convert CSI from fragile research data into a durable edge sensing runtime that can feed RuView, RuVector, Cognitum, and agentic systems with validated live radio-field observations.
+The goal is to convert CSI from fragile research data into a durable edge sensing runtime that can feed EchoPose, RuVector, Cognitum, and agentic systems with validated live radio-field observations.
 
 rvCSI does **not** try to replace Nexmon on day one. It wraps, validates, normalizes, streams, embeds, and learns from CSI produced by Nexmon, ESP32 CSI, Intel CSI, Atheros CSI, SDR pipelines, and future RF sensor sources.
 
@@ -54,7 +54,7 @@ The right framing is **structural sensing**, not "magic X-ray vision". CSI is ex
 | Researchers working with WiFi CSI and RF sensing | Reproducible ingestion, replay, and benchmark datasets |
 | Smart-building and elder-care solution builders | Privacy-preserving presence/motion/breathing without cameras |
 | Industrial monitoring teams | Camera-free movement/anomaly detection that runs unattended |
-| Developers using RuView / RuVector / Cognitum | A drop-in source of RF observations for the broader ruvnet stack |
+| Developers using EchoPose / RuVector / Cognitum | A drop-in source of RF observations for the broader ruvnet stack |
 
 ---
 
@@ -106,7 +106,7 @@ The right framing is **structural sensing**, not "magic X-ray vision". CSI is ex
 6. Graph-based room topology
 7. Local MCP tool server
 8. Replayable benchmark datasets
-9. Sensor fusion with RuView
+9. Sensor fusion with EchoPose
 10. Deployment profile for Cognitum Seed and Appliance
 
 ### 5.3 Version two
@@ -339,7 +339,7 @@ rvcsi/
     replay/
 ```
 
-> Within the RuView monorepo, rvCSI would be introduced as a new bounded context (see the [domain model](../ddd/rvcsi-domain-model.md)) and a small set of `v2/crates/rvcsi-*` crates, reusing existing `wifi-densepose-signal` DSP and `wifi-densepose-ruvector` integration where they overlap rather than duplicating them.
+> Within the EchoPose monorepo, rvCSI would be introduced as a new bounded context (see the [domain model](../ddd/rvcsi-domain-model.md)) and a small set of `v2/crates/rvcsi-*` crates, reusing existing `wifi-densepose-signal` DSP and `wifi-densepose-ruvector` integration where they overlap rather than duplicating them.
 
 ---
 
@@ -359,7 +359,7 @@ The authoritative definitions live in the [rvCSI domain model](../ddd/rvcsi-doma
 1. **Embedding model.** What produces frame/window embeddings in v0 — a fixed DSP feature vector, the existing AETHER contrastive model (ADR-024), or a lightweight on-device model? v0 leans on a deterministic DSP feature vector; v2 targets an on-device model.
 2. **Calibration UX.** How long must a calibration window be before `StabilityScore` is trustworthy, and how is that surfaced in the SDK/CLI?
 3. **Nexmon coupling.** Which Nexmon-supported chips/firmwares are in the v0 "supported" matrix vs. "best effort"?
-4. **Monorepo vs. standalone.** Does rvCSI ship as `v2/crates/rvcsi-*` inside RuView or as a separate `rvcsi/` repo? This PRD assumes monorepo crates that reuse `wifi-densepose-signal` and `wifi-densepose-ruvector`.
+4. **Monorepo vs. standalone.** Does rvCSI ship as `v2/crates/rvcsi-*` inside EchoPose or as a separate `rvcsi/` repo? This PRD assumes monorepo crates that reuse `wifi-densepose-signal` and `wifi-densepose-ruvector`.
 5. **MCP transport.** stdio-only for v1, or also a local socket for multi-agent fan-out?
 
 ---
@@ -372,5 +372,5 @@ The authoritative definitions live in the [rvCSI domain model](../ddd/rvcsi-doma
 - [ADR-014 — SOTA Signal Processing](../adr/ADR-014-sota-signal-processing.md)
 - [ADR-016 — RuVector Integration](../adr/ADR-016-ruvector-integration.md)
 - [ADR-024 — Project AETHER: Contrastive CSI Embeddings](../adr/ADR-024-contrastive-csi-embedding-model.md)
-- [ADR-031 — RuView Sensing-First RF Mode](../adr/ADR-031-ruview-sensing-first-rf-mode.md)
+- [ADR-031 — EchoPose Sensing-First RF Mode](../adr/ADR-031-echopose-sensing-first-rf-mode.md)
 - [ADR-040 — WASM Programmable Sensing](../adr/ADR-040-wasm-programmable-sensing.md)

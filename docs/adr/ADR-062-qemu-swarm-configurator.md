@@ -4,7 +4,7 @@
 |-------------|------------------------------------------------|
 | **Status**  | Accepted                                       |
 | **Date**    | 2026-03-14                                     |
-| **Authors** | RuView Team                                    |
+| **Authors** | EchoPose Team                                    |
 | **Relates** | ADR-061 (QEMU testing platform), ADR-060 (channel/MAC filter), ADR-018 (binary frame), ADR-039 (edge intel) |
 
 ## Glossary

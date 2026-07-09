@@ -29,7 +29,7 @@ REMOTE="${GCP_USER}@${INSTANCE_IP}"
 LOCAL_SCRIPTS_DIR="$(cd "$(dirname "$0")/../.." && pwd)/scripts"
 OUTPUT_DIR="./out/gcp-checkpoints"
 REMOTE_SNAPSHOTS="/tmp/snapshots"
-REMOTE_SCRIPTS="~/ruview-scripts"
+REMOTE_SCRIPTS="~/echopose-scripts"
 REMOTE_CHECKPOINTS="~/checkpoints"
 
 # ── Validation ────────────────────────────────────────────────────────────────
@@ -73,10 +73,10 @@ log "SSH connection OK"
 # ── Stage 0: Startup script completion check ──────────────────────────────────
 log "Checking that startup script completed ..."
 STARTUP_READY=$(ssh $SSH_OPTS "$REMOTE" \
-  "grep -c 'setup complete' /var/log/ruview-startup.log 2>/dev/null || echo 0")
+  "grep -c 'setup complete' /var/log/echopose-startup.log 2>/dev/null || echo 0")
 if [[ "$STARTUP_READY" -lt 1 ]]; then
   log "WARNING: Startup script may not have finished yet."
-  log "         Check /var/log/ruview-startup.log on the instance."
+  log "         Check /var/log/echopose-startup.log on the instance."
   log "         Continuing anyway — conda env may need more time."
 fi
 
@@ -94,7 +94,7 @@ ssh $SSH_OPTS "$REMOTE" "mkdir -p $REMOTE_SCRIPTS"
 rsync -avz --progress \
   -e "ssh $SSH_OPTS" \
   --include="occworld_retrain.py" \
-  --include="ruview_occ_dataset.py" \
+  --include="echopose_occ_dataset.py" \
   --exclude="*.sh" \
   --exclude="gcp/" \
   "$LOCAL_SCRIPTS_DIR/" \
@@ -110,14 +110,14 @@ set -euo pipefail
 source /opt/conda/etc/profile.d/conda.sh
 conda activate occworld
 
-export PYTHONPATH="$PYTHONPATH:$HOME/OccWorld:$HOME/ruview-scripts"
+export PYTHONPATH="$PYTHONPATH:$HOME/OccWorld:$HOME/echopose-scripts"
 mkdir -p ~/checkpoints/vqvae
 
 echo "[stage1] $(date): starting VQVAE torchrun"
 torchrun \
   --nproc_per_node=8 \
   --master_port=29500 \
-  ~/ruview-scripts/occworld_retrain.py vqvae \
+  ~/echopose-scripts/occworld_retrain.py vqvae \
   --snapshots /tmp/snapshots/ \
   --work-dir ~/checkpoints/vqvae \
   --epochs 200
@@ -139,7 +139,7 @@ set -euo pipefail
 source /opt/conda/etc/profile.d/conda.sh
 conda activate occworld
 
-export PYTHONPATH="$PYTHONPATH:$HOME/OccWorld:$HOME/ruview-scripts"
+export PYTHONPATH="$PYTHONPATH:$HOME/OccWorld:$HOME/echopose-scripts"
 mkdir -p ~/checkpoints/transformer
 
 # Locate the latest VQVAE checkpoint
@@ -154,7 +154,7 @@ echo "[stage2] $(date): starting Transformer torchrun"
 torchrun \
   --nproc_per_node=8 \
   --master_port=29501 \
-  ~/ruview-scripts/occworld_retrain.py transformer \
+  ~/echopose-scripts/occworld_retrain.py transformer \
   --snapshots /tmp/snapshots/ \
   --vqvae-checkpoint "$VQVAE_CKPT" \
   --work-dir ~/checkpoints/transformer \

@@ -100,4 +100,4 @@ The placement-search engine is unchanged; only the target zones differ. ~20 LOC 
 - **R6.2 / R6.2.1 / R6.2.2** — orthogonal extensions; R6.2.3 is a cog-mode option that composes with all three.
 - **R14** (V1 lighting / V3 attention) — both should use chest mode.
 - **R12 PABS** — placement-driven detection sensitivity improves with chest-centric targeting for body-position-detection scenarios.
-- **ADR-104 (ruview-mcp + ruview-cli)** — `--target-mode` is a new CLI arg + a new MCP tool argument.
+- **ADR-104 (echopose-mcp + echopose-cli)** — `--target-mode` is a new CLI arg + a new MCP tool argument.

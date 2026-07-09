@@ -40,7 +40,7 @@ The optimal mixed placement picks Tx at (5.0, 4.0, 0.8) — desk height — and 
 
 ## What this says about the installation guide
 
-Current RuView installer instructions are 2D: "place seeds on opposite walls". The 3D scrutiny says:
+Current EchoPose installer instructions are 2D: "place seeds on opposite walls". The 3D scrutiny says:
 
 1. **Heights matter as much as horizontal positions.** Mixed-height placement gives +15.8% coverage over desk-height-only.
 2. **Ceiling-mount fails alone.** If using ceiling as part of a multi-anchor configuration, MUST also have at least one low-height anchor to bring the envelope down to floor-level targets.

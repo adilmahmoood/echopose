@@ -74,12 +74,12 @@ fn is_esp32_vid_pid(vid: u16, pid: u16) -> bool {
 
 #[test]
 fn test_beacon_parsing() {
-    let data = b"RUVIEW_BEACON|AA:BB:CC:DD:EE:FF|1|0.3.0|esp32s3|coordinator|0|4";
+    let data = b"ECHOPOSE_BEACON|AA:BB:CC:DD:EE:FF|1|0.3.0|esp32s3|coordinator|0|4";
     let text = std::str::from_utf8(data).unwrap();
     let parts: Vec<&str> = text.split('|').collect();
 
     assert_eq!(parts.len(), 8);
-    assert_eq!(parts[0], "RUVIEW_BEACON");
+    assert_eq!(parts[0], "ECHOPOSE_BEACON");
     assert_eq!(parts[1], "AA:BB:CC:DD:EE:FF");
     assert_eq!(parts[2], "1");
     assert_eq!(parts[3], "0.3.0");

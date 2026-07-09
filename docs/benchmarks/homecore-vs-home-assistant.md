@@ -1,9 +1,9 @@
-# RuView HOMECORE vs Home Assistant — Performance & Capability Benchmark
+# EchoPose HOMECORE vs Home Assistant — Performance & Capability Benchmark
 
 **Measured:** 2026-05-31 · Windows 11, Docker Desktop 28.5.1 (WSL2 Linux engine) · single host.
 **Reproduce:** `python aether-arena/staging/run_homecore_bench.py` and `python aether-arena/staging/run_ha_bench.py`.
 
-HOMECORE is RuView's **wire-compatible Rust port of Home Assistant's core** (ADR-125…ADR-134): the
+HOMECORE is EchoPose's **wire-compatible Rust port of Home Assistant's core** (ADR-125…ADR-134): the
 same `/api` REST + WebSocket surface, the same SQLite recorder schema, an automation engine, a
 HomeKit bridge, a WASM plugin runtime, and a voice/assist pipeline — plus **native WiFi/RF sensing
 entities** (presence, breathing, heart-rate, pose) that Home Assistant can only get through external
@@ -16,7 +16,7 @@ add-ons. Because the API is wire-compatible, the two can be measured head-to-hea
 
 ## Performance (measured)
 
-| Metric | RuView HOMECORE `0.1.0-alpha` | Home Assistant `stable` | Advantage |
+| Metric | EchoPose HOMECORE `0.1.0-alpha` | Home Assistant `stable` | Advantage |
 |--------|------------------------------:|------------------------:|-----------|
 | **Cold start → API/web ready** | **0.55 s** | 9.72 s | **18× faster** |
 | **Idle resident memory (RSS)** | **10.1 MB** | 359 MB | **35× leaner** |
@@ -48,7 +48,7 @@ the 2.2× is directional, not a controlled isolate.
 
 ## Capability & feature comparison
 
-| Capability | RuView HOMECORE | Home Assistant |
+| Capability | EchoPose HOMECORE | Home Assistant |
 |-----------|-----------------|----------------|
 | HA-compatible REST `/api` | ✅ wire-compatible subset (ADR-130) | ✅ reference implementation |
 | HA-compatible WebSocket API | ✅ (ADR-130) | ✅ |

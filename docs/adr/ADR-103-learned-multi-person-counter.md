@@ -18,9 +18,9 @@ That gets us to a **stable heuristic that adapts to the room**. It does not get 
 | **DeepCount** (2018) | Atheros 3×3 | 92% within ±1, 5-room | CNN + cross-environment transfer |
 | **CrossCount** (2019) | Atheros, 6 rooms | 84% cross-room within ±1 | Domain-adversarial CNN |
 | **HeadCount** (2021) | Intel 5300 | <1 person MAE, 5 envs | Multi-stream CSI + attention |
-| **RuView today** (PR #491) | ESP32-S3 1×1 SISO | Calibrated heuristic; not measured against ground truth | RollingP95 + dedup_factor |
+| **EchoPose today** (PR #491) | ESP32-S3 1×1 SISO | Calibrated heuristic; not measured against ground truth | RollingP95 + dedup_factor |
 
-The literature uses 3×3 MIMO research NICs. RuView uses 1×1 SISO ESP32-S3 nodes. The published number is therefore not directly attainable, but the **architectural gap** is large enough that a learned-counter approach on our hardware should comfortably beat today's slot heuristic — and the infrastructure to train one already exists in this repo (Candle + RTX 5080 trained `pose_v1.safetensors` in 2.1 s yesterday — see [`docs/benchmarks/pose-estimation-cog.md`](../benchmarks/pose-estimation-cog.md)).
+The literature uses 3×3 MIMO research NICs. EchoPose uses 1×1 SISO ESP32-S3 nodes. The published number is therefore not directly attainable, but the **architectural gap** is large enough that a learned-counter approach on our hardware should comfortably beat today's slot heuristic — and the infrastructure to train one already exists in this repo (Candle + RTX 5080 trained `pose_v1.safetensors` in 2.1 s yesterday — see [`docs/benchmarks/pose-estimation-cog.md`](../benchmarks/pose-estimation-cog.md)).
 
 Five primitives we already have but don't yet compose into a counter:
 

@@ -487,7 +487,7 @@ async fn appliance(State(st): State<GatewayState>, headers: HeaderMap) -> Respon
     // `std::net::TcpStream::connect_timeout` stalled the whole async handler
     // for up to `N * timeout` and parked a Tokio worker thread per probe.
     let probes = [
-        ("ruview-mcp-brain", 9876u16),
+        ("echopose-mcp-brain", 9876u16),
         ("cognitum-rvf-agent", 9004),
         ("ruvector-hailo-worker", 50051),
     ]

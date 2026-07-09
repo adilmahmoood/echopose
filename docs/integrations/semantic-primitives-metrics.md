@@ -2,7 +2,7 @@
 
 Per [ADR-115 §3.12.4](../adr/ADR-115-home-assistant-integration.md#3124-inference-quality-contract), every semantic primitive ships with a published precision/recall on a held-out test set. This document tracks v1 numbers and the methodology for reproducing them.
 
-> **Status**: v1 baselines below were computed against synthetic stress scenarios + a 1,077-sample held-out subset of the ADR-079 paired-capture set (camera-supervised, cognitum-v0, 2026-04 collection). v2 numbers will land after the larger 30 k-sample collection in [issue #645](https://github.com/ruvnet/RuView/issues/645).
+> **Status**: v1 baselines below were computed against synthetic stress scenarios + a 1,077-sample held-out subset of the ADR-079 paired-capture set (camera-supervised, cognitum-v0, 2026-04 collection). v2 numbers will land after the larger 30 k-sample collection in [issue #645](https://github.com/ruvnet/EchoPose/issues/645).
 
 ---
 

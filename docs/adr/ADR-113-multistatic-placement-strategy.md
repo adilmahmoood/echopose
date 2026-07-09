@@ -19,7 +19,7 @@ This ADR consolidates the findings into a single placement specification, parame
 
 ## Decision
 
-Adopt the **4-axis placement decision matrix** below as the binding RuView installation specification.
+Adopt the **4-axis placement decision matrix** below as the binding EchoPose installation specification.
 
 ### Decision matrix
 
@@ -64,7 +64,7 @@ Total LOC for productisation: ~100 LOC on top of the R6.2.5 reference implementa
 ### MCP surface (per ADR-104)
 
 ```
-ruview_placement_recommend(
+echopose_placement_recommend(
     room: {width, depth, ceiling?},
     targets: [{name, position, size}],
     cog: str  // auto-configures target-mode + N
@@ -112,7 +112,7 @@ Placement strategy is not a security-critical decision in itself; coverage gaps 
 1. **Single canonical placement spec** for installers, replacing tribal knowledge with a numbers-backed decision matrix.
 2. **Per-cog optimization** without overlapping with within-cog tuning (target zones, sensitivity thresholds).
 3. **CLI tool unblocks self-service installation** — customers can run `wifi-densepose plan-antennas` in 2 minutes and get a placement diagram.
-4. **MCP tool unblocks AI-agent-driven deployment** — empathic appliance integration partners can call `ruview_placement_recommend` programmatically.
+4. **MCP tool unblocks AI-agent-driven deployment** — empathic appliance integration partners can call `echopose_placement_recommend` programmatically.
 5. **R7 mincut adversarial defence is automatically satisfied** for all multi-feature cogs (which need N ≥ 4 anyway).
 
 ### Negative
@@ -137,7 +137,7 @@ Placement strategy is not a security-critical decision in itself; coverage gaps 
 - **ADR-079 / ADR-101 (pose tracker)**: depends on accurate pose extraction; ADR-113's anchor count guarantees N ≥ 5 for pose cogs, which gives the pose tracker enough multistatic coverage.
 - **ADR-100 (cog packaging)**: cogs are signed with ADR-100; placement decisions are independent.
 - **ADR-103 (cog-person-count)**: 2D body-centric N=4 entry maps to this cog.
-- **ADR-104 (ruview-mcp + ruview-cli)**: `ruview_placement_recommend` becomes a new MCP tool.
+- **ADR-104 (echopose-mcp + echopose-cli)**: `echopose_placement_recommend` becomes a new MCP tool.
 - **ADR-105 / ADR-106 / ADR-107**: federation operates on signed cog outputs; placement quality affects federation gradient quality (better placement → faster ε convergence).
 - **ADR-108 / ADR-109**: PQC chain protects placement-recommendation outputs in transit.
 
@@ -183,7 +183,7 @@ The `--cog` flag in the CLI looks up the cog category and maps to matrix row:
 | Step | LOC | Owner |
 |---|---:|---|
 | 1. CLI `--cog` flag with category lookup | 60 | TBD |
-| 2. MCP tool `ruview_placement_recommend` | 80 | TBD |
+| 2. MCP tool `echopose_placement_recommend` | 80 | TBD |
 | 3. Per-cog category metadata in cog manifests | 30 | per-cog |
 | 4. 3D ellipsoid extension to CLI tool | 50 | TBD |
 | 5. Multi-target union to CLI tool | 40 | TBD |

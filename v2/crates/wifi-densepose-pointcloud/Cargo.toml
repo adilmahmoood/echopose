@@ -5,7 +5,7 @@ edition = "2021"
 description = "Real-time dense point cloud from camera depth + WiFi CSI tomography"
 
 [[bin]]
-name = "ruview-pointcloud"
+name = "echopose-pointcloud"
 path = "src/main.rs"
 
 [dependencies]

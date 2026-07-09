@@ -1,4 +1,4 @@
-# ADR-052: Tauri Desktop Frontend — RuView Hardware Management & Visualization
+# ADR-052: Tauri Desktop Frontend — EchoPose Hardware Management & Visualization
 
 | Field | Value |
 |-------|-------|
@@ -6,11 +6,11 @@
 | Date | 2026-03-06 |
 | Deciders | ruv |
 | Depends on | ADR-012 (ESP32 CSI Mesh), ADR-039 (Edge Intelligence), ADR-040 (WASM Programmable Sensing), ADR-044 (Provisioning Enhancements), ADR-166 (Security Hardening, renumbered from ADR-050), ADR-051 (Server Decomposition) |
-| Issue | [#177](https://github.com/ruvnet/RuView/issues/177) |
+| Issue | [#177](https://github.com/ruvnet/EchoPose/issues/177) |
 
 ## Context
 
-RuView currently requires users to interact with multiple disconnected tools to manage a WiFi DensePose deployment:
+EchoPose currently requires users to interact with multiple disconnected tools to manage a WiFi DensePose deployment:
 
 | Task | Current Tool | Pain Point |
 |------|-------------|------------|
@@ -130,7 +130,7 @@ v2/
 // commands/discovery.rs
 
 /// Discover ESP32 CSI nodes on the local network.
-/// Strategy 1: mDNS — nodes announce _ruview._tcp service
+/// Strategy 1: mDNS — nodes announce _echopose._tcp service
 /// Strategy 2: UDP broadcast probe on port 5005 (CSI aggregator port)
 /// Strategy 3: HTTP health check sweep on port 8032 (OTA server)
 #[tauri::command]
@@ -373,7 +373,7 @@ pub struct NvsConfig {
 
 ```
 +------------------------------------------+
-|  RuView                    [Settings] [?] |
+|  EchoPose                    [Settings] [?] |
 +-------+----------------------------------+
 |       |                                  |
 | Nav   |  Dashboard / Active Page         |
@@ -482,7 +482,7 @@ A force-directed graph showing:
 
 #### 4.3 Linux
 
-- **udev rules**: ESP32 serial ports (`/dev/ttyUSB*`, `/dev/ttyACM*`) require udev rules for non-root access. The app bundles a `99-ruview-esp32.rules` file and offers to install it:
+- **udev rules**: ESP32 serial ports (`/dev/ttyUSB*`, `/dev/ttyACM*`) require udev rules for non-root access. The app bundles a `99-echopose-esp32.rules` file and offers to install it:
   ```
   SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", MODE="0666"  # CP210x
   SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", MODE="0666"  # CH340
@@ -497,7 +497,7 @@ A force-directed graph showing:
 name = "wifi-densepose-desktop"
 version.workspace = true
 edition.workspace = true
-description = "Tauri desktop frontend for RuView WiFi DensePose"
+description = "Tauri desktop frontend for EchoPose WiFi DensePose"
 license.workspace = true
 authors.workspace = true
 
@@ -553,9 +553,9 @@ chrono = { version = "0.4", features = ["serde"] }
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "RuView",
+  "productName": "EchoPose",
   "version": "0.3.0",
-  "identifier": "net.ruv.ruview",
+  "identifier": "net.ruv.echopose",
   "build": {
     "frontendDist": "../frontend/dist",
     "devUrl": "http://localhost:5173",
@@ -565,7 +565,7 @@ chrono = { version = "0.4", features = ["serde"] }
   "app": {
     "windows": [
       {
-        "title": "RuView - WiFi DensePose",
+        "title": "EchoPose - WiFi DensePose",
         "width": 1280,
         "height": 800,
         "minWidth": 900,
@@ -600,7 +600,7 @@ chrono = { version = "0.4", features = ["serde"] }
 ```json
 {
   "identifier": "default",
-  "description": "RuView default capability set",
+  "description": "EchoPose default capability set",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -642,7 +642,7 @@ cargo build --release -p wifi-densepose-sensing-server
 Discovery alone is transient — nodes appear when they broadcast, disappear when they don't. A persistent local registry transforms discovery into **reconciliation**.
 
 ```
-~/.ruview/nodes.db   (SQLite via rusqlite)
+~/.echopose/nodes.db   (SQLite via rusqlite)
 ```
 
 **Schema:**
@@ -718,7 +718,7 @@ pub enum OtaStrategy {
 
 ### 11. Plugin Architecture (Future)
 
-This desktop tool is quietly becoming the **control plane for RuView**. Once it manages discovery, firmware, OTA, WASM, sensing, and mesh topology, plugin extensibility becomes inevitable:
+This desktop tool is quietly becoming the **control plane for EchoPose**. Once it manages discovery, firmware, OTA, WASM, sensing, and mesh topology, plugin extensibility becomes inevitable:
 
 - **Firmware management** today → **swarm orchestration** tomorrow
 - **WASM upload** today → **edge module marketplace** tomorrow

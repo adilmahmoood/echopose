@@ -5,7 +5,7 @@ Apple Home HomeKit Accessory Protocol bridge for HOMECORE with HAP-1.1 trait sur
 [![Crates.io](https://img.shields.io/crates/v/homecore-hap.svg)](https://crates.io/crates/homecore-hap)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![MSRV: 1.89+](https://img.shields.io/badge/MSRV-1.89%2B-purple.svg)
-[![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen.svg)](https://github.com/ruvnet/RuView)
+[![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen.svg)](https://github.com/ruvnet/EchoPose)
 [![ADR-125](https://img.shields.io/badge/ADR-125-orange.svg)](../../docs/adr/ADR-125-homecore-apple-home-homekit-bridge.md)
 
 **P1 scaffold**: trait surface for HAP accessories + characteristics, entity→HAP mapping rules, and bridge ownership. The actual HAP-1.1 TLS server and real mDNS integration are gated behind `--features hap-server` (P2).
@@ -19,7 +19,7 @@ Apple Home HomeKit Accessory Protocol bridge for HOMECORE with HAP-1.1 trait sur
 - **EntityToAccessoryMapper** — bidirectional rules for mapping HOMECORE entities to HAP accessories (e.g., `light.kitchen` → `Light` accessory + `On` + `Brightness` characteristics)
 - **HapBridge** — owns and exposes a collection of mapped accessories over HAP
 - **MdnsAdvertiser trait** — abstraction over mDNS advertisement; P1 ships `NullAdvertiser` (no-op), P2 adds real mDNS via `mdns-sd`
-- **RuViewToHapMapper** — bridges RuView sensing data (temperature, humidity, occupancy) to HAP characteristics
+- **EchoPoseToHapMapper** — bridges EchoPose sensing data (temperature, humidity, occupancy) to HAP characteristics
 
 The bridge itself is a HAP Accessory Bridge (HAP-1.1 spec §8.3), advertising a single service with characteristic slots for each exposed accessory.
 
@@ -29,7 +29,7 @@ The bridge itself is a HAP Accessory Bridge (HAP-1.1 spec §8.3), advertising a 
 - **Bi-directional mapping** — HOMECORE entity state ↔ HAP characteristic values with type-safe enums
 - **HAP-1.1 spec compliance** — characteristic types and permissions match HomeKit's published spec
 - **Trait-based advertisement** — `MdnsAdvertiser` abstraction; swappable implementations (null, real mDNS, etc.)
-- **RuView integration** — maps WiFi sensing data (occupancy, temperature, vital signs) to HomeKit sensor accessories
+- **EchoPose integration** — maps WiFi sensing data (occupancy, temperature, vital signs) to HomeKit sensor accessories
 - **No TLS server in P1** — bridge compiles and tests pass with `--no-default-features`; real server lands in P2 with `--features hap-server`
 - **Home.app compatible** — exposed accessories appear in Home app on any HomeKit hub (Apple TV, HomePod, HomePod mini)
 

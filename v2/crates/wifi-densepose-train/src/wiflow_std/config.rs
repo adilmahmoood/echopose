@@ -67,7 +67,7 @@ fn default_min_feature_width() -> usize {
 /// Hyper-parameters for the WiFlow-STD pose model (ADR-152 §2.2).
 ///
 /// Defaults reproduce the verified upstream architecture exactly (2,225,042
-/// parameters, 15 keypoints). For RuView's ESP32 17-keypoint eval set
+/// parameters, 15 keypoints). For EchoPose's ESP32 17-keypoint eval set
 /// (ADR-152 §2.2(b)) use [`WiFlowStdConfig::for_keypoints`]`(17)` — the
 /// keypoint count only changes the final adaptive pooling, not the parameter
 /// count, so retrained 15-keypoint weights remain shape-compatible.
@@ -118,7 +118,7 @@ pub struct WiFlowStdConfig {
     pub attention_groups: usize,
 
     /// Number of 2-D keypoints produced. Default: **15** (upstream skeleton);
-    /// use **17** for RuView's COCO-skeleton ESP32 eval set. Only changes the
+    /// use **17** for EchoPose's COCO-skeleton ESP32 eval set. Only changes the
     /// parameter-free final adaptive pool — never the trunk: the stride
     /// schedule is governed by [`Self::min_feature_width`], so 15- and
     /// 17-keypoint variants share the identical conv graph and weights

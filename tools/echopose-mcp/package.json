@@ -1,0 +1,72 @@
+{
+  "name": "@ruvnet/rvagent",
+  "version": "0.2.0",
+  "description": "SENSE-BRIDGE: dual-transport MCP server (stdio default; Streamable HTTP opt-in via RVAGENT_HTTP_PORT) exposing EchoPose WiFi-DensePose sensing primitives to AI agents",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "rvagent": "dist/index.js",
+    "echopose-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "rvagent",
+    "echopose",
+    "wifi",
+    "csi",
+    "pose-estimation",
+    "cognitum",
+    "sense-bridge",
+    "ruvnet"
+  ],
+  "author": "ruv <ruv@ruv.net>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruvnet/EchoPose.git",
+    "directory": "tools/echopose-mcp"
+  },
+  "homepage": "https://github.com/ruvnet/EchoPose/tree/main/tools/echopose-mcp",
+  "bugs": {
+    "url": "https://github.com/ruvnet/EchoPose/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.25.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.14.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

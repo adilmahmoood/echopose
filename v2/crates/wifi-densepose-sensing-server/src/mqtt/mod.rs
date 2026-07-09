@@ -6,7 +6,7 @@
 //! 1. Connect to a user-supplied broker with optional TLS / mTLS.
 //! 2. Publish HA discovery `config` topics (retained) on connect and at
 //!    a refresh interval, so HA auto-creates one device + N entities per
-//!    RuView node.
+//!    EchoPose node.
 //! 3. Translate `sensing-server` broadcast messages (`edge_vitals`,
 //!    `pose_data`, `sensing_update`) into per-entity state messages with
 //!    rate limits.
@@ -53,7 +53,7 @@ pub use discovery::{
 };
 
 /// Stable origin string written into every HA discovery payload's `origin`
-/// block so HA users can see which RuView version emitted the entities.
+/// block so HA users can see which EchoPose version emitted the entities.
 pub const ORIGIN_NAME: &str = "wifi-densepose-sensing-server";
 
 /// Stable manufacturer string written into every HA discovery payload's
@@ -67,7 +67,7 @@ pub const SUPPORT_URL: &str = "https://github.com/ruvnet/hass-wifi-densepose";
 
 /// Stable HA discovery topic prefix default. Maintainer-accepted in
 /// ADR-115 §9.2 — ship Home Assistant's own default rather than a
-/// RuView-namespaced one, so the integration is plug-and-play with a
+/// EchoPose-namespaced one, so the integration is plug-and-play with a
 /// stock Mosquitto add-on. Operators with custom HA setups can override
 /// via `--mqtt-prefix`.
 pub const DEFAULT_DISCOVERY_PREFIX: &str = "homeassistant";

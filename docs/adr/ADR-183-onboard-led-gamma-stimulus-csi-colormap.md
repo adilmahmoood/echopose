@@ -6,7 +6,7 @@
 | **Date** | 2026-06-17 |
 | **Deciders** | ruv |
 | **Codename** | **GAMMA-VIZ** |
-| **Builds on** | `ruv-neural-viz::ColorMap` (now `no_std` — ruvnet/ruv-neural#3 / RuView#1126), the ESP32 edge `motion_energy` metric (`edge_processing.c`), PR #962 (WS2812 on GPIO 48) |
+| **Builds on** | `ruv-neural-viz::ColorMap` (now `no_std` — ruvnet/ruv-neural#3 / EchoPose#1126), the ESP32 edge `motion_energy` metric (`edge_processing.c`), PR #962 (WS2812 on GPIO 48) |
 
 ## Context
 
@@ -94,5 +94,5 @@ therefore provably `ruv-neural-viz`'s, and the motion is provably real.
 - Full on-device (xtensa) Rust build of `ColorMap` not run — ESP Rust toolchain absent.
 
 ## References
-- ruvnet/ruv-neural#3 (ColorMap no_std), RuView#1126 (submodule bump), #962 (GPIO 48).
+- ruvnet/ruv-neural#3 (ColorMap no_std), EchoPose#1126 (submodule bump), #962 (GPIO 48).
 - Singer/Tsai GENUS 40 Hz gamma entrainment (origin of the frequency, not a device claim).

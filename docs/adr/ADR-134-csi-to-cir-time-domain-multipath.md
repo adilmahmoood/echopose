@@ -18,7 +18,7 @@ Searching for `CIR`, `channel_impulse`, and `ifft` across the entire Rust worksp
 
 This is a concrete absence in a codebase that already documents CIR extensively. Four research documents propose CIR as the next major signal-processing tier:
 
-- `docs/research/sota-surveys/ruview-multistatic-fidelity-sota-2026.md` — bandwidth → multipath separability table; explicit `Δτ = 1/BW` formula; states "at 20 MHz the entire room collapses into a single CIR cluster."
+- `docs/research/sota-surveys/echopose-multistatic-fidelity-sota-2026.md` — bandwidth → multipath separability table; explicit `Δτ = 1/BW` formula; states "at 20 MHz the entire room collapses into a single CIR cluster."
 - `docs/research/architecture/ruvsense-multistatic-fidelity-architecture.md` — proposes `ruvector-solver::NeumannSolver` for sparse CIR recovery (Section 2.1); uses `link_gates[i].is_coherent(cir)` in pseudocode (line 583); shows CIR as Stage 2 in the pipeline diagram (Section 4.1).
 - `docs/research/rf-topological-sensing/02-csi-edge-weight-computation.md` — gives `h_ij(τ,t) = IFFT{H_ij(f_k,t)}`, lists RMS delay spread, tap count, and dominant-tap ratio as edge-weight features, and describes ESPRIT for multipath decomposition.
 - ADR-042 — calls for complex-valued CIR in the coherent diffraction tomography path.
@@ -532,7 +532,7 @@ Deferring CIR indefinitely means these three capabilities remain permanently gat
 - `v2/crates/wifi-densepose-mat/src/ml/vital_signs_classifier.rs:386` — the only IFFT in production (unrelated to CIR)
 
 ### Research Documents
-- `docs/research/sota-surveys/ruview-multistatic-fidelity-sota-2026.md` — bandwidth table, 20 MHz separability analysis
+- `docs/research/sota-surveys/echopose-multistatic-fidelity-sota-2026.md` — bandwidth table, 20 MHz separability analysis
 - `docs/research/architecture/ruvsense-multistatic-fidelity-architecture.md` — `NeumannSolver` CIR proposal (§2.1), pipeline diagram (§4.1), `is_coherent(cir)` pseudocode (line 583)
 - `docs/research/rf-topological-sensing/02-csi-edge-weight-computation.md` — IFFT formula, CIR features, ESPRIT for multipath decomposition
 

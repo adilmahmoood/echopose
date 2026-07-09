@@ -48,7 +48,7 @@ The per-subject signal in R3.2's setup is **much weaker** than R3 tick 12's. The
 ### What R3.2 DOES NOT demonstrate
 
 1. **80%+ cross-room accuracy.** Needs real AETHER (contrastive learning head), not mean-pooling.
-2. **That production RuView re-ID would work.** Real AETHER would have stronger per-subject signature; the corrected architecture would then close the gap.
+2. **That production EchoPose re-ID would work.** Real AETHER would have stronger per-subject signature; the corrected architecture would then close the gap.
 3. **Numerical predictions for production deployments.** This is a structural validation, not a production benchmark.
 
 ## Three "honest scope" findings now in the loop

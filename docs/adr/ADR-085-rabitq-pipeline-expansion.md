@@ -11,7 +11,7 @@
 
 ## Context
 
-ADR-084 committed RuView to **RaBitQ-style binary sketches as a cheap
+ADR-084 committed EchoPose to **RaBitQ-style binary sketches as a cheap
 similarity sensor** (Gao & Long, SIGMOD 2024 — arxiv 2405.12497) at
 five pipeline sites: AETHER re-ID pre-filter, cluster-Pi novelty,
 mincut subcarrier maintenance, mesh-exchange compression, and the

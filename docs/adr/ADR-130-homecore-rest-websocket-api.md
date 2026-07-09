@@ -6,7 +6,7 @@
 | **Date** | 2026-05-25 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-API** |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-055](ADR-055-integrated-sensing-server.md) (sensing-server Axum pattern), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (SENSE-BRIDGE — bearer auth pattern) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-055](ADR-055-integrated-sensing-server.md) (sensing-server Axum pattern), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (SENSE-BRIDGE — bearer auth pattern) |
 | **Tracking issue** | TBD |
 
 ---
@@ -210,7 +210,7 @@ Legacy `api_password` is deliberately not supported (removed in HA 2022.x and ne
 - `v2/crates/wifi-densepose-sensing-server/src/main.rs` — Axum server architecture (REST + WebSocket); pattern for this ADR
 - `v2/crates/wifi-densepose-sensing-server/src/bearer_auth.rs` — Bearer auth middleware pattern
 - `docs/adr/ADR-127-homecore-state-machine-rust.md` — state machine that REST/WS routes read from
-- `docs/adr/ADR-126-ruview-native-ha-port-master.md` — §6 compatibility contract with companion apps
+- `docs/adr/ADR-126-echopose-native-ha-port-master.md` — §6 compatibility contract with companion apps
 
 ### External
 

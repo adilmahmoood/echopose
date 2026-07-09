@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RuView Medical Vitals Suite — 10 capabilities from a single mmWave sensor
+EchoPose Medical Vitals Suite — 10 capabilities from a single mmWave sensor
 
 Capabilities:
   1. Heart rate monitoring (continuous)
@@ -293,7 +293,7 @@ def main():
 
     print()
     print("=" * 80)
-    print("  RuView Medical Vitals Suite (10 capabilities from 1 sensor)")
+    print("  EchoPose Medical Vitals Suite (10 capabilities from 1 sensor)")
     print("  Point MR60BHA2 at yourself within 1m. Sit still.")
     print("=" * 80)
     print()

@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-hardware` (new UWB driver/parser/auto-detect in `src/`); `wifi-densepose-signal` (`ruvsense/pose_tracker.rs` constraint-aware Kalman update); `wifi-densepose-mat` (`localization/fusion.rs` constraint integration) |
-| **Relates to** | ADR-016 (RuVector Integration), ADR-018 (ESP32 Dev Implementation / binary wire format), ADR-024 (Contrastive CSI Embedding / AETHER), ADR-029 (RuvSense Multistatic), ADR-031 (RuView Sensing-First RF Mode), ADR-063 (mmWave Sensor Fusion), ADR-136 (RuView Rust Streaming Engine), ADR-138 (WiFi-7 MLO LinkGroup / ArrayCoordinator), ADR-139 (WorldGraph Environmental Digital Twin), ADR-141 (BFLD Privacy Control Plane), ADR-145 (Ablation Evaluation Harness) |
+| **Relates to** | ADR-016 (RuVector Integration), ADR-018 (ESP32 Dev Implementation / binary wire format), ADR-024 (Contrastive CSI Embedding / AETHER), ADR-029 (RuvSense Multistatic), ADR-031 (EchoPose Sensing-First RF Mode), ADR-063 (mmWave Sensor Fusion), ADR-136 (EchoPose Rust Streaming Engine), ADR-138 (WiFi-7 MLO LinkGroup / ArrayCoordinator), ADR-139 (WorldGraph Environmental Digital Twin), ADR-141 (BFLD Privacy Control Plane), ADR-145 (Ablation Evaluation Harness) |
 
 ---
 
@@ -19,7 +19,7 @@ WiFi CSI sensing in this codebase produces *relative* perturbation fields, not *
 Searching the workspace confirms there is no UWB support anywhere:
 
 - `grep -ri "uwb\|802.15.4z\|two_way_ranging\|RangeConstraint" v2/crates/` returns nothing in production code. The only `802.15.4` reference is the *timesync* epoch on the ESP32-C6 (`c6_timesync_get_epoch_us()`, ADR-110), which is a clock primitive, not a ranging primitive.
-- `v2/crates/wifi-densepose-hardware/src/` contains parsers for ESP32 CSI (`esp32_parser.rs`, ADR-018 magic `0xC5110001`), sibling RuView packets (`RUVIEW_VITALS_MAGIC` … `RUVIEW_TEMPORAL_MAGIC`), a UDP aggregator (`aggregator/`), a `bridge.rs` (`CsiFrame → CsiData`), and the radio-ops mirror (`radio_ops.rs`). Every magic constant in `esp32_parser.rs` is a *CSI-family* packet. There is no range/anchor frame type and no anchor-bearing device abstraction.
+- `v2/crates/wifi-densepose-hardware/src/` contains parsers for ESP32 CSI (`esp32_parser.rs`, ADR-018 magic `0xC5110001`), sibling EchoPose packets (`ECHOPOSE_VITALS_MAGIC` … `ECHOPOSE_TEMPORAL_MAGIC`), a UDP aggregator (`aggregator/`), a `bridge.rs` (`CsiFrame → CsiData`), and the radio-ops mirror (`radio_ops.rs`). Every magic constant in `esp32_parser.rs` is a *CSI-family* packet. There is no range/anchor frame type and no anchor-bearing device abstraction.
 - `v2/crates/wifi-densepose-signal/src/ruvsense/pose_tracker.rs` (the 17-keypoint Kalman tracker, ADR-029 §2.7) has a position-only measurement model: `KeypointState::update()` takes `&[f32; 3]` and `KeypointState::mahalanobis_distance()` gates a *Cartesian* measurement. There is **no mechanism to apply a range constraint** — a measurement of the form "the centroid is `r ± σ` metres from a fixed anchor" — which is a nonlinear (spherical) observation, not a Cartesian one. `PoseTrack` has no field for accumulated range residuals.
 - `v2/crates/wifi-densepose-mat/src/localization/fusion.rs` has a `PositionFuser` with an `EstimateSource` enum (`RssiTriangulation`, `TimeOfArrival`, `AngleOfArrival`, `CsiFingerprint`, `DepthEstimation`, `Fused`) and `Triangulator` that consumes RSSI. There is **no `TimeOfArrival` producer** — `EstimateSource::TimeOfArrival` is defined but nothing emits it, and `LocalizationService::simulate_rssi_measurements()` explicitly returns `vec![]` with a warning "No sensor hardware connected." The fusion machinery exists; the metric-ranging input does not.
 
@@ -29,7 +29,7 @@ The consequence is concrete. Three failure modes trace directly to the missing m
 - **Track-crossing identity swaps.** When two `PoseTrack`s pass within the Mahalanobis gate of each other, assignment falls back to AETHER re-ID cosine similarity (`pose_tracker.rs` `embedding_weight = 0.4`). Re-ID alone is unreliable for similar body shapes. A UWB tag worn by one person (or a range that is consistent with only one of the two crossing tracks) breaks the tie deterministically.
 - **No metric ground truth for the WorldGraph.** ADR-139's WorldGraph stores object anchors and person tracks as typed nodes; without a metric edge between them, anchor positions are never corrected and the digital twin slowly drifts from physical reality.
 
-ADR-063 (mmWave Sensor Fusion, Accepted) already establishes the *pattern* for fusing an orthogonal ranging modality (60 GHz FMCW range/Doppler) with CSI, and `RUVIEW_FUSED_VITALS_MAGIC` (`0xC5110004`) is the on-wire fused packet. ADR-144 follows that established fusion pattern but for UWB metric range rather than mmWave radial velocity, and it routes the result through the WorldGraph (ADR-139) as a first-class graph edge rather than a flat fused packet.
+ADR-063 (mmWave Sensor Fusion, Accepted) already establishes the *pattern* for fusing an orthogonal ranging modality (60 GHz FMCW range/Doppler) with CSI, and `ECHOPOSE_FUSED_VITALS_MAGIC` (`0xC5110004`) is the on-wire fused packet. ADR-144 follows that established fusion pattern but for UWB metric range rather than mmWave radial velocity, and it routes the result through the WorldGraph (ADR-139) as a first-class graph edge rather than a flat fused packet.
 
 ### 1.2 What a "Range Constraint" Is Here
 
@@ -194,7 +194,7 @@ A new module set in `wifi-densepose-hardware/src/` mirrors the `esp32_parser.rs`
 
 ```rust
 /// UWB range frame magic (ADR-144), next in the 0xC511xxxx family after
-/// RUVIEW_TEMPORAL_MAGIC (0xC5110007). Demultiplexed alongside CSI frames.
+/// ECHOPOSE_TEMPORAL_MAGIC (0xC5110007). Demultiplexed alongside CSI frames.
 pub const UWB_RANGE_MAGIC: u32 = 0xC5110008;
 
 /// ADR-018-style binary layout (little-endian):
@@ -220,7 +220,7 @@ impl UwbFrameParser {
 }
 ```
 
-**Form-factor decision (§1.3 candidates):** adopt the **standalone ESP32-C6 + DW3000 anchor** as the reference build, but the HAL admits all three because the parser only sees bytes. Rationale: (a) it reuses the C6's `c6_timesync_get_epoch_us()` so UWB ranges land in the *same clock* as CSI frames with no new timesync work; (b) it reuses the ADR-018 UDP aggregator, so no new transport, no new firmware OTA channel, no new port; (c) integrating UWB onto an existing CSI node (form 2) is a strict superset — the same parser handles its frames. The aggregator's existing demultiplex loop gains one arm: `if UwbFrameParser::is_uwb_frame(buf) { … } else if Esp32CsiParser` (the same `else if` ladder already used for the seven `RUVIEW_*_MAGIC` sibling packets).
+**Form-factor decision (§1.3 candidates):** adopt the **standalone ESP32-C6 + DW3000 anchor** as the reference build, but the HAL admits all three because the parser only sees bytes. Rationale: (a) it reuses the C6's `c6_timesync_get_epoch_us()` so UWB ranges land in the *same clock* as CSI frames with no new timesync work; (b) it reuses the ADR-018 UDP aggregator, so no new transport, no new firmware OTA channel, no new port; (c) integrating UWB onto an existing CSI node (form 2) is a strict superset — the same parser handles its frames. The aggregator's existing demultiplex loop gains one arm: `if UwbFrameParser::is_uwb_frame(buf) { … } else if Esp32CsiParser` (the same `else if` ladder already used for the seven `ECHOPOSE_*_MAGIC` sibling packets).
 
 **Interface boundary:** `wifi-densepose-hardware` owns parsing and the `RangeConstraint`/`AnchorId`/`TagId` types. It has **no dependency** on `signal` or `mat` — the dependency arrows point the other way, consistent with the crate publishing order (`hardware` has no internal deps; `signal` depends on `core`; `mat` depends on `signal`).
 
@@ -360,7 +360,7 @@ Every fused metric position is a semantic state and therefore carries the full p
 
 ### 2.9 Test Plan and Acceptance Criteria
 
-**Tier 1 — Parser round-trip (unit test).** Encode a `RangeConstraint` to the §2.3 binary layout, parse with `UwbFrameParser::parse()`, assert field equality. Assert `is_uwb_frame()` returns `true` for `UWB_RANGE_MAGIC` and `false` for `ESP32_CSI_MAGIC` and all seven `RUVIEW_*_MAGIC`. Assert a truncated buffer yields `ParseError::InsufficientData` (no fabricated range).
+**Tier 1 — Parser round-trip (unit test).** Encode a `RangeConstraint` to the §2.3 binary layout, parse with `UwbFrameParser::parse()`, assert field equality. Assert `is_uwb_frame()` returns `true` for `UWB_RANGE_MAGIC` and `false` for `ESP32_CSI_MAGIC` and all seven `ECHOPOSE_*_MAGIC`. Assert a truncated buffer yields `ParseError::InsufficientData` (no fabricated range).
 
 **Tier 2 — Spherical EKF correctness (unit test).** Place a track centroid at `(2,0,0)` with a known `P_c`; supply a range of `1.8 m` to an anchor at the origin (true distance 2.0). Assert the corrected centroid moves *along the LOS toward the sphere* by approximately `K·y`, that `P_c` shrinks in the radial direction, and that the skeleton shape (inter-keypoint distances) is unchanged to f32 precision (rigid translation).
 
@@ -407,7 +407,7 @@ Every fused metric position is a semantic state and therefore carries the full p
 | Wrong-track association at a crossing | Low–Medium | Identity swap with high confidence | Spherical Mahalanobis gate + AETHER re-ID; `AmbiguousResolved.margin` surfaced; privacy modes that forbid identity binding fall back to anonymous spherical constraint only |
 | Mis-surveyed anchor | Medium (manual measurement) | Systematic bias on every fused range from that anchor | `anchor_survey_version` invalidation; optional auto-learn *proposal* for operator confirmation; never silent self-update |
 | EKF divergence for a track adjacent to an anchor | Low | Gain blow-up, track teleport | Minimum-range guard on `‖c−a‖`; gate rejects the resulting large innovation |
-| UWB frames starve the aggregator demux of CSI | Low | Dropped CSI frames | UWB ranges are ~10 Hz per tag vs CSI 20 Hz; demux is a cheap magic-match `else if` arm, same as the seven existing `RUVIEW_*` arms |
+| UWB frames starve the aggregator demux of CSI | Low | Dropped CSI frames | UWB ranges are ~10 Hz per tag vs CSI 20 Hz; demux is a cheap magic-match `else if` arm, same as the seven existing `ECHOPOSE_*` arms |
 
 ---
 
@@ -427,7 +427,7 @@ We could skip `pose_tracker.rs` entirely and only fuse UWB at the MAT `PositionF
 
 ### 4.4 Why a New `0xC511xxxx` Magic Rather Than a New Transport
 
-UWB could ride its own port/protocol. Rejected to avoid a second aggregator, a second timesync, and a second firmware OTA channel. Extending the ADR-018 magic family (next id `0xC5110008`) means the existing `aggregator/` demux, the C6 802.15.4 clock, and the existing provisioning path all apply unchanged — the same reasoning that made the seven `RUVIEW_*_MAGIC` sibling packets share one port.
+UWB could ride its own port/protocol. Rejected to avoid a second aggregator, a second timesync, and a second firmware OTA channel. Extending the ADR-018 magic family (next id `0xC5110008`) means the existing `aggregator/` demux, the C6 802.15.4 clock, and the existing provisioning path all apply unchanged — the same reasoning that made the seven `ECHOPOSE_*_MAGIC` sibling packets share one port.
 
 ---
 
@@ -439,9 +439,9 @@ UWB could ride its own port/protocol. Rejected to avoid a second aggregator, a s
 | ADR-016 (RuVector Integration) | **Reused**: AETHER embedding cosine similarity for crossing disambiguation runs through the same `ruvector-mincut::DynamicPersonMatcher` path the tracker already uses |
 | ADR-024 (Contrastive CSI Embedding / AETHER) | **Disambiguator**: 128-dim AETHER embeddings on `PoseTrack` resolve constraint-to-track association when tracks are equidistant from an anchor (§2.4) |
 | ADR-029 (RuvSense Multistatic) | **Extended**: range constraints supply the front/back and scale information the geometric-diversity (Fisher-information) bounds show a near-colinear array cannot recover from CSI alone |
-| ADR-031 (RuView Sensing-First RF Mode) | **Consumer**: fused metric tracks and constraint residuals are sensing-mode outputs surfaced to the RuView stream |
-| ADR-063 (mmWave Sensor Fusion) | **Pattern parallel**: establishes the orthogonal-ranging-modality fusion pattern (`RUVIEW_FUSED_VITALS_MAGIC`); ADR-144 applies the same fusion philosophy to UWB metric range instead of 60 GHz radial velocity |
-| ADR-136 (RuView Rust Streaming Engine) | **Stage**: the UWB parse → associate → fuse path is a stream stage producing constraint-augmented track frames under the ADR-136 frame contract |
+| ADR-031 (EchoPose Sensing-First RF Mode) | **Consumer**: fused metric tracks and constraint residuals are sensing-mode outputs surfaced to the EchoPose stream |
+| ADR-063 (mmWave Sensor Fusion) | **Pattern parallel**: establishes the orthogonal-ranging-modality fusion pattern (`ECHOPOSE_FUSED_VITALS_MAGIC`); ADR-144 applies the same fusion philosophy to UWB metric range instead of 60 GHz radial velocity |
+| ADR-136 (EchoPose Rust Streaming Engine) | **Stage**: the UWB parse → associate → fuse path is a stream stage producing constraint-augmented track frames under the ADR-136 frame contract |
 | ADR-138 (LinkGroup / ArrayCoordinator) | **Clock**: shares the 802.15.4 timesync epoch the ArrayCoordinator uses for clock-quality gating, so UWB ranges and CSI frames associate by time |
 | ADR-139 (WorldGraph Environmental Digital Twin) | **Substrate**: `RangeConstraint` becomes an `object_anchor → person_track` `RangeEdge`; the WorldGraph is the single source of truth for anchor geometry and `anchor_survey_version` |
 | ADR-135 (Empty-Room Baseline Calibration) | **Analogue**: anchor survey/`anchor_survey_version` mirrors the baseline calibration/staleness-invalidation model; both refuse silent automatic self-update |
@@ -453,7 +453,7 @@ UWB could ride its own port/protocol. Rejected to avoid a second aggregator, a s
 
 ### Production Code (verified to exist)
 
-- `v2/crates/wifi-densepose-hardware/src/esp32_parser.rs` — ADR-018 binary frame parser; `ESP32_CSI_MAGIC = 0xC5110001` and the `RUVIEW_*_MAGIC` family (`0xC5110002`–`0xC5110007`) that the new `UWB_RANGE_MAGIC = 0xC5110008` extends
+- `v2/crates/wifi-densepose-hardware/src/esp32_parser.rs` — ADR-018 binary frame parser; `ESP32_CSI_MAGIC = 0xC5110001` and the `ECHOPOSE_*_MAGIC` family (`0xC5110002`–`0xC5110007`) that the new `UWB_RANGE_MAGIC = 0xC5110008` extends
 - `v2/crates/wifi-densepose-hardware/src/lib.rs` — crate root; no-mock guarantee; re-exports `CsiFrame`, `CsiMetadata`, `Esp32CsiParser`, the magic constants
 - `v2/crates/wifi-densepose-hardware/src/aggregator/` — UDP multi-node ingest; gains one `is_uwb_frame()` demux arm
 - `v2/crates/wifi-densepose-hardware/src/csi_frame.rs` — `CsiFrame`, `CsiMetadata`, `PpduType`; new `RangeConstraint`/`AnchorId`/`TagId` types live alongside these

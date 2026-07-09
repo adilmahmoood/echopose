@@ -9,7 +9,7 @@
 //! happily serves the request because every other axum layer treats it as a
 //! normal connection.
 //!
-//! For RuView this means any website the user visits can stream live pose,
+//! For EchoPose this means any website the user visits can stream live pose,
 //! breathing rate, and heart-rate data out of the sensing-server (`/ws/sensing`,
 //! `/api/v1/pose/current`, `/api/v1/vital-signs`, …), and trigger state-mutating
 //! POSTs (`/api/v1/recording/start`, `/api/v1/models/load`, …) when bearer-auth

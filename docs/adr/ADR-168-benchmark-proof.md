@@ -10,7 +10,7 @@ Python env: /home/ruvultra/ml-env
 
 This document proves that the OccWorld TransVQVAE model builds, loads, and
 runs end-to-end on the local RTX 5080 at acceptable latency before any
-domain fine-tuning on RuView CSI/occupancy data. All numbers are measured
+domain fine-tuning on EchoPose CSI/occupancy data. All numbers are measured
 from a cold Python process; no weights were loaded from a checkpoint (the
 config references `out/occworld/epoch_125.pth` which is absent — random
 initialisation is used throughout). Prediction quality numbers are therefore
@@ -81,7 +81,7 @@ Notes:
 | Headroom at inference peak | 12.10 | Available for larger batches or multi-model co-location |
 
 VRAM budget analysis:
-- Idle footprint (0.27 GB) is small enough to co-locate with a RuView CSI
+- Idle footprint (0.27 GB) is small enough to co-locate with a EchoPose CSI
   inference pipeline on the same GPU without contention.
 - Peak inference (3.37 GB allocated / 6.54 GB reserved) leaves >9 GB free
   for a batched training run alongside real-time inference.
@@ -158,7 +158,7 @@ the 213 ms inference latency.
 
 Summary: OccWorld TransVQVAE runs end-to-end on the RTX 5080 at 213 ms
 mean latency with a 3.37 GB VRAM peak. The model is ready for domain
-fine-tuning on RuView CSI-derived occupancy data. Prediction quality
+fine-tuning on EchoPose CSI-derived occupancy data. Prediction quality
 numbers (MDE 9.49 m) confirm that the random-weight baseline is far from
 target and that domain fine-tuning is a prerequisite before any deployment
 evaluation. The VRAM headroom (12.1 GB free at inference peak) is
@@ -210,7 +210,7 @@ ENU position → `snapshot_to_voxels()` → OccWorld inference
 | Person-class voxels (range) | [48,306 – 48,668] |
 
 > Note: high voxel count is expected with random weights (no domain
-> fine-tuning). After retraining on RuView CSI data, person voxels will
+> fine-tuning). After retraining on EchoPose CSI data, person voxels will
 > cluster tightly around predicted person positions.
 
 ### Throughput

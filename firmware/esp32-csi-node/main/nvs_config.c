@@ -14,6 +14,19 @@
 #include "nvs.h"
 #include "sdkconfig.h"
 
+/* ADR-032 §2.6: Secure zeroing of stack buffers containing credentials.
+ * explicit_bzero is preferred (available in ESP-IDF via newlib on S3/C6).
+ * Fallback uses volatile pointer to prevent compiler elision. */
+#if defined(__linux__) || defined(__NEWLIB__)
+#  define secure_zero(buf, len)  explicit_bzero(buf, len)
+#else
+static void secure_zero(void *ptr, size_t len) {
+    volatile unsigned char *p = (volatile unsigned char *)ptr;
+    while (len--) { *p++ = 0; }
+}
+#  define secure_zero(buf, len)  secure_zero(buf, len)
+#endif
+
 static const char *TAG = "nvs_config";
 
 void nvs_config_load(nvs_config_t *cfg)
@@ -91,6 +104,11 @@ void nvs_config_load(nvs_config_t *cfg)
     cfg->wasm_verify = 0;  /* Kconfig disabled signature verification. */
 #endif
 
+    /* ADR-032 §2.8: Mesh key and security level defaults */
+    memset(cfg->mesh_key, 0, 16);
+    cfg->mesh_key_valid = 0;
+    cfg->sec_level      = 1;  /* Default: 1 (transitional) */
+
     /* ADR-060: Channel override and MAC filter defaults. */
     cfg->csi_channel = 0;  /* 0 = auto-detect from connected AP. */
     cfg->filter_mac_set = 0;
@@ -114,6 +132,7 @@ void nvs_config_load(nvs_config_t *cfg)
         cfg->wifi_ssid[NVS_CFG_SSID_MAX - 1] = '\0';
         ESP_LOGI(TAG, "NVS override: ssid=%s", cfg->wifi_ssid);
     }
+    secure_zero(buf, sizeof(buf));
 
     /* WiFi password */
     len = sizeof(buf);
@@ -122,6 +141,7 @@ void nvs_config_load(nvs_config_t *cfg)
         cfg->wifi_password[NVS_CFG_PASS_MAX - 1] = '\0';
         ESP_LOGI(TAG, "NVS override: password=***");
     }
+    secure_zero(buf, sizeof(buf));
 
     /* Target IP */
     len = sizeof(buf);
@@ -130,6 +150,7 @@ void nvs_config_load(nvs_config_t *cfg)
         cfg->target_ip[NVS_CFG_IP_MAX - 1] = '\0';
         ESP_LOGI(TAG, "NVS override: target_ip=%s", cfg->target_ip);
     }
+    secure_zero(buf, sizeof(buf));
 
     /* Target port */
     uint16_t port_val;
@@ -322,6 +343,24 @@ void nvs_config_load(nvs_config_t *cfg)
         cfg->swarm_ingest_sec = 5;
     }
 
+    /* ADR-032 §2.3: NDP rate limiter configuration */
+    cfg->ndp_max_tokens = 0;  /* 0 = use firmware default (20) */
+    cfg->ndp_refill_hz  = 0;  /* 0 = use firmware default (20) */
+    uint8_t ndp_tok_val;
+    if (nvs_get_u8(handle, "ndp_max_tokens", &ndp_tok_val) == ESP_OK) {
+        if (ndp_tok_val >= 1 && ndp_tok_val <= 100) {
+            cfg->ndp_max_tokens = ndp_tok_val;
+            ESP_LOGI(TAG, "NVS override: ndp_max_tokens=%u", (unsigned)cfg->ndp_max_tokens);
+        }
+    }
+    uint8_t ndp_hz_val;
+    if (nvs_get_u8(handle, "ndp_refill_hz", &ndp_hz_val) == ESP_OK) {
+        if (ndp_hz_val >= 1 && ndp_hz_val <= 100) {
+            cfg->ndp_refill_hz = ndp_hz_val;
+            ESP_LOGI(TAG, "NVS override: ndp_refill_hz=%u Hz", (unsigned)cfg->ndp_refill_hz);
+        }
+    }
+
     /* Validate tdm_slot_index < tdm_node_count */
     if (cfg->tdm_slot_index >= cfg->tdm_node_count) {
         ESP_LOGW(TAG, "tdm_slot_index=%u >= tdm_node_count=%u, clamping to 0",
@@ -330,4 +369,24 @@ void nvs_config_load(nvs_config_t *cfg)
     }
 
     nvs_close(handle);
+
+    /* ADR-032 §2.8: Load mesh key and security level from NVS namespace "mesh_sec" */
+    nvs_handle_t sec_handle;
+    if (nvs_open("mesh_sec", NVS_READONLY, &sec_handle) == ESP_OK) {
+        size_t key_len = 16;
+        if (nvs_get_blob(sec_handle, "mesh_key", cfg->mesh_key, &key_len) == ESP_OK && key_len == 16) {
+            cfg->mesh_key_valid = 1;
+            ESP_LOGI(TAG, "NVS: loaded 16-byte mesh_key successfully");
+        }
+        uint8_t sec_level_val;
+        if (nvs_get_u8(sec_handle, "sec_level", &sec_level_val) == ESP_OK) {
+            if (sec_level_val <= 2) {
+                cfg->sec_level = sec_level_val;
+                ESP_LOGI(TAG, "NVS override: sec_level=%u", (unsigned)cfg->sec_level);
+            } else {
+                ESP_LOGW(TAG, "NVS: invalid sec_level=%u, using default transitional (1)", (unsigned)sec_level_val);
+            }
+        }
+        nvs_close(sec_handle);
+    }
 }

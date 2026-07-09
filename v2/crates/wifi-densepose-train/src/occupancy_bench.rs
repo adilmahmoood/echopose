@@ -27,7 +27,7 @@
 //!    always-absent predictor must never release a claim. Vacuous F1 (no
 //!    positives anywhere in the confusion) scores **0.0**, never 1.0.
 //!
-//! The harness is the same shape as the `ruview-gamma` acceptance gate: a single
+//! The harness is the same shape as the `echopose-gamma` acceptance gate: a single
 //! `claim_allowed` invariant, and the claim string is unreadable except through
 //! the gate.
 

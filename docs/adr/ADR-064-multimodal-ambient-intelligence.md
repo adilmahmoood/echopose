@@ -306,12 +306,12 @@ Academic proof-of-concept: "Sensing Plant Water Content Using WiFi Signals" (202
 
 ## Decision
 
-Document these possibilities as the product roadmap for the RuView multimodal ambient intelligence platform. Prioritize P0-P1 items (fall detection, sleep, occupancy, baby monitor, bathroom safety) for immediate implementation using the existing hardware (ESP32-S3 + MR60BHA2 + BH1750).
+Document these possibilities as the product roadmap for the EchoPose multimodal ambient intelligence platform. Prioritize P0-P1 items (fall detection, sleep, occupancy, baby monitor, bathroom safety) for immediate implementation using the existing hardware (ESP32-S3 + MR60BHA2 + BH1750).
 
 ## Consequences
 
 ### Positive
-- Positions RuView as a platform, not just a WiFi sensing demo
+- Positions EchoPose as a platform, not just a WiFi sensing demo
 - Each application can ship as a WASM edge module (ADR-040), deployable to existing hardware
 - Healthcare applications have clear regulatory paths (fall detection is FDA Class I exempt)
 - Most P0-P1 applications require no additional hardware beyond what's already deployed

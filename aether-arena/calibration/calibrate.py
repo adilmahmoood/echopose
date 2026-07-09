@@ -1,4 +1,4 @@
-"""RuView per-room calibration — fit a ~11 KB LoRA adapter from a short labeled in-room capture.
+"""EchoPose per-room calibration — fit a ~11 KB LoRA adapter from a short labeled in-room capture.
 
     python calibrate.py --base pose_mmfi_best.pt --data room_calib.npz --out room_A.adapter.npz
 

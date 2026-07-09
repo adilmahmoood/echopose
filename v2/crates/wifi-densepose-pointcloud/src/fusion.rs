@@ -3,7 +3,7 @@
 use crate::pointcloud::{ColorPoint, PointCloud};
 use std::collections::HashMap;
 
-/// Occupancy volume from WiFi RF tomography (mirrors RuView's OccupancyVolume).
+/// Occupancy volume from WiFi RF tomography (mirrors EchoPose's OccupancyVolume).
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct OccupancyVolume {
     pub densities: Vec<f64>, // [nz][ny][nx] voxel densities

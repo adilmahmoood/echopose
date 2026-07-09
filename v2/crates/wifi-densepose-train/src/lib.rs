@@ -60,7 +60,7 @@ pub mod mae;
 /// single metric definition is reachable from the workspace test gate.
 pub mod metrics_core;
 pub mod rapid_adapt;
-pub mod ruview_metrics;
+pub mod echopose_metrics;
 pub mod signal_features;
 pub mod subcarrier;
 pub mod virtual_aug;

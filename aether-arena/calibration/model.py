@@ -1,4 +1,4 @@
-"""WiFi-CSI pose model + LoRA adapter for the RuView calibration service.
+"""WiFi-CSI pose model + LoRA adapter for the EchoPose calibration service.
 
 Architecture matches the published flagship checkpoint
 [`ruvnet/wifi-densepose-mmfi-pose`](https://huggingface.co/ruvnet/wifi-densepose-mmfi-pose)

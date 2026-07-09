@@ -1,13 +1,13 @@
 //! # wifi-densepose-rufield
 //!
-//! ADR-262 **anti-corruption bridge**: converts RuView's live WiFi-CSI sensing
+//! ADR-262 **anti-corruption bridge**: converts EchoPose's live WiFi-CSI sensing
 //! output into signed RuField [`FieldEvent`](rufield_core::FieldEvent)s.
 //!
-//! This crate is the **single coupling point** (ADR-262 §5.4) between RuView and
+//! This crate is the **single coupling point** (ADR-262 §5.4) between EchoPose and
 //! the standalone RuField MFS spec (`vendor/rufield`, ADR-260). It depends on
 //! the four pure-Rust rufield crates **via path** — `rufield-core`,
-//! `-provenance`, `-privacy`, `-fusion` — and on **no** RuView internal crate.
-//! Inputs are owned primitives ([`SensingSnapshot`]) that mirror what RuView's
+//! `-provenance`, `-privacy`, `-fusion` — and on **no** EchoPose internal crate.
+//! Inputs are owned primitives ([`SensingSnapshot`]) that mirror what EchoPose's
 //! sensing cycle produces, so the bridge never imports `SensingUpdate` /
 //! `TrustedOutput` directly.
 //!
@@ -16,13 +16,13 @@
 //! This is **P1 plumbing**: a tested `SensingSnapshot → FieldEvent` conversion
 //! plus the **fail-closed privacy mapping** that is the §3.3 correctness item.
 //! It is **not** wired into the live server (that is P3) and makes **no accuracy
-//! claim** — RuField v0.1 is synthetic end-to-end and RuView's single-link CSI
+//! claim** — RuField v0.1 is synthetic end-to-end and EchoPose's single-link CSI
 //! carries its own caveats. The gates here are round-trip / fusability /
 //! privacy-safety / determinism, not validated F1.
 //!
 //! ## The critical correctness item: the privacy mapping (§3.3)
 //!
-//! RuView's `Derived` class has byte value `1` (below `Anonymous = 2`) yet
+//! EchoPose's `Derived` class has byte value `1` (below `Anonymous = 2`) yet
 //! carries an identity embedding. The bridge maps it to **P4/P5 by information
 //! content, never P1** — see [`map_privacy`]. Mapping off the byte would leak
 //! identity as low-privacy; [`map_privacy`] (and its dedicated test
@@ -34,7 +34,7 @@
 //! ```
 //! use wifi_densepose_rufield::{
 //!     snapshot_to_field_event, SensingSnapshot, SensingFeatures, SensingClass,
-//!     RuViewPrivacyClass,
+//!     EchoPosePrivacyClass,
 //! };
 //! use rufield_provenance::{Signer, is_fusable};
 //!
@@ -55,7 +55,7 @@
 //!         confidence: 0.82,
 //!     },
 //!     signal_field: None,
-//!     trust_class: RuViewPrivacyClass::Anonymous,
+//!     trust_class: EchoPosePrivacyClass::Anonymous,
 //!     demoted: false,
 //!     identity_bound: false,
 //!     node_id: "esp32_room_01".into(),
@@ -75,7 +75,7 @@ pub mod snapshot;
 pub use bridge::{snapshot_egress_class, snapshot_to_field_event};
 pub use privacy::{apply_demotion_floor, egress_class, map_privacy};
 pub use snapshot::{
-    RuViewPrivacyClass, SensingClass, SensingFeatures, SensingSnapshot, SignalField,
+    EchoPosePrivacyClass, SensingClass, SensingFeatures, SensingSnapshot, SignalField,
 };
 
 // Re-export the rufield surface a bridge consumer needs, so callers depend on
@@ -90,7 +90,7 @@ pub use rufield_provenance::{is_fusable, verify_event, Signer};
 /// the same default §10 network policy `/ws/sensing` honours, never emitting
 /// above-policy data).
 ///
-/// **Fail-closed for a live, unattended surface.** The live RuView surface has
+/// **Fail-closed for a live, unattended surface.** The live EchoPose surface has
 /// **no per-event consent or identity-binding ceremony** — so this is *stricter*
 /// than [`DefaultPrivacyGuard::authorize`]: it requires BOTH that the default
 /// guard would `Allow` the class onto [`Destination::Network`] with **no consent

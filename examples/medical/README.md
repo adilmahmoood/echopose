@@ -99,9 +99,9 @@ This tool is intended for:
 - Technology demonstration
 - Educational purposes
 
-### How This Connects to RuView
+### How This Connects to EchoPose
 
-This example is part of the [RuView](https://github.com/ruvnet/RuView) ambient intelligence platform. When combined with WiFi CSI sensing:
+This example is part of the [EchoPose](https://github.com/ruvnet/EchoPose) ambient intelligence platform. When combined with WiFi CSI sensing:
 
 - **WiFi CSI** provides through-wall presence detection and room-scale activity recognition
 - **mmWave radar** provides clinical-grade heart rate, breathing rate, and BP estimation

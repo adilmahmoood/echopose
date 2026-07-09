@@ -11,8 +11,18 @@ import signal
 from pathlib import Path
 from typing import Optional
 
-# Add src to Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Force UTF-8 encoding for standard streams to prevent UnicodeEncodeError on Windows
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+# Add project root (parent of src) to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config.settings import get_settings, validate_settings
 from src.logger import setup_logging

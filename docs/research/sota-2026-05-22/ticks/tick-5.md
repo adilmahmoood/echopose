@@ -34,4 +34,4 @@ The synthetic perturbation produced a *smaller* spectral distance than natural t
 
 ## Coordination note
 
-This tick wrote NOTHING to `PROGRESS.md` to avoid races with the horizon-tracker agent (which is on the `feat/ruview-mcp-m*` track and editing PROGRESS.md concurrently). The `ticks/tick-N.md` convention used here means each cron-driven tick is fully self-contained — the final 08:00 ET summary script will consolidate them.
+This tick wrote NOTHING to `PROGRESS.md` to avoid races with the horizon-tracker agent (which is on the `feat/echopose-mcp-m*` track and editing PROGRESS.md concurrently). The `ticks/tick-N.md` convention used here means each cron-driven tick is fully self-contained — the final 08:00 ET summary script will consolidate them.

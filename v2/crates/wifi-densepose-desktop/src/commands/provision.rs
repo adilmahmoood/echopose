@@ -16,7 +16,7 @@ const SERIAL_TIMEOUT_MS: u64 = 5000;
 const NVS_PARTITION: &str = "nvs";
 
 /// Magic bytes for provisioning protocol.
-const PROVISION_MAGIC: &[u8] = b"RUVIEW_NVS";
+const PROVISION_MAGIC: &[u8] = b"ECHOPOSE_NVS";
 
 /// Provision NVS configuration to an ESP32 via serial port.
 ///
@@ -134,7 +134,7 @@ pub async fn read_nvs(port: String) -> Result<ProvisioningConfig, String> {
     let (mut reader, mut writer) = tokio::io::split(port_settings);
 
     // Send read command
-    tokio::io::AsyncWriteExt::write_all(&mut writer, b"RUVIEW_NVS_READ\n")
+    tokio::io::AsyncWriteExt::write_all(&mut writer, b"ECHOPOSE_NVS_READ\n")
         .await
         .map_err(|e| format!("Failed to send read command: {}", e))?;
 
@@ -180,7 +180,7 @@ pub async fn erase_nvs(port: String) -> Result<ProvisionResult, String> {
     let (mut reader, mut writer) = tokio::io::split(port_settings);
 
     // Send erase command
-    tokio::io::AsyncWriteExt::write_all(&mut writer, b"RUVIEW_NVS_ERASE\n")
+    tokio::io::AsyncWriteExt::write_all(&mut writer, b"ECHOPOSE_NVS_ERASE\n")
         .await
         .map_err(|e| format!("Failed to send erase command: {}", e))?;
 
@@ -517,13 +517,13 @@ mod tests {
     #[test]
     fn test_provision_header() {
         let header = ProvisionHeader {
-            magic: *b"RUVIEW_NVS",
+            magic: *b"ECHOPOSE_NVS",
             version: 1,
             size: 256,
         };
 
         let bytes = bincode_header(&header);
         assert_eq!(bytes.len(), 15);
-        assert_eq!(&bytes[0..10], b"RUVIEW_NVS");
+        assert_eq!(&bytes[0..10], b"ECHOPOSE_NVS");
     }
 }

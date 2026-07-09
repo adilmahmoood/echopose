@@ -34,7 +34,7 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-028 | ESP32 Capability Audit & Witness Record | Accepted | implemented | audit/witness record; pins commit 96b01008 |
 | ADR-029 | RuvSense — Sensing-First RF Multistatic Mode | Proposed | stale-or-contradicted | repo has ruvsense/ (16 modules); ADR-032 hardens it |
 | ADR-030 | RuvSense Persistent Field Model | Proposed | stale-or-contradicted | field_model/longitudinal/cross_room modules exist; ADR-032 secures |
-| ADR-031 | RuView — Cross-Viewpoint Fusion | Proposed | stale-or-contradicted | ruvector/src/viewpoint/ exists; near-duplicate of ADR-029 |
+| ADR-031 | EchoPose — Cross-Viewpoint Fusion | Proposed | stale-or-contradicted | ruvector/src/viewpoint/ exists; near-duplicate of ADR-029 |
 | ADR-032 | Multistatic Mesh Security Hardening | Accepted | implemented | hardens Proposed 029/030/031 — status-graph inversion |
 | ADR-033 | CRV Signal Line Sensing (Coordinate Remote Viewing) | Proposed | proposed-only | speculative/metaphor-driven; abandonment risk |
 | ADR-034 | Expo React Native Mobile App (FieldView) | Accepted | unknown | no mobile-app crate/dir in CLAUDE.md — unverified |
@@ -50,7 +50,7 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-044 | Geospatial Satellite Integration | Accepted | unknown | no Date/Deciders; wifi-densepose-geo crate not in CLAUDE.md table |
 | ADR-045 | AMOLED Display Support for ESP32-S3 | Proposed | proposed-only | hardware-gated (LilyGO T-Display-S3); ADR-048 depends on it |
 | ADR-046 | Android TV Box / Armbian Deployment Target | Proposed | proposed-only | proposed-but-looks-abandoned; Phase 2 speculative |
-| ADR-047 | RuView Observatory — Three.js Visualization | Accepted (Implemented) | implemented | — |
+| ADR-047 | EchoPose Observatory — Three.js Visualization | Accepted (Implemented) | implemented | — |
 | ADR-048 | Adaptive CSI Activity Classifier | Accepted | implemented | depends on Proposed ADR-045 |
 | ADR-049 | Cross-Platform WiFi Detection & Graceful Degradation | Proposed | proposed-only | targets Python v1 legacy; abandonment risk |
 | ADR-050 | Provisioning Tool Enhancements | Proposed | partial | keeps 050 (collision resolved); partially fulfilled by ADR-060 |
@@ -58,9 +58,9 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-167 | DDD Bounded Contexts (appendix to ADR-052) | (none — appendix, no Status) | unknown | renumbered from ADR-052 (collision resolved); missing-status; cross-ref errors (cites 044 for provisioning) |
 | ADR-052 | Tauri Desktop Frontend — Hardware Mgmt & Viz | Proposed | partial | keeps 052 (collision resolved); superseded_by ADR-054; status drift |
 | ADR-053 | UI Design System — Dark Professional | Accepted | implemented | depends on Proposed ADR-052 |
-| ADR-054 | RuView Desktop Full Implementation | Accepted — in progress | partial | command matrix mostly Stub; espflash version drift vs 052 |
+| ADR-054 | EchoPose Desktop Full Implementation | Accepted — in progress | partial | command matrix mostly Stub; espflash version drift vs 052 |
 | ADR-055 | Integrated Sensing Server in Desktop App | Accepted | implemented | — |
-| ADR-056 | RuView Desktop Complete Capabilities Reference | Accepted | partial | reference doc; "complete" overstates impl state |
+| ADR-056 | EchoPose Desktop Complete Capabilities Reference | Accepted | partial | reference doc; "complete" overstates impl state |
 | ADR-057 | Firmware CSI Build Guard & sdkconfig.defaults | Accepted | implemented | minor C6 CSI matrix tension vs CLAUDE.md |
 | ADR-058 | Dual-Modal WASM Browser Pose (Video + CSI) | Proposed | partial | data-gated; ships placeholder weights |
 | ADR-059 | Live ESP32 CSI Pipeline Integration | Accepted | implemented | hardware-gated (physical ESP32-S3 + UDP:5005) |
@@ -99,15 +99,15 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-094 | Live 3D Point Cloud Viewer — GH Pages | Proposed (2026-04-29) | proposed-only | governs viewer deploy only, not crate data contract |
 | ADR-095 | rvCSI — Edge RF Sensing Runtime Platform | Proposed | implemented | header stale — ADR-097 confirms built, published 0.3.1 |
 | ADR-096 | rvCSI — Crate Topology, napi-c Shim, napi-rs | Proposed | implemented | header stale — 9 crates published 0.3.1 |
-| ADR-097 | Adopt rvCSI as RuView's primary CSI runtime | Proposed | proposed-only | RuView vendors but does not yet consume — adoption open |
+| ADR-097 | Adopt rvCSI as EchoPose's primary CSI runtime | Proposed | proposed-only | EchoPose vendors but does not yet consume — adoption open |
 | ADR-098 | Evaluate ruvnet/midstream | Rejected (with carve-outs) | proposed-only | rejection; carve-outs revived by ADR-099 |
 | ADR-099 | Adopt midstream — introspection + low-latency tap | Proposed | proposed-only | tension with ADR-098 (which rejected midstream) |
 | ADR-100 | Cognitum Cog Packaging Specification | Accepted | implemented | first cog shipped 2026-05-19 (ADR-101) |
 | ADR-101 | Pose Estimation Cog (WiFi-DensePose side) | Accepted — v0.0.1 shipped | implemented | hardware-gated; signed binaries on GCS |
 | ADR-102 | Edge Module Registry Integration | Accepted | implemented | serves 105-cog catalog |
 | ADR-103 | Learned Multi-Person Counter (cog-person-count) | Proposed | proposed-only | data/hardware-gated; claim gutted by ADR-159 |
-| ADR-104 | RuView MCP Server + CLI Distribution | Accepted | partial | depends on Proposed ADR-103 for count tool |
-| ADR-105 | Federated learning for RuView CSI personalization | Proposed | proposed-only | head of 105-108 chain, none implemented |
+| ADR-104 | EchoPose MCP Server + CLI Distribution | Accepted | partial | depends on Proposed ADR-103 for count tool |
+| ADR-105 | Federated learning for EchoPose CSI personalization | Proposed | proposed-only | head of 105-108 chain, none implemented |
 | ADR-106 | Differential privacy + biometric isolation | Proposed | proposed-only | extends Proposed 105 |
 | ADR-107 | Cross-installation federation w/ secure aggregation | Proposed | proposed-only | classical DH later superseded by 108 |
 | ADR-108 | Kyber PQ key exchange for federation | Proposed | proposed-only | extends Proposed 107 (parent unimplemented) |
@@ -122,10 +122,10 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-119 | BFLD Frame Format and Wire Protocol | Proposed | proposed-only | child of Proposed 118 |
 | ADR-120 | BFLD Privacy Class and Hash Rotation | Proposed | proposed-only | child of Proposed 118 |
 | ADR-121 | BFLD Identity Risk Scoring and Coherence Gate | Proposed | proposed-only | abandonment risk; data-gated (KIT BFId dataset) |
-| ADR-122 | BFLD RuView Surface — HA/Matter/MQTT | Proposed | proposed-only | abandonment risk; depends on Soul Signature + cog-ha-matter |
+| ADR-122 | BFLD EchoPose Surface — HA/Matter/MQTT | Proposed | proposed-only | abandonment risk; depends on Soul Signature + cog-ha-matter |
 | ADR-123 | BFLD Capture Path — Pi5/Nexmon, ESP32 feasibility | Proposed | proposed-only | hardware-gated (ESP32 cannot sniff CBFR) |
 | ADR-124 | rvagent — MCP + ruvector npm lib (SENSE-BRIDGE) | Proposed | proposed-only | abandonment risk; not published; open questions |
-| ADR-125 | RuView ↔ Apple Home native HAP bridge | Proposed | proposed-only | abandonment risk; hardware-gated (same-L2 pairing) |
+| ADR-125 | EchoPose ↔ Apple Home native HAP bridge | Proposed | proposed-only | abandonment risk; hardware-gated (same-L2 pairing) |
 | ADR-126 | HOMECORE — Rust+WASM+TS port of Home Assistant | Proposed | proposed-only | multi-quarter; series map cites missing 131/132 + mis-numbered 134 |
 | ADR-127 | HOMECORE-CORE — state machine, registries, event bus | Proposed | proposed-only | future-dated Q3 2026 |
 | ADR-128 | HOMECORE-PLUGINS — WASM integration plugin system | Proposed | proposed-only | future-dated; depends on 127 ABI freeze |
@@ -134,7 +134,7 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-133 | HOMECORE-ASSIST — voice/intent + Ruflo bridge | Proposed | partial | missing tracking issue; P1 partial build, P2 deferred |
 | ADR-134 | First-Class Channel Impulse Response (CIR) Support | Proposed | proposed-only | DUPLICATE IDENTITY (126/129 cite 134 as HOMECORE-MIGRATE); hardware-gated |
 | ADR-135 | Empty-Room Baseline Calibration | Proposed | proposed-only | hardware-gated (COM9/COM12 + 802.15.4 sync) |
-| ADR-136 | RuView Rust Streaming Engine — Architecture/Contracts | Proposed | partial | status-contradiction: §8 says Built (commit 11f89727f, 9 tests) |
+| ADR-136 | EchoPose Rust Streaming Engine — Architecture/Contracts | Proposed | partial | status-contradiction: §8 says Built (commit 11f89727f, 9 tests) |
 | ADR-137 | Fusion Engine Quality Scoring | Proposed | partial | status-contradiction: Built (commit 4fa3847ac, 6 tests) |
 | ADR-138 | WiFi-7 MLO LinkGroup + ArrayCoordinator gating | Proposed | partial | status-contradiction: Built (commit fc7674bde, 8 tests) |
 | ADR-139 | WorldGraph — Environmental Digital Twin | Proposed | partial | status-contradiction: Built (commit 521a012d8, 7 tests) |
@@ -152,7 +152,7 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-170 | yoga-mode — pose detection/scoring demo | Proposed | proposed-only | renumbered from ADR-148 (collision resolved); no tracking issue |
 | ADR-149 | AetherArena — Spatial-Intelligence Benchmark (HF) | Accepted | partial | keeps 149 (collision resolved); external repo out-of-tree; Wi-Pose dropped |
 | ADR-171 | Drone Swarm Benchmarking Methodology | Accepted (peer-reviewed) | partial | renumbered from ADR-149 (collision resolved); critiques 148's own numbers |
-| ADR-150 | RuView RF Foundation Encoder | Proposed | partial | status Proposed but cites measured 81.63% in-domain vs ~11.6% cross-subject |
+| ADR-150 | EchoPose RF Foundation Encoder | Proposed | partial | status Proposed but cites measured 81.63% in-domain vs ~11.6% cross-subject |
 | ADR-151 | Per-Room Calibration & Specialized Model Training | Accepted — Stages 1-5 impl | partial | HF-backbone distillation pending |
 | ADR-152 | WiFi-Pose SOTA 2026 Intake | Proposed | partial | header stale; §2.1-2.3/2.6 impl, WiFlow-STD ~96% PCK; 1/25 claim REFUTED |
 | ADR-153 | IEEE 802.11bf-2025 Forward-Compat Protocol Model | accepted | implemented | amends ADR-152 §2.4; OTA/silicon binding deferred |

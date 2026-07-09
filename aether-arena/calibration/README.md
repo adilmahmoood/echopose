@@ -1,4 +1,4 @@
-# RuView Calibration Service (reference implementation)
+# EchoPose Calibration Service (reference implementation)
 
 Turn a **shared WiFi-CSI pose base model** into a room-specific one with a **30-second labeled
 calibration** and a **~11 KB per-room LoRA adapter**. This is the deployable resolution of the

@@ -6,7 +6,7 @@
 | **Date** | 2026-06-11 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-ruvector` — `viewpoint/` (`attention.rs`, `geometry.rs`, `fusion.rs`, `coherence.rs`), `mat/` (`triangulation.rs`, `heartbeat.rs`), `sketch.rs`, benches, docs |
-| **Relates to** | ADR-031 (RuView sensing-first RF mode), ADR-016/017 (RuVector integration), ADR-024 (AETHER re-ID), ADR-027 (MERIDIAN cross-env), ADR-084 (RaBitQ similarity sensor), ADR-138 (ClockQualityGate), ADR-152 (WiFi-Pose SOTA 2026 intake), ADR-154 (Signal/DSP sweep M0), ADR-155 (NN/Training sweep M1) |
+| **Relates to** | ADR-031 (EchoPose sensing-first RF mode), ADR-016/017 (RuVector integration), ADR-024 (AETHER re-ID), ADR-027 (MERIDIAN cross-env), ADR-084 (RaBitQ similarity sensor), ADR-138 (ClockQualityGate), ADR-152 (WiFi-Pose SOTA 2026 intake), ADR-154 (Signal/DSP sweep M0), ADR-155 (NN/Training sweep M1) |
 | **Scope** | Milestone 2 of the beyond-SOTA sweep: four **correctness/integrity/security** fixes on the cross-viewpoint fusion path (each pinned by a regression test that fails on the old code), one **measured** hot-path perf win + a new criterion bench, the ANN/fusion SOTA landscape graded MEASURED/CLAIMED/data-gated, and a prioritized deferred backlog. **Nothing is silently dropped.** |
 
 ---

@@ -44,7 +44,7 @@ This **belt-and-braces** approach protects against:
 - Implementation bugs in either primitive
 - Adversaries who can compromise *one* of the two primitives
 
-Cost: ~2× key-exchange computation, ~2× public-key size. For RuView's per-round overhead this adds ~3 kB / round / installation — negligible.
+Cost: ~2× key-exchange computation, ~2× public-key size. For EchoPose's per-round overhead this adds ~3 kB / round / installation — negligible.
 
 After CNSA 2.0 fully retires classical primitives (estimated 2030+), the hybrid layer is removed and pure Kyber-768 is used.
 
@@ -134,7 +134,7 @@ Status: **rejected**. Adversaries can record-now-decrypt-later — federated mod
 ## Bridge to existing ADRs
 
 - **ADR-100 (cog packaging Ed25519 signing)** — separate from key-exchange; PQC signature migration needed independently (future ADR-109).
-- **ADR-104 (ruview-mcp + ruview-cli)** — MCP tool `ruview_fed_pqc_status` surfaces hybrid-vs-pure mode and migration phase.
+- **ADR-104 (echopose-mcp + echopose-cli)** — MCP tool `echopose_fed_pqc_status` surfaces hybrid-vs-pure mode and migration phase.
 - **ADR-105 (federation)** + **ADR-106 (DP+isolation)** — operate over secure-aggregation key exchange; transparent to KEM substitution.
 - **ADR-107 (cross-installation federation)** — directly extended by ADR-108; Layer 4 secure aggregation gets Kyber replacement for DH.
 
@@ -151,7 +151,7 @@ Status: **rejected**. Adversaries can record-now-decrypt-later — federated mod
 - **The "when do we need this?" question** is genuinely uncertain. Estimates of cryptographically-relevant quantum computers range from 2030 (aggressive) to 2050+ (conservative). The proactive migration is cheap insurance.
 - **ESP32-S3 can compute Kyber-768** but the timing impact in the per-round federation cycle (~10 ms additional per handshake) needs benchmarking on real hardware. Estimated negligible given the existing ~30 s round duration.
 - **The migration timeline is aspirational** — depends on `pqcrypto-kyber` crate stability + adoption maturity. Plausible alternatives include `liboqs` C-binding or `boring-pq` (Cloudflare's pre-standardisation work, now superseded).
-- **Pure Kyber (Phase 3) end-of-life for classical** — depends on community standardisation and a future RuView decision; not bindingly specified here.
+- **Pure Kyber (Phase 3) end-of-life for classical** — depends on community standardisation and a future EchoPose decision; not bindingly specified here.
 
 ## What this ADR closes
 

@@ -2,7 +2,7 @@
 
 > **Public leaderboard. Private evaluation split. Open scorer. Signed results.**
 
-AetherArena is a **standalone, project-agnostic benchmark** for camera-free **spatial intelligence** — pose, presence, occupancy, tracking, and vitals from RF/WiFi (and, over time, mmWave / UWB / radar / lidar / multimodal). It is **not** a single-vendor leaderboard: any team, framework, or sensing modality can enter, and every entrant — including the RuView baseline that donated the seed scorer — is scored by the identical, open, pinned harness.
+AetherArena is a **standalone, project-agnostic benchmark** for camera-free **spatial intelligence** — pose, presence, occupancy, tracking, and vitals from RF/WiFi (and, over time, mmWave / UWB / radar / lidar / multimodal). It is **not** a single-vendor leaderboard: any team, framework, or sensing modality can enter, and every entrant — including the EchoPose baseline that donated the seed scorer — is scored by the identical, open, pinned harness.
 
 Specified in [ADR-149](../docs/adr/ADR-149-public-community-leaderboard-huggingface.md) (Accepted).
 
@@ -31,7 +31,7 @@ The headline rank is the **category metric**; an optional `arena_score = quality
 
 ## How scoring works
 
-The scorer is RuView's **already-published** `wifi-densepose-train` acceptance harness (`ruview_metrics` + ADR-145 `ablation`), run in a pinned sandbox. **You submit a model, not predictions** — predictions on data you hold prove nothing. Your model is scored against a **private** MM-Fi held-out split (CC BY-NC 4.0; Wi-Pose excluded for redistribution reasons), and one **signed, append-only** row is written to the results ledger with a determinism proof hash.
+The scorer is EchoPose's **already-published** `wifi-densepose-train` acceptance harness (`echopose_metrics` + ADR-145 `ablation`), run in a pinned sandbox. **You submit a model, not predictions** — predictions on data you hold prove nothing. Your model is scored against a **private** MM-Fi held-out split (CC BY-NC 4.0; Wi-Pose excluded for redistribution reasons), and one **signed, append-only** row is written to the results ledger with a determinism proof hash.
 
 Submission lifecycle: `submitted → validated → quarantined → smoke_scored → full_scored → published` (or `rejected` with a reason). The model only ever runs inside a no-network, read-only-FS sandbox.
 
@@ -43,8 +43,8 @@ Submission lifecycle: `submitted → validated → quarantined → smoke_scored 
 
 ## Verify it's fair (you don't have to trust us)
 
-See [`VERIFY.md`](VERIFY.md) — run the **open scorer** locally on the **public smoke split**, reproduce the determinism hash, and confirm RuView's own entries were scored by the identical path. That five-step check is the launch gate (ADR-149 §7).
+See [`VERIFY.md`](VERIFY.md) — run the **open scorer** locally on the **public smoke split**, reproduce the determinism hash, and confirm EchoPose's own entries were scored by the identical path. That five-step check is the launch gate (ADR-149 §7).
 
 ## Neutrality
 
-AA is a neutral commons. The scorer is open and versioned; any metric change is a public `harness_version` bump that **re-scores all entries**. RuView donated the seed harness and enters as one baseline — it gets no special treatment (ADR-149 §2.8).
+AA is a neutral commons. The scorer is open and versioned; any metric change is a public `harness_version` bump that **re-scores all entries**. EchoPose donated the seed harness and enters as one baseline — it gets no special treatment (ADR-149 §2.8).

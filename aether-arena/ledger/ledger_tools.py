@@ -74,7 +74,7 @@ def seed():
     leaderboard. Every result row is produced by the real scoring pipeline
     (load model -> run inference -> score against the private eval split ->
     proof hash). The board starts empty and awaits the first real harness score,
-    including RuView's own — which gets no special seeding.
+    including EchoPose's own — which gets no special seeding.
     """
     if LEDGER.exists():
         LEDGER.unlink()

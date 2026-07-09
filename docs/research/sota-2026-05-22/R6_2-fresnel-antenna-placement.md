@@ -4,7 +4,7 @@
 
 ## Premise
 
-R6 (Fresnel forward model) said: there is a ~40 cm wide ellipsoid around a 5 m WiFi link where occupancy dominates the CSI signal. Outside that envelope, CSI is mostly multipath edge noise. The current RuView installation guide is essentially "stick the seed wherever the AP is and hope for the best."
+R6 (Fresnel forward model) said: there is a ~40 cm wide ellipsoid around a 5 m WiFi link where occupancy dominates the CSI signal. Outside that envelope, CSI is mostly multipath edge noise. The current EchoPose installation guide is essentially "stick the seed wherever the AP is and hope for the best."
 
 This thread quantifies how much coverage you give up by ignoring the Fresnel geometry — and provides a CLI-shaped tool that solves the placement problem given a room layout + target occupancy zones (bed, chair, where the user actually spends time).
 
@@ -67,7 +67,7 @@ These recommendations make the existing installation guides ~50-100× more effec
 ## What this DOES enable
 
 1. **A shippable CLI tool** that gives end users immediate placement guidance. Same input shape as `wifi-densepose plan-antennas --room 5x5 --target bed,1,1,2x1`. The output is a concrete placement that an installer can mount to.
-2. **Reproducible benchmarks** for the "is the placement good enough?" question. Existing RuView installs have no objective placement metric; this tool gives one.
+2. **Reproducible benchmarks** for the "is the placement good enough?" question. Existing EchoPose installs have no objective placement metric; this tool gives one.
 3. **A natural cog feature**: when a new cog is added (e.g. `cog-wildlife`), the placement guide is generated from the cog's target-zone schema, not hand-written per-cog.
 4. **Adaptive 4-anchor multistatic generalisation.** The current 2D single-pair search extends naturally to N anchors — pick the 4-anchor set that maximises union-of-Fresnel-envelopes coverage. Each additional anchor saturates coverage (diminishing returns), giving a quantitative answer to "is 4 anchors enough?" (in a 5×5 m bedroom: yes; in a 10 m living room: no, need 6).
 
@@ -126,11 +126,11 @@ This is the deliverable a customer would run before mounting hardware. Two minut
 - **R6.2.1**: 3D extension. Replace 2D ellipse with prolate ellipsoid; allow ceiling/floor antenna mounts.
 - **R6.2.2**: N-anchor multistatic placement (maximises *union* of N pairwise Fresnel envelopes). Quantitative answer to "is 4 anchors enough?"
 - **R6.2.3**: Pose-trajectory-aware target zones, fed from AETHER's per-installation occupancy data (R3 + ADR-105 federation enables this without raw data leaving the install).
-- **Productise**: add as `wifi-densepose plan-antennas` subcommand; mention in ADR-104's CLI surface as a deferred MCP tool `ruview_placement_recommend`.
+- **Productise**: add as `wifi-densepose plan-antennas` subcommand; mention in ADR-104's CLI surface as a deferred MCP tool `echopose_placement_recommend`.
 
 ## What this DOES close
 
-The "we don't have a placement recommendation tool" gap that every RuView installer hits is now closed with a working CLI-shaped prototype. The 93× median-vs-best improvement is large enough that productising this is high-leverage with no new physics.
+The "we don't have a placement recommendation tool" gap that every EchoPose installer hits is now closed with a working CLI-shaped prototype. The 93× median-vs-best improvement is large enough that productising this is high-leverage with no new physics.
 
 ## Connection back
 

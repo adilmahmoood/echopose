@@ -1,6 +1,6 @@
 //! Cross-viewpoint embedding fusion for multistatic WiFi sensing (ADR-031).
 //!
-//! This module implements the RuView fusion pipeline that combines per-viewpoint
+//! This module implements the EchoPose fusion pipeline that combines per-viewpoint
 //! AETHER embeddings into a single fused embedding using learned cross-viewpoint
 //! attention with geometric bias.
 //!

@@ -6,8 +6,8 @@
 | **Date** | 2026-05-24 |
 | **Deciders** | ruv |
 | **Codename** | **BFLD** — Beamforming Feedback Layer for Detection |
-| **Relates to** | [ADR-024](ADR-024-contrastive-csi-embedding-model.md) (AETHER), [ADR-027](ADR-027-cross-environment-domain-generalization.md) (MERIDIAN), [ADR-028](ADR-028-esp32-capability-audit.md) (witness), [ADR-029](ADR-029-ruvsense-multistatic-sensing-mode.md) (multistatic), [ADR-030](ADR-030-ruvsense-persistent-field-model.md) (field model), [ADR-031](ADR-031-ruview-sensing-first-rf-mode.md) (sensing-first), [ADR-032](ADR-032-multistatic-mesh-security-hardening.md) (mesh security), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI), [ADR-115](ADR-115-home-assistant-integration.md) (HA), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Matter), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (pip) |
-| **Sub-ADRs** | [ADR-119](ADR-119-bfld-frame-format-and-wire-protocol.md) (frame), [ADR-120](ADR-120-bfld-privacy-class-and-hash-rotation.md) (privacy), [ADR-121](ADR-121-bfld-identity-risk-scoring.md) (risk), [ADR-122](ADR-122-bfld-ruview-ha-matter-exposure.md) (RuView), [ADR-123](ADR-123-bfld-capture-path-nexmon-and-esp32.md) (capture) |
+| **Relates to** | [ADR-024](ADR-024-contrastive-csi-embedding-model.md) (AETHER), [ADR-027](ADR-027-cross-environment-domain-generalization.md) (MERIDIAN), [ADR-028](ADR-028-esp32-capability-audit.md) (witness), [ADR-029](ADR-029-ruvsense-multistatic-sensing-mode.md) (multistatic), [ADR-030](ADR-030-ruvsense-persistent-field-model.md) (field model), [ADR-031](ADR-031-echopose-sensing-first-rf-mode.md) (sensing-first), [ADR-032](ADR-032-multistatic-mesh-security-hardening.md) (mesh security), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI), [ADR-115](ADR-115-home-assistant-integration.md) (HA), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Matter), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (pip) |
+| **Sub-ADRs** | [ADR-119](ADR-119-bfld-frame-format-and-wire-protocol.md) (frame), [ADR-120](ADR-120-bfld-privacy-class-and-hash-rotation.md) (privacy), [ADR-121](ADR-121-bfld-identity-risk-scoring.md) (risk), [ADR-122](ADR-122-bfld-echopose-ha-matter-exposure.md) (EchoPose), [ADR-123](ADR-123-bfld-capture-path-nexmon-and-esp32.md) (capture) |
 | **Research bundle** | [`docs/research/BFLD/`](../research/BFLD/) (11 files, 13,544 words) |
 | **Companion research** | [`docs/research/soul/`](../research/soul/) — Soul Signature multi-modal biometric. BFLD is the policy-enforcement and compliance layer for Soul Signature; the two share the AETHER encoder (ADR-024), the witness chain (ADR-110/028), the RVF container, and `cross_room.rs` (ADR-030). |
 | **Tracking issue** | TBD |
@@ -27,11 +27,11 @@ Two independent 2024–2025 research results establish the severity of this expo
 
 Capture tooling is freely available: **Wi-BFI** (pip-installable), **PicoScenes**, **Nexmon BFI patches** for BCM43455c0 (Raspberry Pi 5 / 4 / 3B+).
 
-### 1.2 Gap in the existing RuView pipeline
+### 1.2 Gap in the existing EchoPose pipeline
 
-The wifi-densepose / RuView pipeline processes CSI via the rvCSI runtime (ADR-095/096) and emits presence, pose, vitals, and zone-activity events. **No layer in the existing pipeline measures whether the data it is processing is capable of identifying individuals.** All CSI is treated as equivalent from a privacy standpoint regardless of operating regime.
+The wifi-densepose / EchoPose pipeline processes CSI via the rvCSI runtime (ADR-095/096) and emits presence, pose, vitals, and zone-activity events. **No layer in the existing pipeline measures whether the data it is processing is capable of identifying individuals.** All CSI is treated as equivalent from a privacy standpoint regardless of operating regime.
 
-This gap becomes a compliance and liability issue at deployment scale. An operator placing RuView in a care home, hotel, shared office, or rental property has no instrument to verify that the system is operating anonymously.
+This gap becomes a compliance and liability issue at deployment scale. An operator placing EchoPose in a care home, hotel, shared office, or rental property has no instrument to verify that the system is operating anonymously.
 
 ### 1.3 BFI as a sensing signal
 
@@ -66,7 +66,7 @@ Create a new Rust crate **`wifi-densepose-bfld`** in `v2/crates/` that:
 1. **Ingests** BFI angle matrices (Φ/ψ) from CBFR frames, optionally fused with CSI.
 2. **Computes** nine named features and an `identity_risk_score` (separability × temporal_stability × cross_perspective_consistency × sample_confidence).
 3. **Gates** all output through a `privacy_class` byte that **structurally prevents** identity-correlated data from being published at classes 2 (anonymous) and 3 (restricted).
-4. **Emits** `BfldEvent` JSON over MQTT under `ruview/<node_id>/bfld/*` with per-class topic routing.
+4. **Emits** `BfldEvent` JSON over MQTT under `echopose/<node_id>/bfld/*` with per-class topic routing.
 5. **Enforces three invariants structurally, not by policy**:
    - **I1**: Raw BFI never exits the node.
    - **I2**: Identity embedding is in-RAM-only (no disk, no network).
@@ -79,7 +79,7 @@ The umbrella implementation is decomposed into five sub-ADRs:
 | **ADR-119** | `BfldFrame` wire format, magic `0xBF1D_0001`, deterministic serialization, CRC32 |
 | **ADR-120** | `privacy_class` semantics, BLAKE3 hash rotation, default-deny field classification |
 | **ADR-121** | Identity risk scoring formula, coherence gate, leakage estimator |
-| **ADR-122** | RuView surface: HA entities, Matter cluster boundary, MQTT topic ACL |
+| **ADR-122** | EchoPose surface: HA entities, Matter cluster boundary, MQTT topic ACL |
 | **ADR-123** | Capture path: Pi 5 / Nexmon adapter + ESP32-S3 BFI feasibility |
 
 ### 2.1 Crate module layout
@@ -159,7 +159,7 @@ Deferred to a follow-up ADR. DP sensitivity analysis and its interaction with `i
 
 - [ ] **AC1**: Extractor parses BFI from 802.11ac and 802.11ax captures, 20/40/80/160 MHz, 2×2 through 4×4 MIMO.
 - [ ] **AC2**: Presence detection latency ≤ 1 s p95 from first non-empty BFI frame.
-- [ ] **AC3**: Motion score published at ≥ 1 Hz on `ruview/<node_id>/bfld/motion/state`.
+- [ ] **AC3**: Motion score published at ≥ 1 Hz on `echopose/<node_id>/bfld/motion/state`.
 - [ ] **AC4**: Raw BFI bytes never present in any serialized `BfldFrame` payload at any `privacy_class` value.
 - [ ] **AC5**: With `privacy_mode` enabled, all identity-derived fields are absent from outbound events.
 - [ ] **AC6**: Identical `BfiCapture` inputs produce bit-identical `BfldFrame` serialization (deterministic hash).

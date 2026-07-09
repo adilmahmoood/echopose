@@ -1,4 +1,4 @@
-//! Matter cluster + device-type ID mappings for RuView entities.
+//! Matter cluster + device-type ID mappings for EchoPose entities.
 //!
 //! IDs come from the **Matter Core Spec 1.3 §A.1 Reserved Cluster IDs**
 //! and **§1.3 Device Library**. Where ADR-115 §3.11.1 uses a name,
@@ -31,7 +31,7 @@ pub const CLUSTER_BASIC_INFORMATION: ClusterId = 0x0028;
 pub const CLUSTER_BOOLEAN_STATE: ClusterId = 0x0045;
 
 /// Per §A.1.16 "BridgedDeviceBasicInformation" — identifies a bridged
-/// device (one per RuView node) on a Matter Bridged Devices Aggregator.
+/// device (one per EchoPose node) on a Matter Bridged Devices Aggregator.
 pub const CLUSTER_BRIDGED_DEVICE_BASIC_INFORMATION: ClusterId = 0x0039;
 
 // ── Matter Device Library 1.3 — Device-type IDs ──────────────────────
@@ -40,9 +40,9 @@ pub const DEVICE_TYPE_OCCUPANCY_SENSOR: EndpointTypeId = 0x0107;
 /// Per §6.6 GenericSwitch. Used for fall / bed-exit / multi-room events.
 pub const DEVICE_TYPE_GENERIC_SWITCH: EndpointTypeId = 0x000F;
 /// Per §10.2 Aggregator. The top-level endpoint that exposes all
-/// bridged RuView nodes.
+/// bridged EchoPose nodes.
 pub const DEVICE_TYPE_AGGREGATOR: EndpointTypeId = 0x000E;
-/// Per §10.1 Bridged Node — one endpoint per RuView physical node.
+/// Per §10.1 Bridged Node — one endpoint per EchoPose physical node.
 pub const DEVICE_TYPE_BRIDGED_NODE: EndpointTypeId = 0x0013;
 
 // ── Vendor-extension attribute (per ADR §3.11.1) ─────────────────────

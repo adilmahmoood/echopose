@@ -1,6 +1,6 @@
 # Per-Room Calibration — Integration Overview (for `cognitum-one/v0-appliance`)
 
-**Audience:** integrators wiring the RuView per-room calibration system (ADR-151) into the
+**Audience:** integrators wiring the EchoPose per-room calibration system (ADR-151) into the
 Cognitum V0 appliance (`cognitum-v0`, Pi 5 + Hailo). This document is the contract +
 deployment spec: data formats, API surface, crate API, and the appliance integration plan.
 
@@ -36,7 +36,7 @@ baseline (ADR-135)  →  enroll (anchors + quality gate)  →  extract (features
 | **Calibration service** | **Pi 5 CPU** (aarch64) | this crate: baseline/enroll/train/runtime + HTTP API | **this PR** |
 | **Shared backbone (optional)** | **Hailo HAT (HAILO10H)** | ADR-150 RF Foundation Encoder + neural pose head as HEF | future (ADR-150) |
 
-> The appliance's WiFi (`wlan0`) is `managed` with no nexmon — **the Pi is a CSI *processor*, not a CSI radio.** CSI arrives from the ESP32 nodes (the existing `ruview-vitals-worker:50054` already receives it). Calibration *consumes* that stream; it does not sense directly.
+> The appliance's WiFi (`wlan0`) is `managed` with no nexmon — **the Pi is a CSI *processor*, not a CSI radio.** CSI arrives from the ESP32 nodes (the existing `echopose-vitals-worker:50054` already receives it). Calibration *consumes* that stream; it does not sense directly.
 
 ---
 
@@ -169,7 +169,7 @@ Pure Rust; deps are `wifi-densepose-core` + `wifi-densepose-signal` (default-fea
 
 ## 6. Appliance integration plan (`cognitum-one/v0-appliance`)
 
-Verified on `cognitum-v0`: aarch64, `cargo 1.96.0`, Hailo `HAILO10H`, `ruview-vitals-worker:50054`.
+Verified on `cognitum-v0`: aarch64, `cargo 1.96.0`, Hailo `HAILO10H`, `echopose-vitals-worker:50054`.
 
 **Step 1 — vendor / depend on the crate.** Add `wifi-densepose-calibration` (path or published crate)
 to the appliance workspace. It builds natively on aarch64 — no BLAS/GPU, **and no ONNX/OpenSSL**:
@@ -189,7 +189,7 @@ Verified: `cargo tree -p wifi-densepose-cli --no-default-features` shows **0** `
   Reuse `parse_csi_packet` (or the rvCSI `CsiFrame` schema if you normalise upstream).
 
 **Step 3 — run the calibration service.** Either embed the crate (call `CalibrationRecorder` /
-`MixtureOfSpecialists` in-process from a worker like `ruview-vitals-worker`), or run the
+`MixtureOfSpecialists` in-process from a worker like `echopose-vitals-worker`), or run the
 `calibrate-serve` binary as a sidecar (systemd unit, bind `127.0.0.1` + reverse-proxy through the
 appliance gateway on `:9000`). Persist baselines/banks under the appliance data dir, keyed by `room_id`.
 

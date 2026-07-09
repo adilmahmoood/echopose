@@ -41,7 +41,7 @@ A single `privacy_class: u8` byte in the `BfldFrame` header (ADR-119 §2.1) sele
 | **2** | `anonymous` (**default**) | Production deployment | Aggregate sensing only: presence, motion, person_count, zone_id, confidence |
 | **3** | `restricted` | Care-home / regulated deployment | Class 2 minus `identity_risk_score` and `rf_signature_hash` |
 
-Default for new RuView nodes is class **2**. Operators must explicitly opt-down to class 1 via the existing `--research-mode` flag (ADR-115 §7); class 0 is reserved for `cargo test` and is unreachable from `wifi-densepose-sensing-server`.
+Default for new EchoPose nodes is class **2**. Operators must explicitly opt-down to class 1 via the existing `--research-mode` flag (ADR-115 §7); class 0 is reserved for `cargo test` and is unreachable from `wifi-densepose-sensing-server`.
 
 ### 2.2 Enforcement via marker types
 

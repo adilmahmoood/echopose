@@ -1,11 +1,11 @@
 //! RaBitQ-style binary sketch — cheap similarity sensor for CSI/pose embeddings.
 //!
 //! Implements **Pass 1** of [ADR-084](../../../../../docs/adr/ADR-084-rabitq-similarity-sensor.md):
-//! a thin RuView-flavored API over `ruvector_core::quantization::BinaryQuantized`.
+//! a thin EchoPose-flavored API over `ruvector_core::quantization::BinaryQuantized`.
 //!
 //! # Why a sketch
 //!
-//! Every "have I seen something like this before?" comparison in the RuView
+//! Every "have I seen something like this before?" comparison in the EchoPose
 //! pipeline (AETHER re-ID, room fingerprinting, mincut prefilter, novelty
 //! detection, mesh-exchange compression, privacy event log) shares the same
 //! shape: dense float embedding → similarity score → top-K candidates.
@@ -258,7 +258,7 @@ impl Sketch {
 /// Magic bytes for ADR-084 sketch wire frames. Receivers reject any
 /// payload that doesn't start with these four bytes — the same shape
 /// of magic-prefix check ADR-018's CSI binary frame uses (e.g.
-/// `0xC5110001`). Picked to be distinct from any existing RuView magic.
+/// `0xC5110001`). Picked to be distinct from any existing EchoPose magic.
 pub const WIRE_SKETCH_MAGIC: u32 = 0xC511_0084;
 
 /// On-the-wire schema version. Bump on any field reordering or addition.
@@ -343,7 +343,7 @@ pub enum WireSketchError {
 /// All deserialization paths validate magic, format_version,
 /// embedding_dim → payload-bytes consistency, and total size before
 /// touching `BinaryQuantized`. A malformed UDP packet from a
-/// non-RuView sender will produce a typed `WireSketchError`, never a
+/// non-EchoPose sender will produce a typed `WireSketchError`, never a
 /// panic. Caps via [`WIRE_SKETCH_MAX_BYTES`] guard against memory-
 /// exhaustion attacks.
 pub struct WireSketch;

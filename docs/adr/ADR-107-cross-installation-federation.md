@@ -18,7 +18,7 @@ This ADR specifies the cross-installation protocol that satisfies all the constr
 
 ## Decision
 
-Adopt **Secure Aggregation (Bonawitz 2016) + cross-installation DP composition + cryptographic embedding-space isolation** as the protocol for federating learning *across* RuView installations (e.g. across multiple households contributing to a shared `cog-person-count` model).
+Adopt **Secure Aggregation (Bonawitz 2016) + cross-installation DP composition + cryptographic embedding-space isolation** as the protocol for federating learning *across* EchoPose installations (e.g. across multiple households contributing to a shared `cog-person-count` model).
 
 ### Five-layer defence (extends ADR-105 + ADR-106's three layers)
 
@@ -87,7 +87,7 @@ Per ADR-105's monthly cadence: 50-180 MB / month / installation (the within-inst
 
 ### A. No cross-installation federation
 
-Status: **rejected**. Limits RuView's per-cog accuracy to within-installation training data; for rare events (e.g. wildlife species seen in only 5% of installations), within-installation only would forever lack training data.
+Status: **rejected**. Limits EchoPose's per-cog accuracy to within-installation training data; for rare events (e.g. wildlife species seen in only 5% of installations), within-installation only would forever lack training data.
 
 ### B. Trusted-coordinator cross-installation
 
@@ -130,7 +130,7 @@ Status: **rejected**. Per-installation rotation alone (Layer 5) prevents linkage
 
 ### Negative
 
-1. **Substantial implementation cost**: SA protocol + threshold Shamir + per-round PKI adds ~600 LOC on top of ADR-105's 500 + ADR-106's 300. Total `ruview-fed` budget revised to **~1,400 LOC**.
+1. **Substantial implementation cost**: SA protocol + threshold Shamir + per-round PKI adds ~600 LOC on top of ADR-105's 500 + ADR-106's 300. Total `echopose-fed` budget revised to **~1,400 LOC**.
 2. **Drop-out handling complexity**: Bonawitz §4 reconstruction adds the most engineering surface area.
 3. **Requires a PKI service**: cognitum-v0 fleet plays this role *within an org*; cross-org PKI is a separate operational/legal question.
 4. **Quantum-resistant key exchange** is not yet specified — Kyber substitution is mechanically simple but not formally part of this ADR.
@@ -149,7 +149,7 @@ Status: **rejected**. Per-installation rotation alone (Layer 5) prevents linkage
 - **ADR-029 (multistatic)**: per-installation multistatic geometry is unchanged; federation operates on model weights, not geometry.
 - **ADR-100 (cog packaging)**: Ed25519 signing covers cross-installation models with no protocol change.
 - **ADR-103 (cog-person-count)** + **ADR-101 (cog-pose-estimation)**: first candidates for cross-installation training (large benefit from diverse training data).
-- **ADR-104 (ruview-mcp + ruview-cli)**: cross-installation federation status surfaces as MCP tools `ruview_xfed_status`, `ruview_xfed_optin`, `ruview_xfed_optout`. Out of scope here but in the roadmap.
+- **ADR-104 (echopose-mcp + echopose-cli)**: cross-installation federation status surfaces as MCP tools `echopose_xfed_status`, `echopose_xfed_optin`, `echopose_xfed_optout`. Out of scope here but in the roadmap.
 - **ADR-105 (federation)**: ADR-107 extends the within-installation protocol; Krum still applies on masked deltas.
 - **ADR-106 (DP-SGD + primitive isolation)**: cross-installation composition uses ADR-106's Moments Accountant with √N amplification factor.
 

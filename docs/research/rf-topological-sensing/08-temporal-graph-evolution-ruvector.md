@@ -3,7 +3,7 @@
 **Research Document 08** | March 2026
 **Status**: SOTA Survey + Design Proposal
 **Scope**: Temporal dynamic graph models applied to WiFi CSI-based RF sensing,
-with concrete integration points into the RuView/wifi-densepose Rust codebase.
+with concrete integration points into the EchoPose/wifi-densepose Rust codebase.
 
 ---
 
@@ -41,7 +41,7 @@ capabilities that static analysis cannot provide:
 
 This document surveys state-of-the-art temporal graph models, then designs
 concrete data structures and algorithms for integrating temporal graph
-evolution tracking into the RuView codebase via RuVector's graph engine.
+evolution tracking into the EchoPose codebase via RuVector's graph engine.
 
 ### 1.1 Scope Boundaries
 
@@ -107,7 +107,7 @@ CTDG Event Stream:
   ...
 ```
 
-For RuView's 20 Hz TDMA cycle, the DTDG snapshot model aligns naturally
+For EchoPose's 20 Hz TDMA cycle, the DTDG snapshot model aligns naturally
 with the `MultistaticFuser` output cadence. However, within a single TDMA
 cycle the individual node frames arrive asynchronously (per
 `MultistaticConfig::guard_interval_us`), making a hybrid approach optimal:
@@ -129,7 +129,7 @@ TGN's per-node memory maps directly to the per-link `CoherenceState` in
 that encodes the link's recent history. The `DriftProfile` enum
 (Stable/Linear/StepChange) serves as a coarse embedding.
 
-**Relevance to RuView**: TGN's memory update mechanism can be adapted for
+**Relevance to EchoPose**: TGN's memory update mechanism can be adapted for
 our per-edge CSI state. Rather than learning memory updates via
 backpropagation, we use physics-informed updates (Welford statistics,
 EMA reference tracking) that are deterministic and auditable.
@@ -140,7 +140,7 @@ Kumar et al. (2019) model interactions between two types of nodes using
 coupled RNN-based projections. Each interaction updates both nodes'
 embeddings and projects them forward in time.
 
-**Relevance to RuView**: The TX-RX duality in our multistatic mesh is
+**Relevance to EchoPose**: The TX-RX duality in our multistatic mesh is
 analogous to JODIE's user-item pairs. When person P crosses link L(A,B),
 we can update both the "transmitter A state" and "receiver B state"
 simultaneously, projecting both forward to the next expected observation.
@@ -151,7 +151,7 @@ Chen et al. (2021) use temporal point processes to model irregularly-sampled
 graph events. Edge events are modeled as a Hawkes process with learned
 triggering kernels.
 
-**Relevance to RuView**: The coherence gate decision stream
+**Relevance to EchoPose**: The coherence gate decision stream
 (Accept/PredictOnly/Reject/Recalibrate from `coherence_gate.rs`) is
 naturally a point process. Gate transitions from Accept to Reject cluster
 in time during person movement, exhibiting the self-exciting behavior that
@@ -163,7 +163,7 @@ Trivedi et al. (2019) model two processes jointly: association (structural
 changes) and communication (information flow). The temporal attention
 mechanism weighs recent events more heavily.
 
-**Relevance to RuView**: The `CrossViewpointAttention` module in
+**Relevance to EchoPose**: The `CrossViewpointAttention` module in
 `viewpoint/attention.rs` already implements geometric bias via
 `GeometricBias::new(w_angle, w_dist, d_ref)`. DyRep suggests adding
 temporal bias: more recent viewpoint observations should receive higher
@@ -171,7 +171,7 @@ attention weight.
 
 ### 2.3 Comparison Matrix
 
-| Framework | Time Model | Memory | Scalability | RuView Fit |
+| Framework | Time Model | Memory | Scalability | EchoPose Fit |
 |-----------|-----------|--------|-------------|-----------|
 | TGN | Continuous | Per-node | O(N) update | High -- maps to CoherenceState |
 | JODIE | Continuous | Per-pair | O(E) update | Medium -- TX-RX pairs |
@@ -181,7 +181,7 @@ attention weight.
 
 ### 2.4 Recommended Hybrid Approach
 
-For RuView, we propose a **snapshot-anchored event-driven** model:
+For EchoPose, we propose a **snapshot-anchored event-driven** model:
 
 1. **Anchor snapshots** at each TDMA cycle (20 Hz) capturing the full graph
    state (all link coherences, amplitudes, phases).
@@ -1507,7 +1507,7 @@ This work warrants a new Architecture Decision Record:
 
 13. ADR-029: RuvSense Multistatic Sensing Mode
 14. ADR-030: RuvSense Persistent Field Model
-15. ADR-031: RuView Sensing-First RF Mode
+15. ADR-031: EchoPose Sensing-First RF Mode
 16. ADR-024: Contrastive CSI Embedding / AETHER
 17. ADR-027: Cross-Environment Domain Generalization / MERIDIAN
 

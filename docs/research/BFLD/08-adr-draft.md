@@ -9,7 +9,7 @@
 | **Date** | 2026-05-24 |
 | **Deciders** | ruv |
 | **Codename** | **BFLD** — Beamforming Feedback Layer for Detection |
-| **Relates to** | [ADR-024](ADR-024-contrastive-csi-embedding-model.md) (AETHER contrastive embedding), [ADR-027](ADR-027-cross-environment-domain-generalization.md) (MERIDIAN cross-environment), [ADR-028](ADR-028-esp32-capability-audit.md) (capability audit / witness), [ADR-029](ADR-029-ruvsense-multistatic-sensing-mode.md) (RuvSense multistatic), [ADR-030](ADR-030-ruvsense-persistent-field-model.md) (persistent field model), [ADR-031](ADR-031-ruview-sensing-first-rf-mode.md) (sensing-first RF mode), [ADR-032](ADR-032-multistatic-mesh-security-hardening.md) (mesh security hardening), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI platform), [ADR-115](ADR-115-home-assistant-integration.md) (HA integration), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Matter seed packaging), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (pip modernization) |
+| **Relates to** | [ADR-024](ADR-024-contrastive-csi-embedding-model.md) (AETHER contrastive embedding), [ADR-027](ADR-027-cross-environment-domain-generalization.md) (MERIDIAN cross-environment), [ADR-028](ADR-028-esp32-capability-audit.md) (capability audit / witness), [ADR-029](ADR-029-ruvsense-multistatic-sensing-mode.md) (RuvSense multistatic), [ADR-030](ADR-030-ruvsense-persistent-field-model.md) (persistent field model), [ADR-031](ADR-031-echopose-sensing-first-rf-mode.md) (sensing-first RF mode), [ADR-032](ADR-032-multistatic-mesh-security-hardening.md) (mesh security hardening), [ADR-095](ADR-095-rvcsi-edge-rf-sensing-platform.md) (rvCSI platform), [ADR-115](ADR-115-home-assistant-integration.md) (HA integration), [ADR-116](ADR-116-cog-ha-matter-seed.md) (Matter seed packaging), [ADR-117](ADR-117-pip-wifi-densepose-modernization.md) (pip modernization) |
 | **Tracking issue** | TBD |
 
 ---
@@ -74,7 +74,7 @@ We will create a new crate `wifi-densepose-bfld` (to live in `v2/crates/`) that:
    formula.
 3. **Gates** all output through a `privacy_class` mechanism that structurally prevents
    identity-correlated data from being published at privacy classes 2 and 3.
-4. **Emits** `BfldEvent` structs on MQTT topics under `ruview/<node_id>/bfld/` with
+4. **Emits** `BfldEvent` structs on MQTT topics under `echopose/<node_id>/bfld/` with
    per-class topic routing.
 5. **Enforces** three invariants structurally (not by policy):
    - Raw BFI never exits the node.
@@ -175,7 +175,7 @@ than noise injection.
   4×4 MIMO configurations.
 - [ ] **AC2**: Presence detection latency is ≤ 1s p95 from the first non-empty BFI
   frame in a new occupancy event.
-- [ ] **AC3**: Motion score is published at ≥ 1 Hz on the `ruview/<node_id>/bfld/motion/state`
+- [ ] **AC3**: Motion score is published at ≥ 1 Hz on the `echopose/<node_id>/bfld/motion/state`
   MQTT topic during sustained occupancy.
 - [ ] **AC4**: Raw BFI bytes (Phi/Psi angle matrices) are never present in any
   serialized `BfldFrame` payload at any `privacy_class` value.

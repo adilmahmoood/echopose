@@ -10,19 +10,19 @@ use std::path::PathBuf;
 #[derive(clap::Args, Debug, Clone)]
 pub struct MqttArgs {
     /// Enable MQTT publisher with HA auto-discovery
-    #[arg(long, env = "RUVIEW_MQTT")]
+    #[arg(long, env = "ECHOPOSE_MQTT")]
     pub mqtt: bool,
 
     /// MQTT broker host
-    #[arg(long, env = "RUVIEW_MQTT_HOST", default_value = "localhost")]
+    #[arg(long, env = "ECHOPOSE_MQTT_HOST", default_value = "localhost")]
     pub mqtt_host: String,
 
     /// MQTT broker port (defaults: 1883 plain / 8883 with TLS)
-    #[arg(long, env = "RUVIEW_MQTT_PORT")]
+    #[arg(long, env = "ECHOPOSE_MQTT_PORT")]
     pub mqtt_port: Option<u16>,
 
     /// MQTT username
-    #[arg(long, env = "RUVIEW_MQTT_USERNAME")]
+    #[arg(long, env = "ECHOPOSE_MQTT_USERNAME")]
     pub mqtt_username: Option<String>,
 
     /// Environment variable holding the MQTT password
@@ -30,15 +30,15 @@ pub struct MqttArgs {
     pub mqtt_password_env: String,
 
     /// MQTT client ID (default: wifi-densepose-<pid>)
-    #[arg(long, env = "RUVIEW_MQTT_CLIENT_ID")]
+    #[arg(long, env = "ECHOPOSE_MQTT_CLIENT_ID")]
     pub mqtt_client_id: Option<String>,
 
     /// Discovery topic prefix (ADR-115 §9.2 — accepted: `homeassistant`)
-    #[arg(long, env = "RUVIEW_MQTT_PREFIX", default_value = "homeassistant")]
+    #[arg(long, env = "ECHOPOSE_MQTT_PREFIX", default_value = "homeassistant")]
     pub mqtt_prefix: String,
 
     /// Enable TLS to the broker
-    #[arg(long, env = "RUVIEW_MQTT_TLS")]
+    #[arg(long, env = "ECHOPOSE_MQTT_TLS")]
     pub mqtt_tls: bool,
 
     /// CA bundle for TLS
@@ -82,7 +82,7 @@ pub struct MqttArgs {
     pub mqtt_rate_pose: f64,
 
     /// Strip biometrics (HR/BR/pose) before any MQTT/Matter publish (ADR-115 §3.10).
-    #[arg(long, env = "RUVIEW_PRIVACY_MODE")]
+    #[arg(long, env = "ECHOPOSE_PRIVACY_MODE")]
     pub privacy_mode: bool,
 }
 
@@ -188,19 +188,19 @@ pub struct Args {
 
     // ─── ADR-115 §3.8 — MQTT publisher (HA-DISCO) ──────────────────────────
     /// Enable MQTT publisher with HA auto-discovery
-    #[arg(long, env = "RUVIEW_MQTT")]
+    #[arg(long, env = "ECHOPOSE_MQTT")]
     pub mqtt: bool,
 
     /// MQTT broker host
-    #[arg(long, env = "RUVIEW_MQTT_HOST", default_value = "localhost")]
+    #[arg(long, env = "ECHOPOSE_MQTT_HOST", default_value = "localhost")]
     pub mqtt_host: String,
 
     /// MQTT broker port (defaults: 1883 plain / 8883 with TLS)
-    #[arg(long, env = "RUVIEW_MQTT_PORT")]
+    #[arg(long, env = "ECHOPOSE_MQTT_PORT")]
     pub mqtt_port: Option<u16>,
 
     /// MQTT username
-    #[arg(long, env = "RUVIEW_MQTT_USERNAME")]
+    #[arg(long, env = "ECHOPOSE_MQTT_USERNAME")]
     pub mqtt_username: Option<String>,
 
     /// Environment variable holding the MQTT password
@@ -208,15 +208,15 @@ pub struct Args {
     pub mqtt_password_env: String,
 
     /// MQTT client ID (default: wifi-densepose-<hostname>)
-    #[arg(long, env = "RUVIEW_MQTT_CLIENT_ID")]
+    #[arg(long, env = "ECHOPOSE_MQTT_CLIENT_ID")]
     pub mqtt_client_id: Option<String>,
 
     /// Discovery topic prefix (ADR-115 §9.2 — accepted: `homeassistant`)
-    #[arg(long, env = "RUVIEW_MQTT_PREFIX", default_value = "homeassistant")]
+    #[arg(long, env = "ECHOPOSE_MQTT_PREFIX", default_value = "homeassistant")]
     pub mqtt_prefix: String,
 
     /// Enable TLS to the broker
-    #[arg(long, env = "RUVIEW_MQTT_TLS")]
+    #[arg(long, env = "ECHOPOSE_MQTT_TLS")]
     pub mqtt_tls: bool,
 
     /// CA bundle for TLS
@@ -264,12 +264,12 @@ pub struct Args {
     /// Discovery for those entities is suppressed entirely — the controller
     /// never sees them exist. Implements the ADR-106 primitive-isolation
     /// contract at the integration boundary.
-    #[arg(long, env = "RUVIEW_PRIVACY_MODE")]
+    #[arg(long, env = "ECHOPOSE_PRIVACY_MODE")]
     pub privacy_mode: bool,
 
     // ─── ADR-115 §3.11 — Matter Bridge (HA-FABRIC) ─────────────────────────
     /// Enable Matter Bridge
-    #[arg(long, env = "RUVIEW_MATTER")]
+    #[arg(long, env = "ECHOPOSE_MATTER")]
     pub matter: bool,
 
     /// Write Matter setup code + QR string to this file on first start
@@ -366,7 +366,7 @@ mod tests {
             "--mqtt",
             "--mqtt-host", "broker.example.com",
             "--mqtt-port", "8883",
-            "--mqtt-username", "ruview",
+            "--mqtt-username", "echopose",
             "--mqtt-prefix", "homeassistant",
             "--mqtt-tls",
             "--mqtt-refresh-secs", "300",
@@ -378,7 +378,7 @@ mod tests {
         assert!(args.mqtt);
         assert_eq!(args.mqtt_host, "broker.example.com");
         assert_eq!(args.mqtt_port, Some(8883));
-        assert_eq!(args.mqtt_username.as_deref(), Some("ruview"));
+        assert_eq!(args.mqtt_username.as_deref(), Some("echopose"));
         assert!(args.mqtt_tls);
         assert_eq!(args.mqtt_refresh_secs, 300);
         assert_eq!(args.mqtt_rate_vitals, 0.5);

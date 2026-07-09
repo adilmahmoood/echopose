@@ -454,7 +454,7 @@ t = -100 ms: NV detects motor command formation (further topology shift)
 t = 0 ms:    WiFi CSI detects actual body movement
 ```
 
-This enables **predictive** body tracking: RuView knows the person will move before
+This enables **predictive** body tracking: EchoPose knows the person will move before
 the movement physically occurs.
 
 ---

@@ -60,7 +60,7 @@ trap 'rm -f "$STARTUP_SCRIPT_FILE"' EXIT
 cat > "$STARTUP_SCRIPT_FILE" << 'STARTUP_EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-LOGFILE="/var/log/ruview-startup.log"
+LOGFILE="/var/log/echopose-startup.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "[startup] $(date): beginning environment setup"
@@ -107,9 +107,9 @@ fi
 cd "$OCCWORLD_DIR"
 pip install -q -r requirements.txt 2>/dev/null || true
 
-# ── 5. RuView repo sync placeholder ──────────────────────────────────────────
+# ── 5. EchoPose repo sync placeholder ──────────────────────────────────────────
 # Actual repo sync is done by run_training.sh via rsync before SSH commands.
-mkdir -p ~/ruview-scripts ~/checkpoints/vqvae ~/checkpoints/transformer
+mkdir -p ~/echopose-scripts ~/checkpoints/vqvae ~/checkpoints/transformer
 
 echo "[startup] $(date): setup complete — instance ready for training"
 STARTUP_EOF
@@ -193,7 +193,7 @@ log "  IP      : $INSTANCE_IP"
 log "  SSH     : gcloud compute ssh $INSTANCE_NAME --project=$PROJECT --zone=$ZONE"
 log "  SSH IP  : ssh $(gcloud config get-value account 2>/dev/null)@$INSTANCE_IP"
 log ""
-log "Startup script is running in background (/var/log/ruview-startup.log)."
+log "Startup script is running in background (/var/log/echopose-startup.log)."
 log "Wait 3-5 min for conda/deps before running run_training.sh."
 log ""
 log "Next step:"

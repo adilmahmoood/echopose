@@ -6,15 +6,15 @@
 | **Date** | 2026-05-23 |
 | **Deciders** | ruv |
 | **Codename** | **HA-DISCO** (MQTT) + **HA-FABRIC** (Matter) + **HA-MIND** (semantic primitives) |
-| **Relates to** | ADR-018 (CSI binary frame format), ADR-021 (ESP32 vitals), ADR-031 (RuView sensing-first), ADR-039 (edge vitals packet 0xC511_0002), ADR-079 (camera ground-truth), ADR-103 (cog-person-count), ADR-110 (ESP32-C6 firmware), ADR-114 (cog-quantum-vitals) |
-| **Tracking issue** | [#776](https://github.com/ruvnet/RuView/issues/776) — implementation in PR [#778](https://github.com/ruvnet/RuView/pull/778) |
-| **Related issues** | [#574](https://github.com/ruvnet/RuView/issues/574) (mDNS for seed_url), [#760](https://github.com/ruvnet/RuView/issues/760) (sensing UI), [#761](https://github.com/ruvnet/RuView/issues/761) (HA competitor scan) |
+| **Relates to** | ADR-018 (CSI binary frame format), ADR-021 (ESP32 vitals), ADR-031 (EchoPose sensing-first), ADR-039 (edge vitals packet 0xC511_0002), ADR-079 (camera ground-truth), ADR-103 (cog-person-count), ADR-110 (ESP32-C6 firmware), ADR-114 (cog-quantum-vitals) |
+| **Tracking issue** | [#776](https://github.com/ruvnet/EchoPose/issues/776) — implementation in PR [#778](https://github.com/ruvnet/EchoPose/pull/778) |
+| **Related issues** | [#574](https://github.com/ruvnet/EchoPose/issues/574) (mDNS for seed_url), [#760](https://github.com/ruvnet/EchoPose/issues/760) (sensing UI), [#761](https://github.com/ruvnet/EchoPose/issues/761) (HA competitor scan) |
 
 ---
 
 ## 1. Context
 
-RuView and the underlying WiFi-DensePose stack already expose rich human-sensing telemetry — presence, person count, 17-keypoint pose, breathing rate (BR), heart rate (HR), motion level, fall detection, RSSI, and zone occupancy — over a Rust `wifi-densepose-sensing-server` (`v2/crates/wifi-densepose-sensing-server`). The server emits three structured message types over its WebSocket at `/ws/sensing`:
+EchoPose and the underlying WiFi-DensePose stack already expose rich human-sensing telemetry — presence, person count, 17-keypoint pose, breathing rate (BR), heart rate (HR), motion level, fall detection, RSSI, and zone occupancy — over a Rust `wifi-densepose-sensing-server` (`v2/crates/wifi-densepose-sensing-server`). The server emits three structured message types over its WebSocket at `/ws/sensing`:
 
 | Server message `type` | Source (`main.rs`) | Payload (selected fields) |
 |---|---|---|
@@ -31,7 +31,7 @@ Two recent customer-facing issues show the same plug-and-play gap:
 - **#574 (mDNS for seed_url)** — users don't want to manually paste a `seed://` URL into the dashboard; they expect the hub to discover the node.
 - **#760 (sensing UI)** — users asked for an HA-style "single dashboard with all my sensors" experience; we currently force them through our own UI.
 
-Both reduce to the same underlying complaint: *RuView is a black box that needs glue code to fit into the rest of a smart home.* HA solves that problem industry-wide. We should meet users where they already are.
+Both reduce to the same underlying complaint: *EchoPose is a black box that needs glue code to fit into the rest of a smart home.* HA solves that problem industry-wide. We should meet users where they already are.
 
 ### 1.2 Comparison: who else does this
 
@@ -42,7 +42,7 @@ Both reduce to the same underlying complaint: *RuView is a black box that needs 
 | **Aqara FP2** | Native ZigBee + HA | Presence + zones only; commercial mmWave |
 | **mmWave HLK-LD2410** | ESPHome firmware → HA | Presence + distance, no pose, no vitals |
 | **Matter devices (any)** | Native Matter clusters, multi-controller | Apple/Google/Alexa/HA all consume; presence in `OccupancySensing` since Matter 1.3; no vitals/pose clusters yet |
-| **RuView (today)** | None | Customer must build their own bridge |
+| **EchoPose (today)** | None | Customer must build their own bridge |
 
 The competitive bar is set by Aqara FP2 (HA-native, multi-zone presence) and ESPHome-flashed LD2410 nodes (cheap, plug-and-play). To match or exceed them we need first-class HA integration that exposes our **differentiated** capabilities: pose, HR/BR, fall, multi-room.
 
@@ -59,9 +59,9 @@ The competitive bar is set by Aqara FP2 (HA-native, multi-zone presence) and ESP
 
 Adopt a **dual-protocol** integration strategy:
 
-1. **Primary — MQTT + Home Assistant auto-discovery (HA-DISCO).** Add an MQTT publisher to `wifi-densepose-sensing-server` that connects to a user-supplied MQTT broker (default: `mqtt://localhost:1883`), publishes one HA-discovery message per capability per RuView node on startup and on periodic refresh (default 600 s), translates each WebSocket broadcast (`edge_vitals`, `pose_data`, `sensing_update`) into per-entity MQTT state messages, and honors a `--privacy-mode` flag that strips biometrics (HR / BR / pose keypoints) before publish.
+1. **Primary — MQTT + Home Assistant auto-discovery (HA-DISCO).** Add an MQTT publisher to `wifi-densepose-sensing-server` that connects to a user-supplied MQTT broker (default: `mqtt://localhost:1883`), publishes one HA-discovery message per capability per EchoPose node on startup and on periodic refresh (default 600 s), translates each WebSocket broadcast (`edge_vitals`, `pose_data`, `sensing_update`) into per-entity MQTT state messages, and honors a `--privacy-mode` flag that strips biometrics (HR / BR / pose keypoints) before publish.
 
-2. **Secondary — Matter Bridge (HA-FABRIC).** Expose RuView nodes as Matter Bridged Devices over WiFi so the **subset of capabilities Matter standardises today** — presence (`OccupancySensing`), motion (`BooleanState`), fall events (`SwitchCluster`-as-event), person count (numeric attribute on the bridge) — are consumable by **any Matter controller**: Apple Home, Google Home, Amazon Alexa, Samsung SmartThings, and Home Assistant itself. Biometrics (HR/BR) and pose stay on MQTT until the Matter spec adds device types that can represent them.
+2. **Secondary — Matter Bridge (HA-FABRIC).** Expose EchoPose nodes as Matter Bridged Devices over WiFi so the **subset of capabilities Matter standardises today** — presence (`OccupancySensing`), motion (`BooleanState`), fall events (`SwitchCluster`-as-event), person count (numeric attribute on the bridge) — are consumable by **any Matter controller**: Apple Home, Google Home, Amazon Alexa, Samsung SmartThings, and Home Assistant itself. Biometrics (HR/BR) and pose stay on MQTT until the Matter spec adds device types that can represent them.
 
 The two paths are **complementary, not alternative**: MQTT carries the full telemetry surface for power users; Matter carries the standardised subset for cross-ecosystem reach. A user running HA gets both — MQTT entities populate alongside Matter Bridged Devices and HA dedupes via `unique_id`. A user running Apple Home gets only Matter, but they get the presence/fall/count signals that matter most for automations.
 
@@ -85,7 +85,7 @@ A **Home Assistant HACS Python integration** is sketched as a follow-on (§6.A) 
 | **Certification cost** | none | "Works with HA" free; **CSA Matter certification optional** (~$3 k/year membership for the badge) | HACS review (free) | none |
 | **Test surface in CI** | dockerised mosquitto + schema lint | matter-rs test harness + chip-tool sims | full HA test harness | curl |
 
-**MQTT is primary** because it carries 100% of RuView's differentiated telemetry (pose, HR, BR) which no other path can. **Matter is secondary** because it covers the ~30% subset (presence/count/fall) that matters across the *other 70% of smart-home buyers* who don't run HA. Together they cover the whole market. Webhook (C) gives up too much (no entity discovery, no control plane) and is rejected. HACS (B) is strictly more polished than MQTT but strictly more expensive; revisit after MQTT adoption data is in.
+**MQTT is primary** because it carries 100% of EchoPose's differentiated telemetry (pose, HR, BR) which no other path can. **Matter is secondary** because it covers the ~30% subset (presence/count/fall) that matters across the *other 70% of smart-home buyers* who don't run HA. Together they cover the whole market. Webhook (C) gives up too much (no entity discovery, no control plane) and is rejected. HACS (B) is strictly more polished than MQTT but strictly more expensive; revisit after MQTT adoption data is in.
 
 ---
 
@@ -93,7 +93,7 @@ A **Home Assistant HACS Python integration** is sketched as a follow-on (§6.A) 
 
 ### 3.1 Entity mapping
 
-Each RuView node becomes one HA **device**. Each capability becomes an **entity** on that device. ESP32 nodes behind a Cognitum Seed appliance are linked via HA's `via_device` field so the topology shows up in the HA UI.
+Each EchoPose node becomes one HA **device**. Each capability becomes an **entity** on that device. ESP32 nodes behind a Cognitum Seed appliance are linked via HA's `via_device` field so the topology shows up in the HA UI.
 
 | Capability | HA component | `device_class` | `state_class` | Unit | Icon | Source field (server WS) |
 |---|---|---|---|---|---|---|
@@ -130,11 +130,11 @@ homeassistant/sensor/wifi_densepose_<node_id>/breathing_rate/state
 homeassistant/event/wifi_densepose_<node_id>/fall/config                   (retained, QoS 1)
 homeassistant/event/wifi_densepose_<node_id>/fall/state                     (not retained, QoS 1)
 
-ruview/<node_id>/raw/pose                                                  (opt-in, not retained, QoS 0)
-ruview/<node_id>/raw/sensing_update                                        (opt-in, not retained, QoS 0)
+echopose/<node_id>/raw/pose                                                  (opt-in, not retained, QoS 0)
+echopose/<node_id>/raw/sensing_update                                        (opt-in, not retained, QoS 0)
 ```
 
-The `ruview/<node_id>/raw/*` namespace is **outside** the `homeassistant/` discovery prefix on purpose: it carries the original WebSocket JSON for users who want to consume it directly (Node-RED, Grafana, custom scripts), without HA trying to interpret it as an entity.
+The `echopose/<node_id>/raw/*` namespace is **outside** the `homeassistant/` discovery prefix on purpose: it carries the original WebSocket JSON for users who want to consume it directly (Node-RED, Grafana, custom scripts), without HA trying to interpret it as an entity.
 
 ### 3.3 Example discovery payloads
 
@@ -155,7 +155,7 @@ The `ruview/<node_id>/raw/*` namespace is **outside** the `homeassistant/` disco
   "qos": 1,
   "device": {
     "identifiers": ["wifi_densepose_aabbccddeeff"],
-    "name": "RuView node aabbccddeeff",
+    "name": "EchoPose node aabbccddeeff",
     "manufacturer": "ruvnet",
     "model": "ESP32-S3 CSI node",
     "sw_version": "v0.6.7",
@@ -164,7 +164,7 @@ The `ruview/<node_id>/raw/*` namespace is **outside** the `homeassistant/` disco
   "origin": {
     "name": "wifi-densepose-sensing-server",
     "sw_version": "0.7.0",
-    "support_url": "https://github.com/ruvnet/RuView"
+    "support_url": "https://github.com/ruvnet/EchoPose"
   }
 }
 ```
@@ -215,7 +215,7 @@ State payload (fired once per fall, **not retained**):
 
 ### 3.4 Device-level grouping
 
-- One HA `device` per RuView **node** (ESP32-S3 / S3-Mini / C6, or the host running sensing-server in mock mode).
+- One HA `device` per EchoPose **node** (ESP32-S3 / S3-Mini / C6, or the host running sensing-server in mock mode).
 - `device.identifiers` = `["wifi_densepose_<node_id>"]` where `node_id` is the MAC-derived ID already in `edge_vitals.node_id`.
 - For nodes behind a **Cognitum Seed**, set `device.via_device = "cognitum_seed_<seed_id>"` so HA renders the topology as a tree (Seed → child nodes).
 - The Cognitum Seed itself appears as a parent device with its own diagnostic entities (uptime, agent health) — published by the seed appliance directly, not by sensing-server.
@@ -229,7 +229,7 @@ State payload (fired once per fall, **not retained**):
 | `*/state` (binary_sensor) | 1 | **yes** | on change only | Last value matters; new HA subscribers should see current state |
 | `*/state` (event) | 1 | no | on event | Falls must not be missed; never retained or HA replays old events |
 | `*/availability` | 1 | **yes** | LWT + 30 s heartbeat | Offline detection |
-| `ruview/*/raw/*` | 0 | no | as-emitted | Raw firehose; consumers opt in |
+| `echopose/*/raw/*` | 0 | no | as-emitted | Raw firehose; consumers opt in |
 
 ### 3.6 Availability + Last Will and Testament (LWT)
 
@@ -283,7 +283,7 @@ New CLI flags on `wifi-densepose-sensing-server` (gated behind `--mqtt`):
 --privacy-mode                  Strip biometrics (HR/BR/pose) before publish
 ```
 
-Env var equivalents follow `RUVIEW_MQTT_HOST`, `RUVIEW_MQTT_USERNAME`, etc., so Docker / systemd users don't have to wire long arg lists. Configuration is loaded in the order: CLI > env > defaults.
+Env var equivalents follow `ECHOPOSE_MQTT_HOST`, `ECHOPOSE_MQTT_USERNAME`, etc., so Docker / systemd users don't have to wire long arg lists. Configuration is loaded in the order: CLI > env > defaults.
 
 ### 3.9 TLS + auth
 
@@ -311,11 +311,11 @@ This implements the ADR-106 primitive-isolation contract at the integration boun
 
 ### 3.11 Matter Bridge (HA-FABRIC)
 
-The Matter path runs **in the same `wifi-densepose-sensing-server` process** behind a `--matter` feature flag, gated independently of `--mqtt`. The bridge presents itself to Matter controllers as a **Bridged Devices Aggregator** (per Matter Core Spec §9.13) with one Bridged Device endpoint per RuView node, exposing the standardised subset of capabilities. Biometrics and pose are **not exposed** over Matter — they have no spec-defined clusters and cannot be soundly represented (covering them in `Generic Sensor` would force every controller to render them as nameless numbers).
+The Matter path runs **in the same `wifi-densepose-sensing-server` process** behind a `--matter` feature flag, gated independently of `--mqtt`. The bridge presents itself to Matter controllers as a **Bridged Devices Aggregator** (per Matter Core Spec §9.13) with one Bridged Device endpoint per EchoPose node, exposing the standardised subset of capabilities. Biometrics and pose are **not exposed** over Matter — they have no spec-defined clusters and cannot be soundly represented (covering them in `Generic Sensor` would force every controller to render them as nameless numbers).
 
 #### 3.11.1 Matter device-type mapping
 
-| RuView capability | Matter cluster | Endpoint device type | Source field |
+| EchoPose capability | Matter cluster | Endpoint device type | Source field |
 |---|---|---|---|
 | Presence | `OccupancySensing` (0x0406) | `OccupancySensor` (0x0107) | `edge_vitals.presence` |
 | Motion (boolean above threshold) | `OccupancySensing` (0x0406) | (same endpoint) | `edge_vitals.motion > 0.1` |
@@ -324,7 +324,7 @@ The Matter path runs **in the same `wifi-densepose-sensing-server` process** beh
 | Zone occupancy | one `OccupancySensor` endpoint per zone | (multiple endpoints) | `sensing_update.zones[*]` |
 | RSSI / motion energy / presence score / breathing rate / heart rate / pose | **not exposed over Matter** | — | (MQTT only) |
 
-The vendor-specific person-count attribute uses RuView's CSA-assigned vendor ID (open question §9.9). Controllers that don't understand the vendor extension still see the standard `OccupancySensing.Occupancy` boolean — graceful degradation.
+The vendor-specific person-count attribute uses EchoPose's CSA-assigned vendor ID (open question §9.9). Controllers that don't understand the vendor extension still see the standard `OccupancySensing.Occupancy` boolean — graceful degradation.
 
 #### 3.11.2 Commissioning + fabric model
 
@@ -365,7 +365,7 @@ HA dedupes by `unique_id` (we set both paths' IDs to `wifi_densepose_<node_id>_<
 
 ### 3.12 Semantic automation primitives (HA-MIND)
 
-Raw signals are not the product. Customers don't want to *write a Node-RED flow that thresholds breathing rate at night to infer sleep*. They want a `binary_sensor.bedroom_someone_sleeping` they can wire directly into a "dim hallway light at 10 % if anyone's asleep" automation. Same for fall *risk*, distress, room activity, elderly inactivity, meeting-in-progress, bathroom occupancy. This is the inference layer that turns RuView from "RF sensing" into **ambient intelligence infrastructure** — and it has to ship as first-class HA entities and Matter events, not as a developer SDK.
+Raw signals are not the product. Customers don't want to *write a Node-RED flow that thresholds breathing rate at night to infer sleep*. They want a `binary_sensor.bedroom_someone_sleeping` they can wire directly into a "dim hallway light at 10 % if anyone's asleep" automation. Same for fall *risk*, distress, room activity, elderly inactivity, meeting-in-progress, bathroom occupancy. This is the inference layer that turns EchoPose from "RF sensing" into **ambient intelligence infrastructure** — and it has to ship as first-class HA entities and Matter events, not as a developer SDK.
 
 #### 3.12.1 Catalog of inferred primitives (v1)
 
@@ -444,7 +444,7 @@ This means: **adding a new primitive is one file change**. No MQTT schema rev, n
 | **P5** | Docs: new `docs/integrations/home-assistant.md` with screenshots of the HA UI after auto-discovery completes, example HA dashboard YAML (Lovelace card configs), 8 starter blueprints from §3.12.2 (distress notify, wake routine, hallway dim, elderly anomaly alert, meeting lights, bathroom fan, fall-risk escalate, auto-arm security), and the raw-channel example automations: "turn on hall light when presence ON", "send notification on fall_detected event", "log HR/BR to InfluxDB". | pending |
 | **P6** | Ship `--mqtt` in the next sensing-server release (target: v0.7.0). Demo end-to-end on `cognitum-v0` against a Mosquitto add-on running on a Home Assistant OS install. Update README hardware-options table with "Works with Home Assistant" badge. | pending |
 | **P7** | Matter Bridge spike: build a throwaway prototype with `matter-rs` exposing one `OccupancySensor` endpoint + one `GenericSwitch` for fall. Pair against Apple Home, Google Home, and HA's Matter integration. Decision gate: if pairing works on all three, proceed to P8; if blocked, switch to chip-tool FFI and re-spike. | pending |
-| **P8** | Matter Bridge production. Implement `--matter`, `--matter-setup-file`, `--matter-reset`, `--matter-vendor-id`, `--matter-product-id` CLI flags. Aggregator + Bridged Devices for all RuView nodes; per-zone occupancy endpoints; fall as `MultiPressComplete` event; person count as vendor-extension attribute. Integration tests via chip-tool sim. | pending |
+| **P8** | Matter Bridge production. Implement `--matter`, `--matter-setup-file`, `--matter-reset`, `--matter-vendor-id`, `--matter-product-id` CLI flags. Aggregator + Bridged Devices for all EchoPose nodes; per-zone occupancy endpoints; fall as `MultiPressComplete` event; person count as vendor-extension attribute. Integration tests via chip-tool sim. | pending |
 | **P9** | Multi-controller validation. Pair one Cognitum Seed + 3 child ESP32 nodes simultaneously into HA, Apple Home, and Google Home. Verify presence flips on all three within 1 s of a real motion change. Document the multi-admin flow in `docs/integrations/matter.md`. | pending |
 | **P10** | CSA Matter certification path (optional, ADR-1xx follow-up). Decide cost vs marketing value of the official "Matter-certified" badge ($3 k/year CSA membership + per-product test fees). Sketch only — production decision deferred. | pending |
 
@@ -457,8 +457,8 @@ Each phase ends with a checkbox PR. The ADR is updated with actual artifacts (co
 ### 5.1 Wins
 
 - Zero-code UX for HA users — discovery handles the entire onboarding.
-- **Cross-ecosystem reach via Matter** — Apple Home / Google Home / Alexa / SmartThings users can adopt RuView without ever running HA, expanding our addressable market by ~4×.
-- Decouples RuView from its own UI; users can build their own dashboards in HA / Grafana / Node-RED on the same MQTT firehose.
+- **Cross-ecosystem reach via Matter** — Apple Home / Google Home / Alexa / SmartThings users can adopt EchoPose without ever running HA, expanding our addressable market by ~4×.
+- Decouples EchoPose from its own UI; users can build their own dashboards in HA / Grafana / Node-RED on the same MQTT firehose.
 - Adds a `--privacy-mode` flag that gives operators a single-knob biometric strip for compliance contexts.
 - Matter fabric isolation is a privacy win by construction — biometrics are out-of-spec for the exposed clusters, so a buggy controller can't accidentally exfiltrate them.
 - Webhook + future HACS path stay open (§6) — no lock-in.
@@ -531,7 +531,7 @@ mDNS / Zeroconf lets HA (or any local client) discover sensing-server's IP witho
 | **Matter SDK (`matter-rs`) immaturity blocks cert** | medium | medium | P7 spike validates pairing on three controllers before P8 production work; fall back to chip-tool FFI if blocked |
 | **Matter spec adds vitals device types**, our vendor-extension attributes become non-standard | low (3+ years out) | low | Vendor-extension attributes are opt-in for controllers; migration to standard cluster IDs is a one-version bump when the spec lands |
 | **Multi-fabric races** (HA, Apple, Google all see the same node and fire conflicting automations) | medium | medium | Document the multi-admin guidance in `docs/integrations/matter.md`: pick one primary controller for automations, others for visibility |
-| **Apple Home / Google Home rendering misrepresents** RuView (e.g. shows generic "Sensor") | medium | low | Set rich `VendorName` / `ProductName` / `ProductLabel` in BasicInformation cluster; ship a Matter App icon (per CSA brand guidelines) once vendor ID is real |
+| **Apple Home / Google Home rendering misrepresents** EchoPose (e.g. shows generic "Sensor") | medium | low | Set rich `VendorName` / `ProductName` / `ProductLabel` in BasicInformation cluster; ship a Matter App icon (per CSA brand guidelines) once vendor ID is real |
 | **CSA membership cost** ($3 k/y) is a recurring spend with uncertain ROI | low (decision deferred to P10) | medium | Ship using dev VID `0xFFF1` through P9; commit to membership only after adoption data justifies it |
 
 ---
@@ -572,7 +572,7 @@ grep -E "(heart_rate|breathing_rate|pose)" /tmp/privacy.log
 # - Add Mosquitto broker to a fresh HA OS install
 # - Add MQTT integration in HA, point at broker
 # - Start sensing-server with --mqtt
-# - HA Settings → Devices → expect "RuView node <mac>" with all entities
+# - HA Settings → Devices → expect "EchoPose node <mac>" with all entities
 # - Trigger mock presence change; presence entity flips ON / OFF live
 
 # 7. LWT / availability
@@ -651,20 +651,20 @@ Empty as of 2026-05-23. New questions discovered during implementation will be f
 - **Google Home Matter support**: https://developers.home.google.com/matter
 - **CSA membership / vendor ID program**: https://csa-iot.org/become-member/
 - **"Works with Home Assistant" certification**: https://partner.home-assistant.io/
-- RuView ADR-018 — CSI binary frame format
-- RuView ADR-021 — ESP32 vitals (edge breathing/HR extraction)
-- RuView ADR-028 — ESP32 capability audit
-- RuView ADR-031 — RuView sensing-first RF mode
-- RuView ADR-039 — Edge vitals packet (`0xC511_0002`)
-- RuView ADR-079 — Camera ground-truth training (pose schema)
-- RuView ADR-103 — `cog-person-count` (person count primitive)
-- RuView ADR-106 — DP-SGD + primitive isolation (privacy contract)
-- RuView ADR-110 — ESP32-C6 firmware extension
-- RuView ADR-114 — `cog-quantum-vitals`
-- Issue [#574](https://github.com/ruvnet/RuView/issues/574) — mDNS for seed_url (complementary)
-- Issue [#760](https://github.com/ruvnet/RuView/issues/760) — Sensing UI / onboarding friction
-- Issue [#761](https://github.com/ruvnet/RuView/issues/761) — Competitive scan (espectre.dev, tommysense.com)
+- EchoPose ADR-018 — CSI binary frame format
+- EchoPose ADR-021 — ESP32 vitals (edge breathing/HR extraction)
+- EchoPose ADR-028 — ESP32 capability audit
+- EchoPose ADR-031 — EchoPose sensing-first RF mode
+- EchoPose ADR-039 — Edge vitals packet (`0xC511_0002`)
+- EchoPose ADR-079 — Camera ground-truth training (pose schema)
+- EchoPose ADR-103 — `cog-person-count` (person count primitive)
+- EchoPose ADR-106 — DP-SGD + primitive isolation (privacy contract)
+- EchoPose ADR-110 — ESP32-C6 firmware extension
+- EchoPose ADR-114 — `cog-quantum-vitals`
+- Issue [#574](https://github.com/ruvnet/EchoPose/issues/574) — mDNS for seed_url (complementary)
+- Issue [#760](https://github.com/ruvnet/EchoPose/issues/760) — Sensing UI / onboarding friction
+- Issue [#761](https://github.com/ruvnet/EchoPose/issues/761) — Competitive scan (espectre.dev, tommysense.com)
 
 ---
 
-*ADR-115 is the integration story that turns RuView from "another sensing platform" into "drop-in upgrade for any HA install **and** any Matter-controller home." MQTT carries the rich, differentiated telemetry; Matter carries the standardised subset across every controller ecosystem. Numbers 111 and 112 remain reserved per the project ADR-numbering policy.*
+*ADR-115 is the integration story that turns EchoPose from "another sensing platform" into "drop-in upgrade for any HA install **and** any Matter-controller home." MQTT carries the rich, differentiated telemetry; Matter carries the standardised subset across every controller ecosystem. Numbers 111 and 112 remain reserved per the project ADR-numbering policy.*

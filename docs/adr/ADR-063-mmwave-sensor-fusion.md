@@ -7,7 +7,7 @@
 
 ## Context
 
-RuView currently senses the environment using WiFi CSI — a passive technique that analyzes how WiFi signals are disturbed by human presence and movement. While this works through walls and requires no line of sight, CSI-derived vital signs (breathing rate, heart rate) are inherently noisy because they rely on phase extraction from multipath-rich WiFi channels.
+EchoPose currently senses the environment using WiFi CSI — a passive technique that analyzes how WiFi signals are disturbed by human presence and movement. While this works through walls and requires no line of sight, CSI-derived vital signs (breathing rate, heart rate) are inherently noisy because they rely on phase extraction from multipath-rich WiFi channels.
 
 A complementary sensing modality exists: **60 GHz mmWave radar** modules (e.g., Seeed MR60BHA2) that use active FMCW radar at 60 GHz to measure breathing and heart rate with clinical-grade accuracy. These modules are inexpensive (~$15), run on ESP32-C6/C3, and output structured vital signs over UART.
 
@@ -75,7 +75,7 @@ The viewpoint fusion pipeline (`ruvector/src/viewpoint/`) extends naturally:
 
 ## Decision
 
-Add 60 GHz mmWave radar sensor support to the RuView firmware and sensing pipeline with auto-detection and device-specific capabilities.
+Add 60 GHz mmWave radar sensor support to the EchoPose firmware and sensing pipeline with auto-detection and device-specific capabilities.
 
 ### Architecture
 

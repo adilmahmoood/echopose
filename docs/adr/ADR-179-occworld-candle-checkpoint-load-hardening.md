@@ -78,4 +78,4 @@ dtype — the one place malformed/widened weights could reach a panicking candle
 - None. Guards reject only malformed/degenerate inputs.
 
 ## Links
-- ADR-176 / ADR-177 / ADR-178 — sibling Milestone-#9 reviews (ruview-swarm, nvsim, desktop)
+- ADR-176 / ADR-177 / ADR-178 — sibling Milestone-#9 reviews (echopose-swarm, nvsim, desktop)

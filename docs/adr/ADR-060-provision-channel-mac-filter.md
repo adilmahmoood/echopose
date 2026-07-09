@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-03-12
-- **Issues:** [#247](https://github.com/ruvnet/RuView/issues/247), [#229](https://github.com/ruvnet/RuView/issues/229)
+- **Issues:** [#247](https://github.com/ruvnet/EchoPose/issues/247), [#229](https://github.com/ruvnet/EchoPose/issues/229)
 
 ## Context
 

@@ -1,17 +1,17 @@
-# RuView ↔ HomePod Integration Guide
+# EchoPose ↔ HomePod Integration Guide
 
-**Ambient intelligence for Apple Home.** Run RuView as a native HomeKit accessory so your HomePod discovers it, Siri understands it, and Apple Home automations govern it — no Home Assistant required.
+**Ambient intelligence for Apple Home.** Run EchoPose as a native HomeKit accessory so your HomePod discovers it, Siri understands it, and Apple Home automations govern it — no Home Assistant required.
 
 ---
 
 ## Architecture Overview
 
-RuView turns WiFi radio reflections into spatial intelligence (presence, breathing, fall risk, activity patterns). When paired with a HomePod or Apple TV acting as your Home Hub, RuView becomes an invisible sensor that feeds Siri, automations, and scenes:
+EchoPose turns WiFi radio reflections into spatial intelligence (presence, breathing, fall risk, activity patterns). When paired with a HomePod or Apple TV acting as your Home Hub, EchoPose becomes an invisible sensor that feeds Siri, automations, and scenes:
 
 ```
 ESP32-C6 CSI node (living room)
   ↓ (UDP feature stream)
-RuView Sensing Server (announces presence, vital signs, BFLD events)
+EchoPose Sensing Server (announces presence, vital signs, BFLD events)
   ↓ (HTTP polling)
 HAP Bridge (advertises HomeKit accessory on mDNS)
   ↓ (Bonjour discovery)
@@ -22,7 +22,7 @@ iPhone, iPad, Mac, Watch, Apple Home automations
 
 The integration leverages HomeKit Accessory Protocol (HAP-1.1) — the same standard that Philips Hue, Eve, and Nanoleaf use. Your HomePod discovers the bridge within seconds of launch, pairing is one-tap from the Home app, and Siri queries work immediately: *"Hey Siri, is anyone in the living room?"*
 
-For design rationale and privacy safeguards, see [ADR-125 — RuView ↔ Apple Home native HAP bridge](docs/adr/ADR-125-ruview-apple-home-native-hap-bridge.md).
+For design rationale and privacy safeguards, see [ADR-125 — EchoPose ↔ Apple Home native HAP bridge](docs/adr/ADR-125-echopose-apple-home-native-hap-bridge.md).
 
 ---
 
@@ -43,11 +43,11 @@ Eight incremental iterations landed in PR #797 on the `feat/adr-125-apple-fabric
 
 **What you can do today:**
 
-- Pair a RuView bridge into your Home app on iPhone, iPad, or Mac.
+- Pair a EchoPose bridge into your Home app on iPhone, iPad, or Mac.
 - Ask Siri room-specific presence questions ("is anyone home", "is the office occupied", "did someone fall").
 - Trigger automations on presence detection, breathing presence, fall risk, or activity pattern anomalies.
-- Stream RuView events to HomePod announcements via the Shortcuts-as-glue path (Tier 2).
-- Query RuView data programmatically through the agentic MCP interface (Claude Code integration).
+- Stream EchoPose events to HomePod announcements via the Shortcuts-as-glue path (Tier 2).
+- Query EchoPose data programmatically through the agentic MCP interface (Claude Code integration).
 
 ---
 
@@ -80,21 +80,21 @@ ping 192.168.1.20
 ### Step 2: Create a Python venv on the Mac and install HAP-python
 
 ```bash
-mkdir -p ~/ruview-hap
-cd ~/ruview-hap
+mkdir -p ~/echopose-hap
+cd ~/echopose-hap
 python3 -m venv venv
 source venv/bin/activate
 pip install HAP-python
 ```
 
-### Step 3: Copy the RuView bridge scripts to the Mac
+### Step 3: Copy the EchoPose bridge scripts to the Mac
 
 From the repository (e.g., cloned on your Mac), copy these files:
 
 ```bash
-cp scripts/c6-presence-watcher.py ~/ruview-hap/
-cp scripts/ruview-sensing-server.py ~/ruview-hap/
-cp scripts/ruview-hap-bridge.py ~/ruview-hap/
+cp scripts/c6-presence-watcher.py ~/echopose-hap/
+cp scripts/echopose-sensing-server.py ~/echopose-hap/
+cp scripts/echopose-hap-bridge.py ~/echopose-hap/
 ```
 
 ### Step 4: Start the three daemons in order
@@ -102,19 +102,19 @@ cp scripts/ruview-hap-bridge.py ~/ruview-hap/
 **Terminal 1: Start the C6 presence watcher** (reads UDP packets from the C6, applies BFLD privacy gate)
 
 ```bash
-cd ~/ruview-hap
+cd ~/echopose-hap
 source venv/bin/activate
 python c6-presence-watcher.py --node-id 1 --esp32-ip 192.168.1.20 --privacy-class 2
 ```
 
-Output: Writes presence events to `/tmp/ruview-state.json`.
+Output: Writes presence events to `/tmp/echopose-state.json`.
 
 **Terminal 2: Start the sensing server** (HTTP polling interface for the HAP bridge)
 
 ```bash
-cd ~/ruview-hap
+cd ~/echopose-hap
 source venv/bin/activate
-python ruview-sensing-server.py --port 3000
+python echopose-sensing-server.py --port 3000
 ```
 
 Output: Listening on `http://127.0.0.1:3000/api/v1/...`.
@@ -122,9 +122,9 @@ Output: Listening on `http://127.0.0.1:3000/api/v1/...`.
 **Terminal 3: Start the HAP bridge** (advertises HomeKit accessory on mDNS)
 
 ```bash
-cd ~/ruview-hap
+cd ~/echopose-hap
 source venv/bin/activate
-python ruview-hap-bridge.py --port 51826 --pin 200-70-910
+python echopose-hap-bridge.py --port 51826 --pin 200-70-910
 ```
 
 Output: Look for setup code in the terminal output, e.g., `Setup code: 200-70-910`.
@@ -134,7 +134,7 @@ Output: Look for setup code in the terminal output, e.g., `Setup code: 200-70-91
 1. Open the **Home** app on your iPhone.
 2. Tap the **+** icon (top right) → **Add Accessory**.
 3. Scan the setup code (or tap **Don't Have a Code or Can't Scan?** → **More Options**).
-4. Select the **RuView Sense** bridge from the list (should appear within 10 seconds).
+4. Select the **EchoPose Sense** bridge from the list (should appear within 10 seconds).
 5. Assign to a room (e.g., "Living Room").
 6. Tap **Done**.
 
@@ -157,23 +157,23 @@ To monitor multiple rooms, run multiple C6 nodes, each with its own `c6-presence
 ```bash
 # Terminal: Room 1 (Living Room, node_id=1)
 python c6-presence-watcher.py --node-id 1 --esp32-ip 192.168.1.20 \
-  --output /tmp/ruview-state.living-room.json
+  --output /tmp/echopose-state.living-room.json
 
 # Terminal: Room 2 (Bedroom, node_id=2)
 python c6-presence-watcher.py --node-id 2 --esp32-ip 192.168.1.21 \
-  --output /tmp/ruview-state.bedroom.json
+  --output /tmp/echopose-state.bedroom.json
 
 # Terminal: HAP bridge (auto-discovers both state files)
-python ruview-hap-bridge.py --port 51826 --rooms "Living Room,Bedroom"
+python echopose-hap-bridge.py --port 51826 --rooms "Living Room,Bedroom"
 ```
 
-The HAP bridge auto-discovers `*.json` files in `/tmp/ruview-state*` and creates a child HomeKit accessory per room. Each room appears separately in the Home app and can be assigned to its physical location.
+The HAP bridge auto-discovers `*.json` files in `/tmp/echopose-state*` and creates a child HomeKit accessory per room. Each room appears separately in the Home app and can be assigned to its physical location.
 
 ---
 
 ## Privacy Semantics
 
-RuView's BFLD (Beamforming Feedback Layer for Detection) uses a **privacy class** gate that enforces what data can cross the HomeKit boundary. Only Classes 2 and 3 (Anonymous and Restricted) are eligible; Class 0/1 (Raw identity information) is never exposed.
+EchoPose's BFLD (Beamforming Feedback Layer for Detection) uses a **privacy class** gate that enforces what data can cross the HomeKit boundary. Only Classes 2 and 3 (Anonymous and Restricted) are eligible; Class 0/1 (Raw identity information) is never exposed.
 
 ### The Three Semantic Events
 
@@ -205,7 +205,7 @@ Name each HomeKit accessory after its room. The HAP bridge pulls room names from
 
 ```bash
 python c6-presence-watcher.py --node-id 1 \
-  --output /tmp/ruview-state.LIVING_ROOM.json
+  --output /tmp/echopose-state.LIVING_ROOM.json
 
 # HAP bridge sees this and names the accessory "Living Room"
 ```
@@ -230,7 +230,7 @@ Each room also exposes a **StatelessProgrammableSwitch** that fires on semantic-
 
 ## HomePod Announcements via Shortcuts (Tier 2 Path)
 
-The easiest way to announce RuView events on a HomePod is through **Shortcuts-as-glue** — a native macOS launchd job that watches RuView's semantic events and triggers a Shortcut you define.
+The easiest way to announce EchoPose events on a HomePod is through **Shortcuts-as-glue** — a native macOS launchd job that watches EchoPose's semantic events and triggers a Shortcut you define.
 
 This path **bypasses the Bonjour reflector blocker** that can prevent HomePod discovery in some mesh networks. Instead of direct mDNS, the Mac uses the Home graph (iCloud-paired) to reach the HomePod.
 
@@ -242,26 +242,26 @@ This path **bypasses the Bonjour reflector blocker** that can prevent HomePod di
 2. Click **+** (top left) → **Create Shortcut**.
 3. Click **Add Action** → search for **"Speak Text"** → add it.
 4. In the **"Speak Text"** action, click the **speaker icon** → select your **HomePod** (or HomePod mini).
-5. Name the Shortcut **`RuView Announce`** (exact name).
+5. Name the Shortcut **`EchoPose Announce`** (exact name).
 6. **Save** (top right).
 
 #### 2. Test the Shortcut from the terminal
 
 ```bash
-osascript -e 'tell application "Shortcuts Events" to run shortcut "RuView Announce" with input "Test from RuView"'
+osascript -e 'tell application "Shortcuts Events" to run shortcut "EchoPose Announce" with input "Test from EchoPose"'
 ```
 
-Your HomePod should speak "Test from RuView" in your chosen voice.
+Your HomePod should speak "Test from EchoPose" in your chosen voice.
 
 #### 3. Install the launchd job
 
 Copy the launchd plist from the repository:
 
 ```bash
-cp scripts/macos-shortcuts/ruview-watcher.plist \
-  ~/Library/LaunchAgents/com.ruvnet.ruview.watcher.plist
+cp scripts/macos-shortcuts/echopose-watcher.plist \
+  ~/Library/LaunchAgents/com.ruvnet.echopose.watcher.plist
 
-launchctl load ~/Library/LaunchAgents/com.ruvnet.ruview.watcher.plist
+launchctl load ~/Library/LaunchAgents/com.ruvnet.echopose.watcher.plist
 
 launchctl list | grep ruvnet  # Confirm it's loaded
 ```
@@ -271,13 +271,13 @@ launchctl list | grep ruvnet  # Confirm it's loaded
 Tail the log in one terminal:
 
 ```bash
-tail -f /tmp/ruview-watcher.log
+tail -f /tmp/echopose-watcher.log
 ```
 
 In another terminal, walk past the C6 and trigger a presence detection. The log should show:
 
 ```
-[17:10:12] unknown_presence rising-edge → running 'RuView Announce'
+[17:10:12] unknown_presence rising-edge → running 'EchoPose Announce'
 ```
 
 And your HomePod should announce the event in its configured voice.
@@ -286,8 +286,8 @@ And your HomePod should announce the event in its configured voice.
 
 To announce different events in different rooms, create multiple Shortcuts in Shortcuts.app:
 
-- `RuView Announce Kitchen`
-- `RuView Announce Bedroom`
+- `EchoPose Announce Kitchen`
+- `EchoPose Announce Bedroom`
 
 Then run multiple watcher jobs with different `--shortcut-name` flags:
 
@@ -295,13 +295,13 @@ Then run multiple watcher jobs with different `--shortcut-name` flags:
 # Kitchen events on HomePod mini in kitchen
 scripts/macos-shortcuts/announce-via-homepod.sh \
   --node-id 1 --event unknown_presence \
-  --shortcut-name "RuView Announce Kitchen" \
+  --shortcut-name "EchoPose Announce Kitchen" \
   --poll-interval 2 &
 
 # Bedroom events on HomePod in bedroom
 scripts/macos-shortcuts/announce-via-homepod.sh \
   --node-id 2 --event unknown_presence \
-  --shortcut-name "RuView Announce Bedroom" \
+  --shortcut-name "EchoPose Announce Bedroom" \
   --poll-interval 2 &
 ```
 
@@ -315,7 +315,7 @@ Because the Shortcut is operator-editable in Shortcuts.app, you can extend it to
 - **Send a message** to another person's iPhone
 - **Trigger a HomeKit secure camera recording**
 
-This is the flexibility of the Shortcuts-as-glue approach — no code change needed in RuView, all customization in the operator's own Shortcuts library.
+This is the flexibility of the Shortcuts-as-glue approach — no code change needed in EchoPose, all customization in the operator's own Shortcuts library.
 
 For complete setup details and troubleshooting, see [`scripts/macos-shortcuts/README.md`](scripts/macos-shortcuts/README.md).
 
@@ -323,7 +323,7 @@ For complete setup details and troubleshooting, see [`scripts/macos-shortcuts/RE
 
 ## Agentic Consumption via MCP
 
-RuView's sensing stream is also available through Model Context Protocol (MCP) — the standard interface for Claude Code and other AI agents to query RuView data.
+EchoPose's sensing stream is also available through Model Context Protocol (MCP) — the standard interface for Claude Code and other AI agents to query EchoPose data.
 
 ### The `@ruvnet/rvagent` npm package (v0.1.0)
 
@@ -356,18 +356,18 @@ Then in your Claude Code chat:
 
 | Tool | Input | Output |
 |------|-------|--------|
-| `ruview_csi_latest` | node_id | Latest CSI window (1024 subcarriers, 30 OFDM symbols) |
-| `ruview_pose_infer` | CSI window | 17-keypoint skeleton (x, y, confidence per joint) |
-| `ruview_count_infer` | CSI window | Person count + 95% CI |
-| `ruview_registry_list` | query (optional) | List of 105+ available edge modules |
-| `ruview_train_count` | epochs, learning_rate | Kickoff training job ID |
-| `ruview_job_status` | job_id | Progress, ETA, current loss |
-| `ruview.bfld.last_scan` | node_id | Latest BFLD scan: privacy_class, person_count (identity_risk_score=null per I1 invariant) |
-| `ruview.bfld.subscribe` | node_id, event_filter | Stream BFLD windows until you close the stream |
-| `ruview.presence.now` | room (optional) | Current occupancy per room |
-| `ruview.vitals.get_breathing` | node_id | Breathing rate (BPM) + confidence |
-| `ruview.vitals.get_heart_rate` | node_id | Heart rate (BPM) + confidence |
-| `ruview.vitals.get_all` | node_id | Breathing + heart rate + metadata |
+| `echopose_csi_latest` | node_id | Latest CSI window (1024 subcarriers, 30 OFDM symbols) |
+| `echopose_pose_infer` | CSI window | 17-keypoint skeleton (x, y, confidence per joint) |
+| `echopose_count_infer` | CSI window | Person count + 95% CI |
+| `echopose_registry_list` | query (optional) | List of 105+ available edge modules |
+| `echopose_train_count` | epochs, learning_rate | Kickoff training job ID |
+| `echopose_job_status` | job_id | Progress, ETA, current loss |
+| `echopose.bfld.last_scan` | node_id | Latest BFLD scan: privacy_class, person_count (identity_risk_score=null per I1 invariant) |
+| `echopose.bfld.subscribe` | node_id, event_filter | Stream BFLD windows until you close the stream |
+| `echopose.presence.now` | room (optional) | Current occupancy per room |
+| `echopose.vitals.get_breathing` | node_id | Breathing rate (BPM) + confidence |
+| `echopose.vitals.get_heart_rate` | node_id | Heart rate (BPM) + confidence |
+| `echopose.vitals.get_all` | node_id | Breathing + heart rate + metadata |
 
 ### Example: Claude Code Agent Workflow
 
@@ -378,15 +378,15 @@ import claude_code
 tools = claude_code.mcp_tools("rvagent")
 
 # Query latest presence
-presence = tools["ruview.presence.now"](room="living room")
+presence = tools["echopose.presence.now"](room="living room")
 print(f"Living room occupancy: {presence.occupancy}")  # True/False
 
 # Check vitals
-vitals = tools["ruview.vitals.get_all"](node_id=1)
+vitals = tools["echopose.vitals.get_all"](node_id=1)
 print(f"Breathing: {vitals.breathing_bpm} BPM")
 
 # Stream BFLD events in real-time
-for event in tools["ruview.bfld.subscribe"](node_id=1, event_filter="unknown_presence"):
+for event in tools["echopose.bfld.subscribe"](node_id=1, event_filter="unknown_presence"):
     print(f"Unknown presence detected: privacy_class={event.privacy_class}")
 ```
 
@@ -417,20 +417,20 @@ For the full MCP specification, see [ADR-124 — rvagent MCP / RuVector npm inte
 1. Stop the HAP bridge daemon.
 2. Delete the pairing state file:
    ```bash
-   rm -rf ~/.ruview-hap-prod/accessory.state
+   rm -rf ~/.echopose-hap-prod/accessory.state
    ```
 3. Restart the HAP bridge — it regenerates a new setup code.
 4. From the Home app, retry **Add Accessory** → **More Options** with the new setup code.
 
 ### The Setup Code Regenerates on Restart
 
-**Expected behavior.** HAP-python regenerates the setup code if the pairing persist file is missing or corrupt. Once you've paired successfully, the pairing key is stored separately in `~/.ruview-hap-prod/` and survives restarts — the setup code itself is transient and only matters during initial pairing.
+**Expected behavior.** HAP-python regenerates the setup code if the pairing persist file is missing or corrupt. Once you've paired successfully, the pairing key is stored separately in `~/.echopose-hap-prod/` and survives restarts — the setup code itself is transient and only matters during initial pairing.
 
 If you lose the setup code before pairing, simply delete the state and restart to get a new one.
 
 ### Presence Updates Are Slow or Stuck
 
-**Likely cause**: The HTTP polling loop in `ruview-sensing-server.py` is blocked, or the C6 is not sending UDP packets.
+**Likely cause**: The HTTP polling loop in `echopose-sensing-server.py` is blocked, or the C6 is not sending UDP packets.
 
 **Check**:
 
@@ -465,10 +465,10 @@ These items are intentionally deferred or beyond the current release:
 
 ## References
 
-- [ADR-125 — RuView ↔ Apple Home native HAP bridge](docs/adr/ADR-125-ruview-apple-home-native-hap-bridge.md) — Design spec, privacy rationale, sequencing
+- [ADR-125 — EchoPose ↔ Apple Home native HAP bridge](docs/adr/ADR-125-echopose-apple-home-native-hap-bridge.md) — Design spec, privacy rationale, sequencing
 - [ADR-118 — Beamforming Feedback Layer for Detection](docs/adr/ADR-118-bfld-beamforming-feedback-layer-for-detection.md) — BFLD privacy gate and identity-risk semantics
 - [ADR-124 — rvagent MCP / RuVector npm integration](docs/adr/ADR-124-rvagent-mcp-ruvector-npm-integration.md) — MCP tool specification
-- [Issue #796](https://github.com/ruvnet/RuView/issues/796) — Tier 1+2 sprint tracking (close-out comments have per-iter empirical data)
+- [Issue #796](https://github.com/ruvnet/EchoPose/issues/796) — Tier 1+2 sprint tracking (close-out comments have per-iter empirical data)
 - [scripts/macos-shortcuts/README.md](scripts/macos-shortcuts/README.md) — Shortcuts-as-glue setup and troubleshooting
 - [HomeKit Accessory Protocol (Non-Commercial Version)](https://developer.apple.com/apple-home/) — HAP-1.1 spec
 - [HAP-python on GitHub](https://github.com/ikalchev/HAP-python) — Implementation library

@@ -6,7 +6,7 @@
 | **Date**       | 2026-04-26                                                                              |
 | **Authors**    | ruv                                                                                     |
 | **Refines**    | ADR-021 (60 GHz / mmWave vital-signs pipeline)                                          |
-| **Companion**  | `docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md` §6.3, ADR-029 (RuvSense multistatic), ADR-089 (nvsim simulator), ADR-090 (Lindblad extension) |
+| **Companion**  | `docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md` §6.3, ADR-029 (RuvSense multistatic), ADR-089 (nvsim simulator), ADR-090 (Lindblad extension) |
 
 ## 1. Context
 
@@ -15,16 +15,16 @@
 On Good Friday 3 April 2026 the press reported a CIA system called "Ghost Murmur"
 — a Lockheed Skunk Works NV-diamond + AI sensor reportedly used in the recovery
 of an F-15E pilot in southern Iran. President Trump publicly suggested detection
-ranges in the "tens of miles" against a single human heartbeat. RuView shipped
-a research spec (`16-ghost-murmur-ruview-spec.md`) which (a) reality-checked the
+ranges in the "tens of miles" against a single human heartbeat. EchoPose shipped
+a research spec (`16-ghost-murmur-echopose-spec.md`) which (a) reality-checked the
 press claims against published physics, (b) mapped the *honestly-scoped* version
-onto the existing RuView three-tier mesh, and (c) explicitly deferred one
+onto the existing EchoPose three-tier mesh, and (c) explicitly deferred one
 modality — high-power and sub-THz coherent radar — as out of scope. From §6.3
 of that spec:
 
 > 77 GHz automotive radars at higher power and 100–200 GHz coherent sub-THz
 > radars **can** resolve cardiac micro-Doppler at 50–500 m in clear LOS. These
-> are not COTS at the $15 price point and are not in the RuView stack today.
+> are not COTS at the $15 price point and are not in the EchoPose stack today.
 > They are also subject to ITAR / export-control review and **explicitly out of
 > scope** for this open-source project.
 
@@ -35,7 +35,7 @@ take, given that even the research itself touches dual-use territory.
 
 ### 1.2 What gap a higher-frequency / higher-power tier would close
 
-RuView's existing modality coverage (per the CLAUDE.md crate table):
+EchoPose's existing modality coverage (per the CLAUDE.md crate table):
 
 | Modality | Crate / ADR | Honest LOS range for HR | Through-wall HR |
 |---|---|---|---|
@@ -296,7 +296,7 @@ It costs:
 
 For a single-aperture monostatic radar (one Tx, one Rx, one chip), coherence
 is nearly free (the LO is shared on-die). For a *mesh* of coherent sub-THz
-nodes, the engineering cost is significant — and would require RuView to
+nodes, the engineering cost is significant — and would require EchoPose to
 develop sub-ns mesh clock-synchronisation it does not have today.
 
 ### 3.5 Published cardiac micro-Doppler at sub-THz
@@ -333,7 +333,7 @@ work may exist in the classified or US-Government / EU defence-funded
 literature; it is **not** in the open record at the level of detail required
 for a build decision.
 
-## 4. Physics ceiling for RuView's heartbeat-mesh use case
+## 4. Physics ceiling for EchoPose's heartbeat-mesh use case
 
 ### 4.1 Cardiac signal vs. distance, multi-band comparison
 
@@ -425,7 +425,7 @@ heartbeat is not consistent with any physically realisable open-air radar
 system at any band the laws of physics allow**. The claim either refers to
 *cued* detection (i.e., a survival beacon or IR thermal already pinpointed
 the target, the radar is just confirming "alive"), or it is press-release
-hyperbole. RuView is not in a position to either confirm or contest the
+hyperbole. EchoPose is not in a position to either confirm or contest the
 operational reality; we are in a position to say that the *modality alone* —
 "detect a heartbeat at 40 miles with a radar" — is not what closed the loop.
 
@@ -478,7 +478,7 @@ individual experimental-licence application to operate legally, it cannot be
   the safe path for an open-source project is: **do not publish firmware
   whose primary purpose is to push a controlled-radar configuration**.
 
-The correct posture for RuView is: **assume the worst case**. If RuView
+The correct posture for EchoPose is: **assume the worst case**. If EchoPose
 *shipped* firmware that drove a 140 GHz coherent sub-THz cardiac mesh, even
 without the hardware in the workspace, that firmware *itself* could fall
 within ECCN 6A008 / USML XI(c), particularly if it implemented the
@@ -487,7 +487,7 @@ controlled radars from uncontrolled ones. We do not ship that firmware.
 
 ### 5.3 Open-source ethics and dual-use risk
 
-The Ghost Murmur spec (§9) is explicit about RuView's civilian-only ethics
+The Ghost Murmur spec (§9) is explicit about EchoPose's civilian-only ethics
 framing:
 
 1. Civilian, opt-in deployments only.
@@ -505,13 +505,13 @@ analyses, contributing to the open literature — pushes the open-source
 ecosystem closer to capabilities that the press already (correctly, in the
 sense of "physically possible") associates with covert military intelligence.
 
-Two specific dual-use risks if RuView research were to ship anything beyond
+Two specific dual-use risks if EchoPose research were to ship anything beyond
 this ADR:
 
 - **Through-wall surveillance**: high-power 77 GHz radar with a wide-band
   FMCW chirp can resolve human presence and coarse pose through interior
   drywall at tens of meters. This is the literal Ghost Murmur use case at
-  short range. RuView already discloses this capability for the existing
+  short range. EchoPose already discloses this capability for the existing
   60 GHz tier; pushing it to 77 GHz at higher power expands the addressable
   surveillance distance.
 - **Biometric tracking at distance**: cardiac and respiratory micro-Doppler
@@ -519,7 +519,7 @@ this ADR:
   across short occlusions (this is part of the AETHER / re-ID work in
   ADR-024). Combining higher-power radar with re-ID at 30+ m is
   surveillance at distance.
-- **Target acquisition**: this is the use case RuView explicitly does not
+- **Target acquisition**: this is the use case EchoPose explicitly does not
   build for. Period.
 
 ## 6. Build / Research / Skip decision matrix
@@ -532,19 +532,19 @@ this ADR:
 | 100 GHz coherent mesh | — | **✓ Research only** | — | Document the physics, the COTS gap (no sub-$1k transceiver), the regulatory gap (no civilian allocation for active sensing in the 90–110 GHz band). Build only if all three conditions in §7.4 below trigger. |
 | 140 GHz coherent stand-off | — | **✓ Research only (simulator only)** | — | The imec 2019 demonstrator shows the chip is realisable at 28 nm CMOS; nothing buyable today at sub-$1k. ECCN 6A008 risk is real. Simulator OK; firmware no. |
 | 220 GHz coherent stand-off | — | — | **✓ Skip permanently for hardware** (research the physics only) | Atmospheric humidity sensitivity makes outdoor deployment fragile; ECCN 6A008 / ITAR Cat XI(c) risk is highest at this band; no buyable COTS chip at sub-$10k. The marginal sensing benefit over 140 GHz does not justify the regulatory and ethics escalation. |
-| 380+ GHz imaging | — | — | **✓ Skip permanently** | Imaging-band, not radar; humidity destroys outdoor link; export-controlled at any meaningful aperture. Not RuView's modality at any plausible build. |
+| 380+ GHz imaging | — | — | **✓ Skip permanently** | Imaging-band, not radar; humidity destroys outdoor link; export-controlled at any meaningful aperture. Not EchoPose's modality at any plausible build. |
 
 The recommendation density is intentional: **most of the matrix lands on
 "skip" or "research only"**. Only one row (77 GHz at the §95.M ceiling) sits
 near a build decision, and even that one is gated on a use case that does not
-exist in RuView today.
+exist in EchoPose today.
 
-## 7. If we research: what does RuView ship?
+## 7. If we research: what does EchoPose ship?
 
 ### 7.1 Mirror the `nvsim` pattern
 
 ADR-089 / 090 established the precedent: when a sensing modality is
-*physically interesting but not buildable today*, RuView ships a deterministic
+*physically interesting but not buildable today*, EchoPose ships a deterministic
 forward simulator, not hardware. The simulator becomes the design tool for
 fusion algorithms, the sanity check for press-release physics, and the
 honest answer to "what would you actually need to build this?"
@@ -611,17 +611,17 @@ of:
 2. **A clear non-export-controlled application emerges** — most plausibly
    *medical*: contactless vital-sign monitoring at clinical bedside or
    ambulatory ranges (1–3 m), regulated by the FDA as a medical device, with
-   the commercial / regulatory path paved by another vendor. RuView would
+   the commercial / regulatory path paved by another vendor. EchoPose would
    then be one of many open-source contributors to a medical sensing modality
    already cleared for civilian use.
-3. **RuView core team agrees by RFC**, with explicit sign-off on the dual-use
+3. **EchoPose core team agrees by RFC**, with explicit sign-off on the dual-use
    review and the ethics framing in §5.3.
 
 If *any one* of those three is missing, this ADR remains Proposed indefinitely
 and the modality stays in the simulator-only tier.
 
 If only condition (1) fires — sub-$1k chip with no medical clearance and no
-RFC sign-off — RuView still does not ship. The simulator might be expanded;
+RFC sign-off — EchoPose still does not ship. The simulator might be expanded;
 no firmware ships.
 
 ## 8. Related work / cross-references
@@ -650,7 +650,7 @@ no firmware ships.
 
 ### 8.2 Research docs
 
-- `docs/research/quantum-sensing/16-ghost-murmur-ruview-spec.md` — the
+- `docs/research/quantum-sensing/16-ghost-murmur-echopose-spec.md` — the
   Ghost Murmur reality-check spec. §6.3 is the explicit boundary that
   triggered this ADR. §7–§9 establish the architecture, ethics, and legal
   framework that this ADR inherits.
@@ -731,7 +731,7 @@ the §6 decision matrix:
    commercial vendor clears a 140 GHz contactless vital-sign monitor as a
    Class II medical device, the entire ethical framing of "open-source
    contribution to a medical sensing modality" opens up. Without that
-   clearance, RuView remains in the simulator-only tier.
+   clearance, EchoPose remains in the simulator-only tier.
 4. **Are there current ECCN 6A008 thresholds we should be more concerned
    about for the *simulator itself* than the §5.2 analysis suggests?** The
    simulator is forward-only and emits IQ samples and a SHA-256 witness.
@@ -739,10 +739,10 @@ the §6 decision matrix:
    would be characteristic of controlled radars. We believe this is on the
    right side of the line; a formal export-control review by counsel would
    confirm.
-5. **Should RuView contribute the sub-THz simulator to a neutral upstream**
+5. **Should EchoPose contribute the sub-THz simulator to a neutral upstream**
    (e.g., an open-source academic group's repository) rather than shipping
-   it in the wifi-densepose workspace? Decoupling the simulator from RuView
-   reduces the risk that future RuView capability work is interpreted as
+   it in the wifi-densepose workspace? Decoupling the simulator from EchoPose
+   reduces the risk that future EchoPose capability work is interpreted as
    building toward a stand-off cardiac mesh.
 6. **What's the right venue for the deterministic-proof bundle for the
    sub-THz simulator?** Same question that ADR-089 left open. Probably
@@ -759,7 +759,7 @@ This ADR is **Proposed — Research only**. The decision matrix in §6 lands on:
   stand-off.
 - **Build now**: nothing.
 
-If RuView builds anything in this space, it builds a sub-THz forward
+If EchoPose builds anything in this space, it builds a sub-THz forward
 simulator (`subthz-radar-sim`) following the `nvsim` pattern: deterministic,
 host-side, witness-verified, with explicit "what this is not for" framing
 and no firmware. The simulator does not ship until conditions §7.4 (1)–(3)

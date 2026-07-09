@@ -14,19 +14,19 @@ use crate::domain::node::{
 };
 use crate::state::AppState;
 
-/// Service type for RuView ESP32 nodes using mDNS.
-const MDNS_SERVICE_TYPE: &str = "_ruview._udp.local.";
+/// Service type for EchoPose ESP32 nodes using mDNS.
+const MDNS_SERVICE_TYPE: &str = "_echopose._udp.local.";
 
 /// UDP broadcast port for node discovery.
 const UDP_DISCOVERY_PORT: u16 = 5006;
 
 /// Discovery beacon magic bytes.
-const BEACON_MAGIC: &[u8] = b"RUVIEW_BEACON";
+const BEACON_MAGIC: &[u8] = b"ECHOPOSE_BEACON";
 
 /// Discover ESP32 CSI nodes on the local network via mDNS + UDP broadcast.
 ///
 /// Discovery strategy:
-/// 1. Start mDNS browser for `_ruview._udp.local.`
+/// 1. Start mDNS browser for `_echopose._udp.local.`
 /// 2. Send UDP broadcast on port 5006
 /// 3. Collect responses for `timeout_ms` milliseconds
 /// 4. Deduplicate by MAC address and return merged results
@@ -197,7 +197,7 @@ async fn discover_via_udp(timeout_duration: Duration) -> Result<Vec<DiscoveredNo
 
         // Send discovery beacon
         let broadcast_addr = format!("255.255.255.255:{}", UDP_DISCOVERY_PORT);
-        if let Err(e) = socket.send_to(b"RUVIEW_DISCOVER", &broadcast_addr) {
+        if let Err(e) = socket.send_to(b"ECHOPOSE_DISCOVER", &broadcast_addr) {
             tracing::warn!("Failed to send discovery beacon: {}", e);
         }
 
@@ -209,7 +209,7 @@ async fn discover_via_udp(timeout_duration: Duration) -> Result<Vec<DiscoveredNo
             match socket.recv_from(&mut buf) {
                 Ok((len, addr)) => {
                     if len >= BEACON_MAGIC.len() && &buf[..BEACON_MAGIC.len()] == BEACON_MAGIC {
-                        // Parse beacon response: RUVIEW_BEACON|mac|node_id|version
+                        // Parse beacon response: ECHOPOSE_BEACON|mac|node_id|version
                         if let Some(node) = parse_beacon_response(&buf[..len], addr) {
                             discovered.push(node);
                         }
@@ -237,12 +237,12 @@ async fn discover_via_udp(timeout_duration: Duration) -> Result<Vec<DiscoveredNo
 }
 
 /// Parse a UDP beacon response into a DiscoveredNode.
-/// Format: RUVIEW_BEACON|<mac>|<node_id>|<version>|<chip>|<role>|<tdm_slot>|<tdm_total>
+/// Format: ECHOPOSE_BEACON|<mac>|<node_id>|<version>|<chip>|<role>|<tdm_slot>|<tdm_total>
 fn parse_beacon_response(data: &[u8], addr: SocketAddr) -> Option<DiscoveredNode> {
     let text = std::str::from_utf8(data).ok()?;
     let parts: Vec<&str> = text.split('|').collect();
 
-    if parts.len() < 2 || parts[0] != "RUVIEW_BEACON" {
+    if parts.len() < 2 || parts[0] != "ECHOPOSE_BEACON" {
         return None;
     }
 
@@ -568,7 +568,7 @@ mod tests {
 
     #[test]
     fn test_parse_beacon_response() {
-        let data = b"RUVIEW_BEACON|AA:BB:CC:DD:EE:FF|1|0.3.0|esp32s3|coordinator|0|4";
+        let data = b"ECHOPOSE_BEACON|AA:BB:CC:DD:EE:FF|1|0.3.0|esp32s3|coordinator|0|4";
         let addr: SocketAddr = "192.168.1.100:5006".parse().unwrap();
 
         let node = parse_beacon_response(data, addr).unwrap();

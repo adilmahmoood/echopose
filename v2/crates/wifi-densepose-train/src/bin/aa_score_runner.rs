@@ -1,7 +1,7 @@
 //! AetherArena ("AA") Score Runner + Witness Chain (ADR-149).
 //!
 //! Benchmark-first scorer for the official Spatial-Intelligence Benchmark. It runs
-//! the **real** `wifi-densepose-train::ruview_metrics` pose-acceptance harness and
+//! the **real** `wifi-densepose-train::echopose_metrics` pose-acceptance harness and
 //! emits a **witness record** for proof + repeatability analysis:
 //!
 //!   witness = { inputs_sha256, harness_version, metrics, tier, proof_sha256 }
@@ -40,7 +40,7 @@ use std::process::ExitCode;
 use ndarray::{Array1, Array2};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use wifi_densepose_train::ruview_metrics::{
+use wifi_densepose_train::echopose_metrics::{
     evaluate_joint_error, JointErrorResult, JointErrorThresholds,
 };
 

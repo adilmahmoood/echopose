@@ -139,7 +139,7 @@ fn config_message(
 ) -> TopicMessage {
     let unique_id = format!("{node_id}_bfld_{entity}");
     let topic = format!("homeassistant/{ha_type}/{unique_id}/config");
-    let state_topic = format!("ruview/{node_id}/bfld/{entity}/state");
+    let state_topic = format!("echopose/{node_id}/bfld/{entity}/state");
     let availability_topic_str = crate::availability::availability_topic(node_id);
 
     let mut payload = String::with_capacity(384);
@@ -175,11 +175,11 @@ fn config_message(
     push_str_field(
         &mut payload,
         "name",
-        &format!("RuView Seed {node_id}"),
+        &format!("EchoPose Seed {node_id}"),
         false,
     );
     push_str_field(&mut payload, "model", "BFLD", false);
-    push_str_field(&mut payload, "manufacturer", "RuView", false);
+    push_str_field(&mut payload, "manufacturer", "EchoPose", false);
     payload.push('}');
     payload.push('}');
 

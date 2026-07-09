@@ -14,7 +14,7 @@ https://storage.googleapis.com/cognitum-apps/app-registry.json
 
 As of v2.1.0 (2026-05-13) the registry advertises **105 cogs across 11 categories** (health, security, building, retail, industrial, research, ai, swarm, signal, network, developer). Each entry carries `id`, `name`, `category`, `version`, `description`, `size_kb`, `difficulty`, `sha256`, `binary_size`, and a `config[]` schema describing the runtime parameters the appliance offers when installing the cog.
 
-RuView today has no live awareness of this catalog. The `README.md` capability table is hand-curated; the UI surfaces only the capabilities the dashboard's HTML knows about; nothing in `wifi-densepose-sensing-server` references the registry. Result: when Cognitum ships a new cog (the registry was last updated 6 days ago — a fast cadence), RuView stays unaware until someone manually edits the README. Customers running the RuView dashboard against a real appliance see a 10-capability bag in the UI while the appliance is actually capable of installing 105 cogs.
+EchoPose today has no live awareness of this catalog. The `README.md` capability table is hand-curated; the UI surfaces only the capabilities the dashboard's HTML knows about; nothing in `wifi-densepose-sensing-server` references the registry. Result: when Cognitum ships a new cog (the registry was last updated 6 days ago — a fast cadence), EchoPose stays unaware until someone manually edits the README. Customers running the EchoPose dashboard against a real appliance see a 10-capability bag in the UI while the appliance is actually capable of installing 105 cogs.
 
 Today's `cog-pose-estimation@0.0.1` release (PRs #642 / #643, ADR-100, ADR-101) is the first cog this repo ships to that registry. We need the discovery side to match.
 
@@ -27,7 +27,7 @@ GET /api/v1/edge/registry
 GET /api/v1/edge/registry?refresh=1   (force-bypass cache, log if abused)
 ```
 
-The registry is **passively surfaced**, not modified. RuView is a presentation layer for the canonical Cognitum catalog; it never re-signs entries or re-hosts binaries.
+The registry is **passively surfaced**, not modified. EchoPose is a presentation layer for the canonical Cognitum catalog; it never re-signs entries or re-hosts binaries.
 
 ### Module
 
@@ -77,9 +77,9 @@ The `registry` field is the upstream JSON inlined verbatim so consumers don't ne
 
 ### UI surfacing
 
-New page `ui/edge-modules.html` renders the registry into category sections with cog cards. Each card links out to the Cognitum V0 appliance's `/cogs` page (`http://cognitum-v0:9000/cogs#<id>`) for the install action — RuView itself never installs.
+New page `ui/edge-modules.html` renders the registry into category sections with cog cards. Each card links out to the Cognitum V0 appliance's `/cogs` page (`http://cognitum-v0:9000/cogs#<id>`) for the install action — EchoPose itself never installs.
 
-The existing dashboard's "Capabilities" section continues to show RuView-native sensing capabilities (presence, breathing, pose, etc. — the things RuView itself runs); the new edge-modules page shows the broader Cognitum cog catalog. The two are distinct surfaces and shouldn't be merged.
+The existing dashboard's "Capabilities" section continues to show EchoPose-native sensing capabilities (presence, breathing, pose, etc. — the things EchoPose itself runs); the new edge-modules page shows the broader Cognitum cog catalog. The two are distinct surfaces and shouldn't be merged.
 
 ### Failure modes
 
@@ -101,8 +101,8 @@ The existing dashboard's "Capabilities" section continues to show RuView-native 
 
 ### Positive
 
-- One source of truth for the cog catalog across RuView + Cognitum dashboards.
-- Zero ongoing maintenance: when Cognitum publishes registry v2.2.0, RuView sees it within an hour without a release.
+- One source of truth for the cog catalog across EchoPose + Cognitum dashboards.
+- Zero ongoing maintenance: when Cognitum publishes registry v2.2.0, EchoPose sees it within an hour without a release.
 - The endpoint is also useful for non-UI consumers (CI checks, fleet automation, third-party integrations).
 - Lets us deprecate the hand-curated README capability table in favour of generated content (separate PR).
 
@@ -113,7 +113,7 @@ The existing dashboard's "Capabilities" section continues to show RuView-native 
 
 ### Risks
 
-- **Upstream rug-pull**: if `cognitum-apps` is deleted or replaced, the endpoint goes dark. The `--edge-registry-url` flag lets operators repoint without a code change. Long-term, RuView could mirror the registry into its own GCS bucket if the relationship requires it.
+- **Upstream rug-pull**: if `cognitum-apps` is deleted or replaced, the endpoint goes dark. The `--edge-registry-url` flag lets operators repoint without a code change. Long-term, EchoPose could mirror the registry into its own GCS bucket if the relationship requires it.
 - **Cache poisoning**: the upstream is public-read; an attacker who breaches Cognitum's GCS write could push a bad registry. The cog-level signatures (ADR-100) limit the blast radius — bad registry entries can't install bad binaries, only show wrong metadata. Acceptable until registry-level signing lands.
 
 ## Security review
@@ -133,8 +133,8 @@ A real review of the attack surface this endpoint introduces.
 | T7 | **JSON deserialisation panics** — malformed registry triggers a Rust panic | Payload is parsed as `serde_json::Value` (opaque untyped tree) — never coerced into a strongly-typed struct that could panic. Failure is propagated as `FetcherError::Network` which the handler maps to 503. |
 | T8 | **Stale-on-error masks outages from operators** | Response carries `stale: true` + `fetched_at` (unix timestamp). UI rendering MUST surface this badge — encoded as an explicit field, not an implicit silence. |
 | T9 | **TLS downgrade / MITM on the fetch** | `ureq` is built with the `tls` feature (rustls) by default. No `--insecure` flag exists. If the upstream uses LetsEncrypt the cert chain is system-trusted; certificate pinning is out of scope (would block the bucket from rotating certs). |
-| T10 | **Unauthenticated access exposes ‘what cogs exist’** | The registry is canonical-public information (already public-read on GCS via anonymous HTTP GET). Surfacing it on a local LAN HTTP API does not increase its disclosure. The endpoint stays under the project's existing `RUVIEW_API_TOKEN` Bearer auth — when set, the registry is gated like other `/api/v1/*` routes. |
-| T11 | **Configuration injection via env var** — `RUVIEW_EDGE_REGISTRY_URL` set to a malicious URL by an attacker who controls the process environment | If an attacker controls the env, they own the process; this is not a new threat surface. Documented in the CLI help. |
+| T10 | **Unauthenticated access exposes ‘what cogs exist’** | The registry is canonical-public information (already public-read on GCS via anonymous HTTP GET). Surfacing it on a local LAN HTTP API does not increase its disclosure. The endpoint stays under the project's existing `ECHOPOSE_API_TOKEN` Bearer auth — when set, the registry is gated like other `/api/v1/*` routes. |
+| T11 | **Configuration injection via env var** — `ECHOPOSE_EDGE_REGISTRY_URL` set to a malicious URL by an attacker who controls the process environment | If an attacker controls the env, they own the process; this is not a new threat surface. Documented in the CLI help. |
 | T12 | **Cache mutation across threads / poisoning** | The cache is `RwLock<Option<CachedEntry>>`. Writes go through `cached.write()` once per fetch. Snapshot reads `clone()` the `CachedEntry` (cheap — `Value` is reference-counted internally for large strings) so concurrent readers don't share mutable state. Tests cover the multi-call path; no `unsafe` is used. |
 
 ### What this ADR does NOT secure

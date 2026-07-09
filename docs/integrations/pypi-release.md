@@ -1,4 +1,4 @@
-# PyPI release runbook — `wifi-densepose` + `ruview`
+# PyPI release runbook — `wifi-densepose` + `echopose`
 
 Operations doc for the `.github/workflows/pip-release.yml` CI workflow.
 
@@ -6,7 +6,7 @@ Operations doc for the `.github/workflows/pip-release.yml` CI workflow.
 
 The workflow uses one GitHub Actions secret named `PYPI_API_TOKEN`.
 It's a project-token issued by the rUv PyPI account with upload
-scope for both `wifi-densepose` and `ruview`.
+scope for both `wifi-densepose` and `echopose`.
 
 ## Refreshing the token
 
@@ -19,7 +19,7 @@ gcloud secrets versions access latest \
     --secret=PYPI_TOKEN \
     --project=cognitum-20260110 \
   | tr -d '\r\n\xef\xbb\xbf' \
-  | gh secret set PYPI_API_TOKEN --repo ruvnet/RuView
+  | gh secret set PYPI_API_TOKEN --repo ruvnet/EchoPose
 ```
 
 The `tr` step strips any BOM / CRLF that PowerShell pipes or
@@ -49,8 +49,8 @@ Per ADR-117 §7.3, the tombstone publishes first so it claims the
    wifi_densepose"` → ImportError with migration URL.
 3. `git tag v2.0.0-pip && git push origin v2.0.0-pip` → v2 wheel
    matrix live at `https://pypi.org/project/wifi-densepose/2.0.0/`.
-4. (Optional, in lock-step) build + publish a matching `ruview`
-   release from `python/ruview-meta/` so the meta-package version
+4. (Optional, in lock-step) build + publish a matching `echopose`
+   release from `python/echopose-meta/` so the meta-package version
    stays pinned to the same wifi-densepose version.
 
 ## Off-loop manual gates

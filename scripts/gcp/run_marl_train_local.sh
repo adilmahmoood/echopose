@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run ruview-swarm MARL training locally on the RTX 5080 (no GCP needed).
+# Run echopose-swarm MARL training locally on the RTX 5080 (no GCP needed).
 # For development runs and smaller episode counts. The local 5080 (16GB) is
 # more than enough for the 64→128→64 policy network.
 #
@@ -13,6 +13,6 @@ EPISODES="${1:-1000}"
 DRONES="${2:-4}"
 PROFILE="${3:-sar}"
 echo "Training MARL: $EPISODES episodes, $DRONES drones, profile=$PROFILE on local GPU"
-cargo run --release -p ruview-swarm --features train,cuda --bin train_marl -- \
+cargo run --release -p echopose-swarm --features train,cuda --bin train_marl -- \
     --episodes "$EPISODES" --drones "$DRONES" --profile "$PROFILE" \
     --checkpoint-dir ./marl-checkpoints 2>&1 | tee marl-train-$(date +%Y%m%d-%H%M%S).log

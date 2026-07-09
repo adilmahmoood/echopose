@@ -13,7 +13,7 @@
 
 ## 1. Context
 
-RuView's WorldGraph (ADR-139) produces a current-state environmental digital twin; the RF
+EchoPose's WorldGraph (ADR-139) produces a current-state environmental digital twin; the RF
 encoder (ADR-146) predicts present-frame pose/presence/count at ~20 Hz. There is no
 future-state prediction — no trajectory priors beyond the Kalman tracker's 5–10 frame
 horizon, and no physics-aware validation of SemanticState updates.
@@ -33,7 +33,7 @@ is available or for offline training data generation only.
 | OccWorld (wzzheng/OccWorld, ECCV 2024) | Outdoor AV (nuScenes) | 3D semantic voxel seq | **1.65 GB validated** | Code available, Apache-2.0 |
 | RoboOccWorld (arXiv 2505.05512) | Indoor robotics | 3D voxel seq, camera poses | ~2–4 GB estimated | Code not yet released (~Q3 2025) |
 
-Both operate natively in 3D occupancy space — the same representation RuView produces
+Both operate natively in 3D occupancy space — the same representation EchoPose produces
 from WiFi CSI. No video rendering intermediate is needed (unlike Cosmos).
 
 **OccWorld architecture**: VQVAE tokenizer (72.4M params) encodes 3D semantic occupancy
@@ -43,13 +43,13 @@ integer class labels. Output: predicted occupancy for the next F−1 timesteps.
 
 **RoboOccWorld** (once released): identical paradigm but trained on indoor scenes
 (60×60×36 voxels at 0.08 m/voxel, 4.8×4.8×2.88 m space, 12 indoor semantic classes)
-— near-perfect match for RuView's room-scale CSI occupancy.
+— near-perfect match for EchoPose's room-scale CSI occupancy.
 
 ## 2. Decision
 
 **Phase A (now)**: Use OccWorld as the integration scaffold. Run inference from a Python
-subprocess. Adapt its dataset loader to accept RuView's custom occupancy format. Remap
-semantic classes from nuScenes outdoor (18 classes) to RuView indoor (wall, floor,
+subprocess. Adapt its dataset loader to accept EchoPose's custom occupancy format. Remap
+semantic classes from nuScenes outdoor (18 classes) to EchoPose indoor (wall, floor,
 person, furniture, free).
 
 **Phase B (Q3–Q4 2025)**: Swap in RoboOccWorld when its code releases. The Rust
@@ -178,21 +178,21 @@ impl OccWorldBridge {
 }
 ```
 
-### 4.3 RuView → OccWorld Adaptation (required before production use)
+### 4.3 EchoPose → OccWorld Adaptation (required before production use)
 
 OccWorld was trained on nuScenes outdoor driving (200×200×16 at 0.4 m/voxel, 80×80×6.4 m,
-18 outdoor classes). RuView uses indoor room-scale occupancy (~10×10×3 m at finer resolution).
+18 outdoor classes). EchoPose uses indoor room-scale occupancy (~10×10×3 m at finer resolution).
 Required adaptations:
 
 1. **New dataset loader**: replace `nuScenesSceneDatasetLidarTraverse` with a
-   `RuViewOccDataset` that reads WorldGraph history snapshots and returns the
+   `EchoPoseOccDataset` that reads WorldGraph history snapshots and returns the
    `(B, F, H, W, D)` tensor in OccWorld's expected format.
-2. **Class remapping**: 18 nuScenes outdoor classes → 6 RuView indoor classes
+2. **Class remapping**: 18 nuScenes outdoor classes → 6 EchoPose indoor classes
    (floor, wall, ceiling, person, furniture, free). Remap during tensor construction.
 3. **Ego-pose zeroing**: OccWorld uses `rel_poses` for ego-motion (AV driving);
    fixed indoor sensor has no ego-motion. Pass zero poses in `forward_inference_with_plan`.
 4. **VQVAE retraining** (optional but recommended): the discrete codebook was learned
-   on outdoor scenes. Re-train VQVAE stage on RuView synthetic occupancy data before
+   on outdoor scenes. Re-train VQVAE stage on EchoPose synthetic occupancy data before
    fine-tuning the transformer.
 5. **Resolution rescaling**: if indoor occupancy uses finer voxels (e.g. 0.08 m/voxel
    as in RoboOccWorld), bilinear-upsample to 200×200 for OccWorld, or retrain at
@@ -239,7 +239,7 @@ calibration_id: <active baseline from ADR-135>
 
 | Risk | Likelihood | Mitigation |
 |------|-----------|------------|
-| RoboOccWorld delayed past Q4 2025 | Medium | OccWorld retrained on synthetic RuView data as fallback |
+| RoboOccWorld delayed past Q4 2025 | Medium | OccWorld retrained on synthetic EchoPose data as fallback |
 | VQVAE codebook quality low on indoor after retraining | Low | RoboOccWorld swap; OccWorld still useful for coarse occupancy |
 | OccWorld API drift (unmaintained repo) | Low | Local fork at ~/projects/OccWorld; patches documented above |
 | WorldGraph update rate too low for meaningful sequences | Medium | Log WorldGraph snapshots at configurable rate for inference |
@@ -250,9 +250,9 @@ calibration_id: <active baseline from ADR-135>
 |-------|-------|--------|
 | 1 | Install OccWorld; validate forward pass with synthetic data | **Done (2026-05-29)** |
 | 2 | `wifi-densepose-worldmodel` Rust thin client crate (Unix socket bridge) | Next |
-| 3 | `RuViewOccDataset` loader + class remapping + ego-pose zeroing | Pending |
+| 3 | `EchoPoseOccDataset` loader + class remapping + ego-pose zeroing | Pending |
 | 4 | Trajectory prior injection into `pose_tracker.rs` Kalman filter | Pending |
-| 5 | VQVAE + transformer retraining on RuView synthetic occupancy | Pending |
+| 5 | VQVAE + transformer retraining on EchoPose synthetic occupancy | Pending |
 | 6 | Swap to RoboOccWorld backend when code releases | Q3–Q4 2025 |
 
 ## 7. Cosmos Path (Deferred — ADR-148)

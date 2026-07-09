@@ -20,9 +20,9 @@ wasm-opt = false
 # crates and benchmarks can keep linking against nvsim natively.
 crate-type = ["cdylib", "rlib"]
 
-# `nvsim` is a standalone leaf crate. It deliberately has NO internal RuView
+# `nvsim` is a standalone leaf crate. It deliberately has NO internal EchoPose
 # dependencies — see `docs/research/quantum-sensing/15-nvsim-implementation-plan.md`
-# §1.1 for the rationale. RuView integration (frame format alignment with
+# §1.1 for the rationale. EchoPose integration (frame format alignment with
 # `wifi-densepose-core::FrameKind`, ruvector trace compression, etc.) is
 # tracked as Optional Integrations in a follow-up section of the README and
 # lands behind feature flags after the core simulator is shipping.

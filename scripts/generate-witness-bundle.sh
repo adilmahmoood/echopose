@@ -146,7 +146,7 @@ cat "$BUNDLE_DIR/crate-manifest/versions.txt"
 # ---------------------------------------------------------------
 echo "[6b] Building @ruvnet/rvagent npm tarball and hashing..."
 mkdir -p "$BUNDLE_DIR/npm-manifest"
-NPM_PKG_DIR="$REPO_ROOT/tools/ruview-mcp"
+NPM_PKG_DIR="$REPO_ROOT/tools/echopose-mcp"
 if [ -d "$NPM_PKG_DIR" ]; then
   (
     cd "$NPM_PKG_DIR"
@@ -171,7 +171,7 @@ if [ -d "$NPM_PKG_DIR" ]; then
     fi
   )
 else
-  echo "  WARNING: tools/ruview-mcp not found — skipping npm manifest"
+  echo "  WARNING: tools/echopose-mcp not found — skipping npm manifest"
 fi
 
 # ---------------------------------------------------------------

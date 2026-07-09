@@ -3,7 +3,7 @@
 **Research Document RD-001**
 **Date**: 2026-03-08
 **Status**: Draft
-**Authors**: RuView Research Team
+**Authors**: EchoPose Research Team
 **Related ADRs**: ADR-029 (RuvSense Multistatic Sensing), ADR-017 (RuVector Signal Integration)
 
 ---
@@ -1107,6 +1107,6 @@ core graph algorithms.
 
 ---
 
-*This research document is part of the RuView project. It provides theoretical
+*This research document is part of the EchoPose project. It provides theoretical
 foundations for the RF topological sensing approach implemented in the
 wifi-densepose-signal and wifi-densepose-ruvector crates.*

@@ -1,4 +1,4 @@
-# rvAgent + RVF integration for agentic flows in RuView
+# rvAgent + RVF integration for agentic flows in EchoPose
 
 **Status**: Research (Exploration) — Pre-Proposal
 **Date**: 2026-05-24
@@ -8,9 +8,9 @@
 
 ## TL;DR
 
-`vendor/ruvector/crates/rvAgent/` ships a production-grade Rust AI-agent framework with eight composable crates (`rvagent-core`, `-middleware`, `-tools`, `-subagents`, `-backends`, `-a2a`, `-acp`, `-mcp`, `-cli`). The framework already speaks **RVF cognitive containers** as its native state-persistence and inter-agent transport. RuView already uses RVF in `v2/crates/wifi-densepose-sensing-server/src/rvf_container.rs`.
+`vendor/ruvector/crates/rvAgent/` ships a production-grade Rust AI-agent framework with eight composable crates (`rvagent-core`, `-middleware`, `-tools`, `-subagents`, `-backends`, `-a2a`, `-acp`, `-mcp`, `-cli`). The framework already speaks **RVF cognitive containers** as its native state-persistence and inter-agent transport. EchoPose already uses RVF in `v2/crates/wifi-densepose-sensing-server/src/rvf_container.rs`.
 
-**Integration thesis**: the two systems share a serialization substrate. Wiring `rvAgent` swarms into RuView turns the existing sensing pipeline into the substrate that an agentic flow can read from, reason about, and respond to — without writing a new agent runtime.
+**Integration thesis**: the two systems share a serialization substrate. Wiring `rvAgent` swarms into EchoPose turns the existing sensing pipeline into the substrate that an agentic flow can read from, reason about, and respond to — without writing a new agent runtime.
 
 Concrete value:
 
@@ -34,14 +34,14 @@ Concrete value:
 | `rvagent-a2a` / `-acp` | Agent-to-agent transport, agent communication protocol | wire format |
 | `rvagent-cli` | Operator CLI | argv parsing |
 
-Selling points relevant to RuView:
+Selling points relevant to EchoPose:
 
 - **O(1) state cloning via `Arc`** → can spawn one subagent per sensing zone without copying gigabytes of context.
 - **Parallel tool execution** → multiple sensor queries (BFLD presence, vitals BPM, pose) issued in parallel from one rvAgent decision step.
 - **Path confinement + env-var sanitization** → operator-facing agents that touch the host filesystem (e.g., reading `data/recordings/`) stay sandboxed.
 - **Witness chains** in `rvagent-middleware::witness` → already RVF-formatted; round-trips cleanly with ADR-028.
 
-## 2. What RVF already does in RuView
+## 2. What RVF already does in EchoPose
 
 `v2/crates/wifi-densepose-sensing-server/src/rvf_container.rs` defines the on-disk container format used for:
 
@@ -55,14 +55,14 @@ Each RVF blob is content-addressed (BLAKE3 of the canonical byte representation)
 
 Three concrete touchpoints, each shippable independently.
 
-### 3.1 RVF as the rvAgent ↔ RuView wire
+### 3.1 RVF as the rvAgent ↔ EchoPose wire
 
-rvAgent's `AgiContainer` (`rvagent-core/src/agi_container.rs`, 627 LOC) already produces RVF-compatible blobs as its persistent state format. RuView only needs to define **two segment types** in `rvf_container.rs`:
+rvAgent's `AgiContainer` (`rvagent-core/src/agi_container.rs`, 627 LOC) already produces RVF-compatible blobs as its persistent state format. EchoPose only needs to define **two segment types** in `rvf_container.rs`:
 
 - `SEG_AGENT_STATE = 0x08` — serialized `rvagent_core::AgentState` (the cloned-on-write tree from `cow_state.rs`).
 - `SEG_DECISION = 0x09` — a single agent decision step: tool calls issued, outputs received, witness signature.
 
-With these two segments, an rvAgent session and a RuView sensing session can interleave entries in the same RVF blob. The witness-bundle script (ADR-028) iterates segments by type, so it would attest both halves with one signing pass.
+With these two segments, an rvAgent session and a EchoPose sensing session can interleave entries in the same RVF blob. The witness-bundle script (ADR-028) iterates segments by type, so it would attest both halves with one signing pass.
 
 ### 3.2 BFLD events as rvAgent tool inputs
 
@@ -96,7 +96,7 @@ Concrete example:
 
 ## 5. Proposed next steps (decision deferred)
 
-- **D1**: Open ADR-124 — "rvAgent + RVF integration for RuView agentic flows" — capturing the segment-type assignments, the cog-subagent contract, and the privacy-class composition rule.
+- **D1**: Open ADR-124 — "rvAgent + RVF integration for EchoPose agentic flows" — capturing the segment-type assignments, the cog-subagent contract, and the privacy-class composition rule.
 - **D2**: Scaffold `v2/crates/wifi-densepose-agent` with the sync ↔ async adapter and one example tool (`read_bfld_state`).
 - **D3**: Add `SEG_AGENT_STATE` and `SEG_DECISION` to `rvf_container.rs` as `#[cfg(feature = "agent")]` segments so the v0 ship doesn't pull rvAgent's transitive deps by default.
 - **D4**: Land a one-page demo in `examples/agent-bedroom-check/` showing the queen-agent flow end-to-end against the `BfldPipelineHandle`.

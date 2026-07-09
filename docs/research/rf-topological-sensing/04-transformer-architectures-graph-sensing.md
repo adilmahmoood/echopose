@@ -1,7 +1,7 @@
 # Transformer Architectures for RF Topological Graph Sensing
 
 **Research Document 04** | March 2026
-**Context**: RuView / wifi-densepose — 16-node ESP32 mesh, CSI coherence-weighted graphs, mincut-based boundary detection, real-time inference requirements.
+**Context**: EchoPose / wifi-densepose — 16-node ESP32 mesh, CSI coherence-weighted graphs, mincut-based boundary detection, real-time inference requirements.
 
 ---
 
@@ -118,7 +118,7 @@ The advantage is simplicity: no custom attention mechanisms, no graph-specific m
 | GPS         | Hybrid (MPNN + attention) | Extensible | Low | Moderate |
 | TokenGT     | Minimal (learned) | Extensible | Low (136 tokens) | High (vanilla transformer) |
 
-For the RuView 16-node mesh, all four architectures are computationally feasible. The choice depends on whether we prioritize structural inductive bias (Graphormer, SAN) or deployment simplicity (TokenGT).
+For the EchoPose 16-node mesh, all four architectures are computationally feasible. The choice depends on whether we prioritize structural inductive bias (Graphormer, SAN) or deployment simplicity (TokenGT).
 
 ---
 
@@ -519,7 +519,7 @@ This injects relative spectral position into the attention mechanism without mod
 | Spatial | N/A | No | Direct (coordinates) | O(N) lookup |
 | Combined | Configurable | Yes | Strong | Sum of components |
 
-**Recommendation for RuView:** Use combined encoding (LapPE with SignNet + RWPE + spatial coordinates). The 16-node mesh makes computational cost irrelevant, and the combined encoding provides the richest structural information for mincut prediction.
+**Recommendation for EchoPose:** Use combined encoding (LapPE with SignNet + RWPE + spatial coordinates). The 16-node mesh makes computational cost irrelevant, and the combined encoding provides the richest structural information for mincut prediction.
 
 ---
 
@@ -738,7 +738,7 @@ Beyond compression, architectural choices dramatically affect edge efficiency:
 
 ### 7.6 Deployment Pipeline
 
-The recommended deployment pipeline for RuView:
+The recommended deployment pipeline for EchoPose:
 
 ```
 1. Train large teacher model (GPU server)
@@ -860,9 +860,9 @@ Based on the analysis across all seven dimensions, we recommend a layered archit
 | Adaptation to new room | <5 min data | N/A |
 | Zero-shot transfer (new room) | >0.75 F1 | 1.00 |
 
-### 8.5 Integration with RuView Pipeline
+### 8.5 Integration with EchoPose Pipeline
 
-The transformer-based mincut predictor integrates into the existing RuView architecture at the following points:
+The transformer-based mincut predictor integrates into the existing EchoPose architecture at the following points:
 
 - **Input**: CSI frames from `wifi-densepose-signal` (after phase alignment and coherence scoring via RuvSense modules)
 - **Graph construction**: `ruvector-mincut` provides the coherence-weighted graph
@@ -893,4 +893,4 @@ The differentiable mincut predictor enables end-to-end gradient flow from downst
 
 ---
 
-*This document supports ADR-029 (RuvSense multistatic sensing mode) and ADR-031 (RuView sensing-first RF mode) by providing the theoretical foundation for transformer-based inference on RF topological graphs.*
+*This document supports ADR-029 (RuvSense multistatic sensing mode) and ADR-031 (EchoPose sensing-first RF mode) by providing the theoretical foundation for transformer-based inference on RF topological graphs.*

@@ -127,7 +127,7 @@ huggingface-cli download ${HF_REASON_MODEL} \
   || echo "[startup] WARNING: Cosmos-Reason2-8B download failed — check HF token"
 
 # ── 7. Workspace prep ─────────────────────────────────────────────────────────
-mkdir -p ~/cosmos-results ~/ruview-scripts ~/control-tensors
+mkdir -p ~/cosmos-results ~/echopose-scripts ~/control-tensors
 
 echo "[startup] \$(date): Cosmos setup complete — instance ready for eval"
 echo "[startup] Models:"

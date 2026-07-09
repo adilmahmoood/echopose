@@ -317,7 +317,7 @@ mod tests {
             "fullname empty after register"
         );
         assert!(
-            fullname.contains("_ruview-ha._tcp"),
+            fullname.contains("_echopose-ha._tcp"),
             "fullname `{fullname}` missing service type"
         );
         handle.shutdown().expect("clean shutdown");

@@ -1,6 +1,6 @@
 # ADR-039: ESP32-S3 Edge Intelligence Pipeline
 
-**Status**: Accepted (hardware-validated on RuView ESP32-S3)
+**Status**: Accepted (hardware-validated on EchoPose ESP32-S3)
 **Date**: 2026-03-02
 **Deciders**: @ruvnet
 
@@ -144,7 +144,7 @@ gesture recognition, coherence monitoring, adversarial detection.
 - `intrusion.rs` — State-machine intrusion detection (calibrate-monitor-arm-alert)
 - `occupancy.rs` — Spatial occupancy zone detection with per-zone variance analysis
 
-## Hardware Benchmark (RuView ESP32-S3)
+## Hardware Benchmark (EchoPose ESP32-S3)
 
 Measured on ESP32-S3 (QFN56 rev v0.2, 8 MB flash, 160 MHz, ESP-IDF v5.2).
 

@@ -4,7 +4,7 @@
 |-------------|------------------------------------------------|
 | **Status**  | Accepted                                       |
 | **Date**    | 2026-03-13 (updated 2026-03-14)                |
-| **Authors** | RuView Team                                    |
+| **Authors** | EchoPose Team                                    |
 | **Relates** | ADR-018 (binary frame), ADR-039 (edge intel), ADR-040 (WASM), ADR-057 (build guard), ADR-060 (channel/MAC filter) |
 
 ## Context

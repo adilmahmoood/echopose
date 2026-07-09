@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-nn` (encoder/model), `wifi-densepose-train` (`ContrastiveBatcher`); AETHER (ADR-024) / MERIDIAN (ADR-027) context |
-| **Relates to** | ADR-136 (RuView Streaming Engine, Frame Contracts, QualityScored), ADR-140 (Semantic State Record Schema & Agent Bridge), ADR-145 (Ablation Evaluation Harness), ADR-024 (AETHER Contrastive CSI Embedding), ADR-027 (MERIDIAN Cross-Environment Generalization), ADR-023 (Trained DensePose Model + RuVector Pipeline) |
+| **Relates to** | ADR-136 (EchoPose Streaming Engine, Frame Contracts, QualityScored), ADR-140 (Semantic State Record Schema & Agent Bridge), ADR-145 (Ablation Evaluation Harness), ADR-024 (AETHER Contrastive CSI Embedding), ADR-027 (MERIDIAN Cross-Environment Generalization), ADR-023 (Trained DensePose Model + RuVector Pipeline) |
 
 ---
 

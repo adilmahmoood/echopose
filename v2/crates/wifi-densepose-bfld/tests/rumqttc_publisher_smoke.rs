@@ -81,7 +81,7 @@ fn publisher_trait_object_is_constructible() {
 fn direct_publish_call_through_trait_object() {
     let (mut publisher, _connection) = RumqttPublisher::connect(unreachable_opts(), 16);
     let msg = TopicMessage {
-        topic: "ruview/seed/bfld/presence/state".into(),
+        topic: "echopose/seed/bfld/presence/state".into(),
         payload: "true".into(),
     };
     publisher.publish(&msg).expect("queue accept");

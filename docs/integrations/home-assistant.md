@@ -1,6 +1,6 @@
 # Home Assistant integration
 
-RuView publishes its full WiFi-sensing capability set to **Home Assistant** via MQTT auto-discovery (HA-DISCO) and to **any Matter controller** (Apple Home / Google Home / Alexa / SmartThings / HA) via a built-in Matter Bridge (HA-FABRIC). This document is the operator guide for both paths. Design rationale: [ADR-115](../adr/ADR-115-home-assistant-integration.md).
+EchoPose publishes its full WiFi-sensing capability set to **Home Assistant** via MQTT auto-discovery (HA-DISCO) and to **any Matter controller** (Apple Home / Google Home / Alexa / SmartThings / HA) via a built-in Matter Bridge (HA-FABRIC). This document is the operator guide for both paths. Design rationale: [ADR-115](../adr/ADR-115-home-assistant-integration.md).
 
 > **Tested against** Home Assistant Core **2025.5**, Mosquitto add-on **6.4**, and Matter (chip-tool) **1.3**. Bump the matrix when you change tested versions.
 
@@ -12,7 +12,7 @@ RuView publishes its full WiFi-sensing capability set to **Home Assistant** via 
 
 - A running **MQTT broker** on your LAN. The easiest path is the [Mosquitto add-on](https://github.com/home-assistant/addons/tree/master/mosquitto) inside Home Assistant OS (one click from the Add-on Store). EMQX and VerneMQ also work — see §Advanced brokers below.
 - Home Assistant **2025.5 or newer** with the MQTT integration enabled and pointed at your broker.
-- A RuView **`wifi-densepose-sensing-server`** v0.7.0+ binary (or `cargo run` from source).
+- A EchoPose **`wifi-densepose-sensing-server`** v0.7.0+ binary (or `cargo run` from source).
 
 ### 2. Start the publisher
 
@@ -35,7 +35,7 @@ cargo run --release -p wifi-densepose-sensing-server \
 
 Within ~5 seconds of starting, Home Assistant should auto-create:
 
-- One **device** per RuView node (named after the MAC or the `friendly_name` from your zones config)
+- One **device** per EchoPose node (named after the MAC or the `friendly_name` from your zones config)
 - 17+ **entities** per device (presence, person count, heart rate, breathing rate, motion, fall events, signal strength, zones, and the 10 semantic primitives)
 
 If nothing appears in HA's Settings → Devices, see [Troubleshooting](#troubleshooting).
@@ -48,7 +48,7 @@ Ctrl-C — the publisher pushes `offline` to every availability topic before dis
 
 ## Entity reference
 
-RuView publishes three classes of entity. Names below are the `unique_id` slugs — Home Assistant assigns friendly names automatically.
+EchoPose publishes three classes of entity. Names below are the `unique_id` slugs — Home Assistant assigns friendly names automatically.
 
 ### Raw signals (11 entities)
 
@@ -89,9 +89,9 @@ Every state change carries a `reason` attribute (e.g. `["motion<5%", "br=12bpm",
 
 ### Matter device-type mapping
 
-Per ADR-115 §3.11.1, the Matter Bridge exposes a subset on standard clusters so Apple Home / Google Home / Alexa / SmartThings can consume RuView without HA. Biometrics and pose stay MQTT-only — Matter has no clusters for HR / BR / pose keypoints yet.
+Per ADR-115 §3.11.1, the Matter Bridge exposes a subset on standard clusters so Apple Home / Google Home / Alexa / SmartThings can consume EchoPose without HA. Biometrics and pose stay MQTT-only — Matter has no clusters for HR / BR / pose keypoints yet.
 
-| RuView | Matter cluster | Matter endpoint device type |
+| EchoPose | Matter cluster | Matter endpoint device type |
 |---|---|---|
 | Presence | `OccupancySensing` (0x0406) | `OccupancySensor` (0x0107) |
 | Motion (above 10%) | (same endpoint, attribute on OccupancySensing) | (same) |
@@ -186,9 +186,9 @@ Drop these YAML files into `<HA config>/blueprints/automation/ruvnet/` and impor
 
 ```yaml
 blueprint:
-  name: RuView — notify on possible distress
+  name: EchoPose — notify on possible distress
   description: >
-    Send a push notification when RuView detects sustained elevated heart
+    Send a push notification when EchoPose detects sustained elevated heart
     rate + agitated motion (possible distress).
   domain: automation
   input:
@@ -209,7 +209,7 @@ action:
     data:
       title: "Possible distress detected"
       message: >
-        RuView flagged sustained elevated heart rate + agitated motion.
+        EchoPose flagged sustained elevated heart rate + agitated motion.
         Reason: {{ state_attr(trigger.entity_id, 'reason') }}.
 ```
 
@@ -217,7 +217,7 @@ action:
 
 ```yaml
 blueprint:
-  name: RuView — dim hallway when someone sleeping
+  name: EchoPose — dim hallway when someone sleeping
   description: >
     Drop hallway lights to 10 % brightness when anyone in the bedroom is
     in the someone-sleeping state, so a midnight bathroom trip doesn't
@@ -258,7 +258,7 @@ action:
 
 ```yaml
 blueprint:
-  name: RuView — wake-up routine on bed exit
+  name: EchoPose — wake-up routine on bed exit
   description: >
     When bed_exit fires between 05:00 and 09:00, ramp up bedroom lights
     over 10 minutes, start the coffee maker, and disarm the home alarm.
@@ -307,16 +307,16 @@ title: Bedroom
 cards:
   - type: glance
     entities:
-      - entity: binary_sensor.ruview_bedroom_presence
-      - entity: sensor.ruview_bedroom_heart_rate
-      - entity: sensor.ruview_bedroom_breathing_rate
-      - entity: sensor.ruview_bedroom_motion_level
+      - entity: binary_sensor.echopose_bedroom_presence
+      - entity: sensor.echopose_bedroom_heart_rate
+      - entity: sensor.echopose_bedroom_breathing_rate
+      - entity: sensor.echopose_bedroom_motion_level
   - type: entities
     entities:
-      - entity: binary_sensor.ruview_bedroom_someone_sleeping
-      - entity: binary_sensor.ruview_bedroom_room_active
-      - entity: binary_sensor.ruview_bedroom_no_movement
-      - entity: sensor.ruview_bedroom_fall_risk_elevated
+      - entity: binary_sensor.echopose_bedroom_someone_sleeping
+      - entity: binary_sensor.echopose_bedroom_room_active
+      - entity: binary_sensor.echopose_bedroom_no_movement
+      - entity: sensor.echopose_bedroom_fall_risk_elevated
 ```
 
 ### Multi-node grid
@@ -326,16 +326,16 @@ type: grid
 columns: 2
 cards:
   - type: tile
-    entity: binary_sensor.ruview_bedroom_presence
+    entity: binary_sensor.echopose_bedroom_presence
     name: Bedroom
   - type: tile
-    entity: binary_sensor.ruview_living_presence
+    entity: binary_sensor.echopose_living_presence
     name: Living
   - type: tile
-    entity: binary_sensor.ruview_kitchen_presence
+    entity: binary_sensor.echopose_kitchen_presence
     name: Kitchen
   - type: tile
-    entity: binary_sensor.ruview_bathroom_occupied
+    entity: binary_sensor.echopose_bathroom_occupied
     name: Bathroom
 ```
 
@@ -345,11 +345,11 @@ cards:
 
 Mosquitto is the recommended default. The integration also works with:
 
-- **EMQX** (https://www.emqx.io/) — clustering, MQTT 5.0, dashboard UI. Good for ≥10 RuView nodes.
+- **EMQX** (https://www.emqx.io/) — clustering, MQTT 5.0, dashboard UI. Good for ≥10 EchoPose nodes.
 - **VerneMQ** (https://vernemq.com/) — Erlang-based, multi-protocol bridges (AMQP, WebSocket).
 - **HiveMQ Edge** (https://www.hivemq.com/edge/) — managed cloud relay if you need off-LAN access.
 
-All three accept the same HA discovery topics RuView publishes. Performance and discovery semantics are identical.
+All three accept the same HA discovery topics EchoPose publishes. Performance and discovery semantics are identical.
 
 ---
 
@@ -362,7 +362,7 @@ All three accept the same HA discovery topics RuView publishes. Performance and 
    mosquitto_sub -h <broker> -t 'homeassistant/#' -v | head -50
    ```
    You should see one `config` topic per entity per node, with a JSON payload.
-2. If `mosquitto_sub` shows nothing, RuView is not reaching the broker. Check `--mqtt-host`, network reachability, and credentials.
+2. If `mosquitto_sub` shows nothing, EchoPose is not reaching the broker. Check `--mqtt-host`, network reachability, and credentials.
 3. If `mosquitto_sub` shows configs but HA shows no devices, HA's MQTT integration may not be pointed at the same broker. Verify under Settings → Devices & Services → MQTT.
 
 ### Entities appear but state never updates
@@ -385,7 +385,7 @@ Per [ADR-115 §3.9](../adr/ADR-115-home-assistant-integration.md#39-tls--auth), 
 
 1. Check the setup code in your `--matter-setup-file` log (defaults to printing on startup).
 2. Make sure the host running `sensing-server` is on the same WiFi subnet as the controller.
-3. If Apple Home complains about an unknown vendor, that's expected — RuView uses dev VID `0xFFF1` until P10 (see [ADR §9.9](../adr/ADR-115-home-assistant-integration.md#9b-matter-path-p7p10)). Tap "Add anyway".
+3. If Apple Home complains about an unknown vendor, that's expected — EchoPose uses dev VID `0xFFF1` until P10 (see [ADR §9.9](../adr/ADR-115-home-assistant-integration.md#9b-matter-path-p7p10)). Tap "Add anyway".
 
 ---
 
@@ -413,7 +413,7 @@ The 21 entities per node — 11 raw signals (presence, person count, breathing, 
 |---|---|---|
 | **Fall detection + escalation** | `fall_detected` | Phase-acceleration spike + 3-frame debounce. Trigger a Lovelace alert, then escalate to a phone call if the person stays still for >2 min. Blueprint `07-fall-risk-escalation.yaml`. |
 | **Elderly inactivity anomaly** | `elderly_inactivity_anomaly` | Learns a person's normal day-pattern and flags deviations (e.g. usually up by 9 am, hasn't moved by 11 am). Blueprint `04-alert-elderly-inactivity-anomaly.yaml`. |
-| **Privacy-mode care monitoring** | `possible_distress` + `no_movement` + `someone_sleeping` | Run with `--privacy-mode` — heart rate and breathing values are stripped at the wire, but the *inferred states* keep working. Care staff sees "Distress detected" without ever seeing the underlying biometric numbers. The architectural win that makes RuView legally deployable in care homes. |
+| **Privacy-mode care monitoring** | `possible_distress` + `no_movement` + `someone_sleeping` | Run with `--privacy-mode` — heart rate and breathing values are stripped at the wire, but the *inferred states* keep working. Care staff sees "Distress detected" without ever seeing the underlying biometric numbers. The architectural win that makes EchoPose legally deployable in care homes. |
 | **Sleep apnea screening** | `breathing_rate_bpm` + `breathing_confidence` | Track per-night BPM histograms; flag dips that correlate with apnea events. |
 | **Post-surgery recovery monitoring** | `no_movement` + `bed_exit` + `breathing_rate_bpm` | Hospital-discharge patient at home; rule: "no bed exits in 12 h" triggers a check-in call. |
 | **Dementia wandering detection** | `multi_room_transition` + nighttime gate | Multi-room transitions between 23:00 and 06:00 alert a caregiver — without GPS tags or wearables the person may refuse to wear. |
@@ -481,7 +481,7 @@ The 21 entities per node — 11 raw signals (presence, person count, breathing, 
 | **Behavioral studies** | Full snapshot stream | Anonymous behavioral data — count, motion, vitals — without IRB-blocking cameras. |
 | **HCI experiments** | `multi_room_transition` + `presence` | Path-following studies in living labs. |
 | **Healthcare datasets** | `breathing_rate_bpm` time-series | Generate breathing-rate corpora for ML training without consent forms for facial data. |
-| **Custom RuView Cogs** | Raw CSI feed + the WebSocket sync field | Bring your own model, consume the firmware-side mesh-aligned timestamps for multistatic fusion. |
+| **Custom EchoPose Cogs** | Raw CSI feed + the WebSocket sync field | Bring your own model, consume the firmware-side mesh-aligned timestamps for multistatic fusion. |
 
 ### Combining entities — recipe patterns
 
@@ -495,13 +495,13 @@ A few patterns appear over and over; if you understand these you can build most 
 
 ### What about regulated environments?
 
-Run RuView with `--privacy-mode` and only the 10 inferred semantic states reach Home Assistant — heart rate, breathing rate, and pose values are stripped at the MQTT wire. Per ADR-115 §6, this passes:
+Run EchoPose with `--privacy-mode` and only the 10 inferred semantic states reach Home Assistant — heart rate, breathing rate, and pose values are stripped at the MQTT wire. Per ADR-115 §6, this passes:
 
 - **HIPAA-style minimum-necessary** (no biometric numbers leave the device)
 - **GDPR purpose-limitation** (the inferred states are the smallest dataset that supports the automation)
 - **CCPA "sensitive personal information"** (no health data crosses the wire)
 
-The fall-risk-elevated / possible-distress / someone-sleeping flags still work — they're computed *inside* the sensor pipeline and only the boolean outputs are published. That's the architectural win that makes RuView deployable in care homes, hospitals, schools, and shared-housing scenarios where raw biometrics would be a non-starter.
+The fall-risk-elevated / possible-distress / someone-sleeping flags still work — they're computed *inside* the sensor pipeline and only the boolean outputs are published. That's the architectural win that makes EchoPose deployable in care homes, hospitals, schools, and shared-housing scenarios where raw biometrics would be a non-starter.
 
 ## References
 

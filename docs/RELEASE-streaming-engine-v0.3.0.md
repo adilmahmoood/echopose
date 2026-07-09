@@ -1,8 +1,8 @@
-# RuView Streaming Engine v0.3.0 — Auditable Environmental Intelligence
+# EchoPose Streaming Engine v0.3.0 — Auditable Environmental Intelligence
 
 ## What this is
 
-Most WiFi-sensing stacks emit a number and hope you trust it. **RuView's streaming
+Most WiFi-sensing stacks emit a number and hope you trust it. **EchoPose's streaming
 engine is built so you don't have to.** Every conclusion it reaches — "someone is
 in the living room," "fall risk elevated," "the room layout changed" — carries a
 full evidence trail: which sensors saw it, how much they agreed, which calibration

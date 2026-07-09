@@ -15,7 +15,7 @@
 The `wifi-densepose-pointcloud` crate ships a Three.js-based viewer
 (`v2/crates/wifi-densepose-pointcloud/src/viewer.html`) that renders the
 fused camera-depth + WiFi CSI + mmWave point cloud produced by the
-`ruview-pointcloud serve` binary. Today the viewer is local-only:
+`echopose-pointcloud serve` binary. Today the viewer is local-only:
 
 - It is served by the Axum binary on `127.0.0.1:9880`.
 - It polls `/api/splats` every 500 ms expecting a backend on the same
@@ -24,7 +24,7 @@ fused camera-depth + WiFi CSI + mmWave point cloud produced by the
   "▶ Live 3D Point Cloud" link points at the moved-content section in
   `docs/readme-details.md`, not at a hosted demo. The two sibling demos
   (Live Observatory, Dual-Modal Pose Fusion) are already hosted at
-  `https://ruvnet.github.io/RuView/` and `…/pose-fusion.html`.
+  `https://ruvnet.github.io/EchoPose/` and `…/pose-fusion.html`.
 
 This is an asymmetry: a first-time visitor can preview the WiFi pose
 demo and the Observatory in one click, but cannot preview the point
@@ -45,7 +45,7 @@ Ship **one** viewer that auto-selects its transport from URL parameters,
 and publish it to `gh-pages/pointcloud/` alongside the other demos:
 
 1. **Default mode** — when the viewer is opened with no query parameters
-   on `https://ruvnet.github.io/RuView/pointcloud/`, present a "▶ Enable
+   on `https://ruvnet.github.io/EchoPose/pointcloud/`, present a "▶ Enable
    camera" CTA. On click the viewer requests webcam access, runs
    **MediaPipe Face Mesh** in-browser (~30 fps, 478 refined landmarks),
    and renders the visitor's own face as a point cloud — the closest
@@ -62,15 +62,15 @@ and publish it to `gh-pages/pointcloud/` alongside the other demos:
    browser. ~480-500 splats from the face plus ~110 floor/wall context
    splats.
 2. **Auto mode** (`?backend=auto`) — fetch from `/api/splats` on the same
-   origin. This is the local-development case (`ruview-pointcloud serve`
+   origin. This is the local-development case (`echopose-pointcloud serve`
    serves the viewer and the API together). On any failure (404, network
    error, CORS), fall back silently to synthetic-demo rendering so the
    tab never dies.
 3. **Remote mode** (`?backend=<url>`) — fetch from `<url>/api/splats`.
    This is the **integrated-ESP32** path: the user runs
-   `ruview-pointcloud serve --bind 127.0.0.1:9880` locally with an
+   `echopose-pointcloud serve --bind 127.0.0.1:9880` locally with an
    ESP32-S3 streaming CSI to UDP port 3333, then opens
-   `https://ruvnet.github.io/RuView/pointcloud/?backend=http://127.0.0.1:9880`.
+   `https://ruvnet.github.io/EchoPose/pointcloud/?backend=http://127.0.0.1:9880`.
    The hosted Pages viewer becomes a thin client for the local Rust
    fusion pipeline (camera depth + WiFi CSI + mmWave) without a clone
    or rebuild. The viewer also exposes a "📡 Connect ESP32" button that
@@ -116,7 +116,7 @@ and nvsim deployments.
 - **First-click demo.** Visitors clicking the README's
   "▶ Live 3D Point Cloud" link land on a working Three.js scene in <1 s,
   no toolchain required. Matches the parity of the other two demos.
-- **Real-data on demand.** Users with their own `ruview-pointcloud serve`
+- **Real-data on demand.** Users with their own `echopose-pointcloud serve`
   host can use the same hosted viewer URL with
   `?backend=https://their-host.example.com` — no clone, no rebuild. The
   hosted demo doubles as a thin client for self-hosted backends.
@@ -143,7 +143,7 @@ and nvsim deployments.
   browser. The latter is a future ADR (WASM port of the fusion crate).
 - **CORS burden on remote mode.** Users who want to share their backend
   must add `Access-Control-Allow-Origin: https://ruvnet.github.io` (or
-  `*`) to their `ruview-pointcloud serve` config. We document this in the
+  `*`) to their `echopose-pointcloud serve` config. We document this in the
   workflow's generated README; we do **not** add a public proxy.
 - **Synthetic generator lives in the viewer.** ~80 LOC of procedural JS
   is now part of `viewer.html`. Acceptable: the file is already the
@@ -155,7 +155,7 @@ and nvsim deployments.
 
 ### Neutral
 
-- The local-dev experience is unchanged. `ruview-pointcloud serve` still
+- The local-dev experience is unchanged. `echopose-pointcloud serve` still
   serves `viewer.html` from the bundled asset and the viewer still hits
   `/api/splats` because `?backend` defaults to `auto`. Nothing in the
   Rust crate changes — this is HTML + workflow only.
@@ -166,7 +166,7 @@ and nvsim deployments.
 |---|---|
 | `v2/crates/wifi-densepose-pointcloud/src/viewer.html` | Add URL-param transport selector (`backend`, `live`), synthetic frame generator, demo-fallback path, transport-aware mode badge. ~120 LOC added, no removed behavior. |
 | `.github/workflows/pointcloud-pages.yml` | New workflow: stage viewer to `_site/pointcloud/index.html`, deploy to `gh-pages/pointcloud/` with `keep_files: true`. Triggers on viewer changes and on manual dispatch. |
-| `README.md` | Already updated — `▶ Live 3D Point Cloud` link will be retargeted to `https://ruvnet.github.io/RuView/pointcloud/` once the first deploy succeeds. (Tracked separately, not blocking this ADR.) |
+| `README.md` | Already updated — `▶ Live 3D Point Cloud` link will be retargeted to `https://ruvnet.github.io/EchoPose/pointcloud/` once the first deploy succeeds. (Tracked separately, not blocking this ADR.) |
 | `docs/adr/README.md` | ADR index — add ADR-094 row. |
 
 ## 5. Acceptance Gates
@@ -176,20 +176,20 @@ This ADR is **Implemented** when all of the following hold:
 1. Pushing to `main` with a viewer change triggers
    `pointcloud-pages.yml`, which deploys to `gh-pages/pointcloud/` in
    under 60 seconds.
-2. `https://ruvnet.github.io/RuView/pointcloud/` loads, shows the
+2. `https://ruvnet.github.io/EchoPose/pointcloud/` loads, shows the
    "Enable camera" CTA, and on accept renders the visitor's face as a
    point cloud with badge `● DEMO Your Face (MediaPipe)` and non-zero
    splat + frame counts. On camera denial, falls back to the
    procedural scene with badge `● DEMO Synthetic`.
-3. Existing demos at `https://ruvnet.github.io/RuView/` and
+3. Existing demos at `https://ruvnet.github.io/EchoPose/` and
    `…/pose-fusion.html` and `…/nvsim/` are still reachable after the
    first deploy (smoke-tested manually).
-4. `https://ruvnet.github.io/RuView/pointcloud/?live=1` shows the
+4. `https://ruvnet.github.io/EchoPose/pointcloud/?live=1` shows the
    `● OFFLINE` panel (because no same-origin backend exists on Pages).
-5. `https://ruvnet.github.io/RuView/pointcloud/?backend=https://example.invalid`
+5. `https://ruvnet.github.io/EchoPose/pointcloud/?backend=https://example.invalid`
    falls back to demo within one poll interval (~500 ms) without
    throwing in the console.
-6. Running `./target/release/ruview-pointcloud serve` locally and
+6. Running `./target/release/echopose-pointcloud serve` locally and
    opening `http://127.0.0.1:9880/` (which serves the same HTML) still
    shows live-mode rendering with the `● LIVE Local Backend` badge.
 

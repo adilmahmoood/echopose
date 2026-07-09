@@ -6,7 +6,7 @@
 
 Hospitals run on a paradox: patients need continuous monitoring, yet cameras and microphones are unacceptable in patient rooms for privacy and dignity reasons. Wearable monitors solve part of this (continuous HR / SpO₂) but require subject compliance and battery management. CSI sensing — passive, no light, no microphone, through-wall-capable — is the right modality for ward-level continuous observation **if** the privacy and clinical-grade accuracy constraints can be met.
 
-The RuView research loop has produced exactly the primitives needed:
+The EchoPose research loop has produced exactly the primitives needed:
 
 | Healthcare requirement | Loop primitive |
 |---|---|

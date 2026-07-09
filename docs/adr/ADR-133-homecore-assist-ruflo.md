@@ -6,7 +6,7 @@
 | **Date** | 2026-05-25 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-ASSIST** |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (SENSE-BRIDGE) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-130](ADR-130-homecore-rest-websocket-api.md) (HOMECORE-API), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (SENSE-BRIDGE) |
 | **Tracking issue** | TBD |
 | **Crate** | `v2/crates/homecore-assist` |
 

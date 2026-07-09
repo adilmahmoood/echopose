@@ -13,7 +13,7 @@ echo "[1/7] Setting up repository..."
 if [ -d "$REPO_DIR/.git" ]; then
   cd "$REPO_DIR" && git pull origin main
 else
-  git clone https://github.com/ruvnet/RuView.git "$REPO_DIR"
+  git clone https://github.com/ruvnet/EchoPose.git "$REPO_DIR"
   cd "$REPO_DIR"
 fi
 

@@ -2,7 +2,7 @@
 //!
 //! Implements sensing-first RF protocols for ESP32-S3 mesh nodes,
 //! including TDM (Time-Division Multiplexed) sensing schedules
-//! per ADR-029 (RuvSense) and ADR-031 (RuView).
+//! per ADR-029 (RuvSense) and ADR-031 (EchoPose).
 //!
 //! ## Security (ADR-032 / ADR-032a)
 //!

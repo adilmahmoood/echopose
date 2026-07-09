@@ -21,7 +21,7 @@ path = "src/bin/verify_training.rs"
 required-features = ["tch-backend"]
 
 # AetherArena (ADR-149) deterministic score runner — the CI harness-gate entry
-# point. Pure ruview_metrics (ndarray + sha2), no torch, so it builds and runs
+# point. Pure echopose_metrics (ndarray + sha2), no torch, so it builds and runs
 # under --no-default-features for a fast, GPU-free PR gate.
 [[bin]]
 name = "aa_score_runner"

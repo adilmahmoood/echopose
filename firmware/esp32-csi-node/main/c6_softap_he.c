@@ -41,10 +41,10 @@ static uint8_t s_sta_count = 0;
 static uint8_t s_channel   = 0;
 
 #ifndef CONFIG_C6_SOFTAP_HE_SSID
-#define CONFIG_C6_SOFTAP_HE_SSID    "ruview-c6-twt"
+#define CONFIG_C6_SOFTAP_HE_SSID    "echopose-c6-twt"
 #endif
 #ifndef CONFIG_C6_SOFTAP_HE_PSK
-#define CONFIG_C6_SOFTAP_HE_PSK     "ruviewtwt"
+#define CONFIG_C6_SOFTAP_HE_PSK     "echoposetwt"
 #endif
 #ifndef CONFIG_C6_SOFTAP_HE_CHANNEL
 #define CONFIG_C6_SOFTAP_HE_CHANNEL 6
@@ -53,7 +53,7 @@ static uint8_t s_channel   = 0;
 static void load_nvs_override(const char *key, char *dst, size_t dst_len)
 {
     nvs_handle_t h;
-    if (nvs_open("ruview", NVS_READONLY, &h) != ESP_OK) return;
+    if (nvs_open("echopose", NVS_READONLY, &h) != ESP_OK) return;
     size_t n = dst_len;
     esp_err_t err = nvs_get_str(h, key, dst, &n);
     if (err == ESP_OK) {
@@ -65,7 +65,7 @@ static void load_nvs_override(const char *key, char *dst, size_t dst_len)
 static uint8_t load_nvs_u8(const char *key, uint8_t fallback)
 {
     nvs_handle_t h;
-    if (nvs_open("ruview", NVS_READONLY, &h) != ESP_OK) return fallback;
+    if (nvs_open("echopose", NVS_READONLY, &h) != ESP_OK) return fallback;
     uint8_t v = fallback;
     if (nvs_get_u8(h, key, &v) == ESP_OK) {
         ESP_LOGI(TAG, "nvs override: %s=%u", key, v);

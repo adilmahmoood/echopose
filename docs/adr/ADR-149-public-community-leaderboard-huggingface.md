@@ -1,6 +1,6 @@
 # ADR-149: AetherArena ("AA") — The Official Spatial-Intelligence Benchmark (Hugging Face)
 
-> **Scope note:** AetherArena is a **standalone, project-agnostic benchmark** for spatial intelligence — open to *any* project, team, or modality, not a RuView-branded board. RuView contributes the initial scoring harness and enters as one baseline among others; it gets no special treatment. This ADR lives in the RuView repo only because RuView is donating the seed harness — the benchmark itself is independent.
+> **Scope note:** AetherArena is a **standalone, project-agnostic benchmark** for spatial intelligence — open to *any* project, team, or modality, not a EchoPose-branded board. EchoPose contributes the initial scoring harness and enters as one baseline among others; it gets no special treatment. This ADR lives in the EchoPose repo only because EchoPose is donating the seed harness — the benchmark itself is independent.
 
 | Field | Value |
 |-------|-------|
@@ -8,8 +8,8 @@
 | **Date** | 2026-05-30 |
 | **Deciders** | ruv |
 | **Gate decisions** | Name **locked**: `ruvnet/aether-arena` ("AA"), positioned as the official cross-project Spatial-Intelligence Benchmark. v0 ranked metrics **locked**: pose, presence, edge-latency, determinism. Dataset legality **resolved**: MM-Fi (CC BY-NC 4.0) only for v0; Wi-Pose dropped (research-use, no redistribution). |
-| **Codebase target** | New repo `ruvnet/aether-arena` (leaderboard + HF Space); reuses `wifi-densepose-train` (`src/ruview_metrics.rs`, `src/ablation.rs`, `src/eval.rs`, `src/proof.rs`) and `wifi-densepose-cli` as the scoring engine |
-| **Relates to** | ADR-011 (Deterministic Proof Harness), ADR-015 (Public Dataset Training Strategy — MM-Fi / Wi-Pose), ADR-024 (Contrastive CSI Embedding / HF model release), ADR-027 (Cross-Environment Domain Generalization / MERIDIAN), ADR-031 (RuView Sensing-First RF Mode — `RuViewTier` acceptance), ADR-079 (Camera-Supervised Pose Fine-tune — PCK@20), ADR-120 / ADR-141 (BFLD Privacy), ADR-145 (Ablation Eval Harness — the scoring substrate) |
+| **Codebase target** | New repo `ruvnet/aether-arena` (leaderboard + HF Space); reuses `wifi-densepose-train` (`src/echopose_metrics.rs`, `src/ablation.rs`, `src/eval.rs`, `src/proof.rs`) and `wifi-densepose-cli` as the scoring engine |
+| **Relates to** | ADR-011 (Deterministic Proof Harness), ADR-015 (Public Dataset Training Strategy — MM-Fi / Wi-Pose), ADR-024 (Contrastive CSI Embedding / HF model release), ADR-027 (Cross-Environment Domain Generalization / MERIDIAN), ADR-031 (EchoPose Sensing-First RF Mode — `EchoPoseTier` acceptance), ADR-079 (Camera-Supervised Pose Fine-tune — PCK@20), ADR-120 / ADR-141 (BFLD Privacy), ADR-145 (Ablation Eval Harness — the scoring substrate) |
 
 ---
 
@@ -17,20 +17,20 @@
 
 ### 1.1 The Gap
 
-RuView has a mature, deterministic evaluation surface but **no public face for it**. Two assets already exist:
+EchoPose has a mature, deterministic evaluation surface but **no public face for it**. Two assets already exist:
 
-1. **A grading harness.** `wifi-densepose-train/src/ruview_metrics.rs` rolls pose (PCK@0.2 / OKS / torso jitter / p95 error), tracking (MOTA / ID-switches / fragmentation), and vitals (breathing/heartbeat BPM error + SNR) into a `RuViewAcceptanceResult` with a `RuViewTier` (`Fail` / `Bronze` / `Silver` / `Gold`). ADR-145's `src/ablation.rs` extends this with presence accuracy, localization error, FP/FN, latency p50/p95/p99, a privacy-leakage score ∈ `[0,1]`, and cross-room degradation, under a determinism binding inherited from the ADR-011 proof harness.
+1. **A grading harness.** `wifi-densepose-train/src/echopose_metrics.rs` rolls pose (PCK@0.2 / OKS / torso jitter / p95 error), tracking (MOTA / ID-switches / fragmentation), and vitals (breathing/heartbeat BPM error + SNR) into a `EchoPoseAcceptanceResult` with a `EchoPoseTier` (`Fail` / `Bronze` / `Silver` / `Gold`). ADR-145's `src/ablation.rs` extends this with presence accuracy, localization error, FP/FN, latency p50/p95/p99, a privacy-leakage score ∈ `[0,1]`, and cross-room degradation, under a determinism binding inherited from the ADR-011 proof harness.
 
 2. **A determinism substrate.** `proof.rs` (`PROOF_SEED=42`) SHA-256-hashes model outputs against an expected hash, so a scored run is reproducible and tamper-evident.
 
-What is missing is a **public, multi-entrant ranking**. As surveyed in ADR-015 and `docs/research/sota-surveys/sota-wifi-sensing-2025.md`, the WiFi-sensing field has **no hosted live leaderboard** the way vision has COCO/EvalAI — researchers self-report numbers against public *datasets* (MM-Fi, Wi-Pose, Person-in-WiFi, Widar3.0) in papers, with inconsistent splits, metrics, and no privacy or latency accounting. RuView's own pose number (PCK@20 ≈ 2.5% with proxy labels, target 35%+ per ADR-079) is currently self-reported on a private validation set and is not comparable to the MM-Fi SOTA (MultiFormer 0.7225).
+What is missing is a **public, multi-entrant ranking**. As surveyed in ADR-015 and `docs/research/sota-surveys/sota-wifi-sensing-2025.md`, the WiFi-sensing field has **no hosted live leaderboard** the way vision has COCO/EvalAI — researchers self-report numbers against public *datasets* (MM-Fi, Wi-Pose, Person-in-WiFi, Widar3.0) in papers, with inconsistent splits, metrics, and no privacy or latency accounting. EchoPose's own pose number (PCK@20 ≈ 2.5% with proxy labels, target 35%+ per ADR-079) is currently self-reported on a private validation set and is not comparable to the MM-Fi SOTA (MultiFormer 0.7225).
 
 ### 1.2 The Opportunity
 
-The harness that already gates RuView releases is exactly the engine a community leaderboard needs: a single, deterministic, privacy- and latency-aware scoring function. Publishing it as an open leaderboard:
+The harness that already gates EchoPose releases is exactly the engine a community leaderboard needs: a single, deterministic, privacy- and latency-aware scoring function. Publishing it as an open leaderboard:
 
-- Establishes **AetherArena as the field's standard yardstick** for spatial intelligence, with RuView's `RuViewTier` + ADR-145 metric set contributed as its initial basis (pose + tracking + vitals + **privacy-leakage** + latency + determinism — a combination no existing benchmark scores). The standard is AA's; RuView donates the seed.
-- Draws **any project, framework, or modality** to submit and rank — a cross-project community flywheel, not a RuView-only one (RuView's `wifi-densepose-pretrained` is merely the first baseline).
+- Establishes **AetherArena as the field's standard yardstick** for spatial intelligence, with EchoPose's `EchoPoseTier` + ADR-145 metric set contributed as its initial basis (pose + tracking + vitals + **privacy-leakage** + latency + determinism — a combination no existing benchmark scores). The standard is AA's; EchoPose donates the seed.
+- Draws **any project, framework, or modality** to submit and rank — a cross-project community flywheel, not a EchoPose-only one (EchoPose's `wifi-densepose-pretrained` is merely the first baseline).
 - Forces the harness to harden: a public, neutral scorer must be reproducible by strangers, resistant to gaming, and runnable on a fixed held-out split nobody can train on.
 
 ### 1.3 Constraints & Risks Up Front
@@ -38,17 +38,17 @@ The harness that already gates RuView releases is exactly the engine a community
 - **Leakage of the held-out split** is the existential risk for any leaderboard. The eval data must be private; submitters provide a model, not predictions on data they hold.
 - **Compute cost.** Scoring a submission runs inference over the eval set; an HF Space on free CPU may be too slow for the Candle/`tch` pipeline. Tiering of compute (CPU smoke vs GPU full score) is required.
 - **Privacy / consent of the eval data.** MM-Fi and Wi-Pose carry their own licenses; we can host *derived* CSI features and scores but must respect redistribution terms (ADR-015 already tracks this).
-- **Trust.** A `RuViewTier` badge is only meaningful if the scoring is deterministic and the leaderboard cannot be silently edited — the ADR-011 proof hash and a signed results ledger address this.
+- **Trust.** A `EchoPoseTier` badge is only meaningful if the scoring is deterministic and the leaderboard cannot be silently edited — the ADR-011 proof hash and a signed results ledger address this.
 
 ---
 
 ## 2. Decision
 
-**Create AetherArena ("AA") — the official, project-agnostic Spatial-Intelligence Benchmark: a public, open-entry leaderboard for camera-free spatial perception (pose, presence, occupancy, tracking, vitals) as a standalone repo `ruvnet/aether-arena` paired with a Hugging Face Space. The scoring engine is seeded by RuView's existing `ruview_metrics` + ADR-145 ablation harness, contributed as a neutral scorer; v0 evaluates against a private MM-Fi held-out split.**
+**Create AetherArena ("AA") — the official, project-agnostic Spatial-Intelligence Benchmark: a public, open-entry leaderboard for camera-free spatial perception (pose, presence, occupancy, tracking, vitals) as a standalone repo `ruvnet/aether-arena` paired with a Hugging Face Space. The scoring engine is seeded by EchoPose's existing `echopose_metrics` + ADR-145 ablation harness, contributed as a neutral scorer; v0 evaluates against a private MM-Fi held-out split.**
 
-AA is **not a RuView leaderboard**. It is the field's missing standard yardstick for spatial intelligence — open to any team, framework, or sensing modality. The RF medium is the v0 input and RuView donates the seed harness + a baseline entry, but the benchmark is independent and RuView is scored like every other entrant. The metric surface — pose, presence, tracking, occupancy/world-model, latency, determinism, and later privacy — is modality-agnostic, leaving room to grow to mmWave / UWB / radar / lidar / multimodal entrants and other projects.
+AA is **not a EchoPose leaderboard**. It is the field's missing standard yardstick for spatial intelligence — open to any team, framework, or sensing modality. The RF medium is the v0 input and EchoPose donates the seed harness + a baseline entry, but the benchmark is independent and EchoPose is scored like every other entrant. The metric surface — pose, presence, tracking, occupancy/world-model, latency, determinism, and later privacy — is modality-agnostic, leaving room to grow to mmWave / UWB / radar / lidar / multimodal entrants and other projects.
 
-The leaderboard does **not** fork or re-implement the scoring logic. It is a thin orchestration + presentation layer over the published `wifi-densepose-cli` scorer, so the public number a model earns is identical to the number RuView uses internally to gate releases. **This makes the leaderboard governance, not marketing.**
+The leaderboard does **not** fork or re-implement the scoring logic. It is a thin orchestration + presentation layer over the published `wifi-densepose-cli` scorer, so the public number a model earns is identical to the number EchoPose uses internally to gate releases. **This makes the leaderboard governance, not marketing.**
 
 The whole design reduces to a precise four-part structure:
 
@@ -73,23 +73,23 @@ The whole design reduces to a precise four-part structure:
 ### 2.2 Architecture
 
 ```
- Submitter                        ruvnet/aether-arena                     RuView harness
+ Submitter                        ruvnet/aether-arena                     EchoPose harness
  ─────────                        ──────────────────                     ──────────────
  push model.safetensors  ──►  HF Space (Gradio): submit form       ┌─ wifi-densepose-cli score
  + model card (adapter,        │  • validates manifest             │   ├─ load model snapshot
    input contract, license)    │  • queues job                ──►  │   ├─ replay private MM-Fi/
                                 │  • runs scorer in container       │   │   Wi-Pose split (PROOF_SEED)
-                                │  • appends signed result          │   ├─ ruview_metrics → RuViewTier
+                                │  • appends signed result          │   ├─ echopose_metrics → EchoPoseTier
                                 ▼                                   │   ├─ ablation.rs → p50/p95,
                           leaderboard.parquet  ◄────────────────────┘   │   privacy-leakage, cross-room
                           (HF dataset, append-only,                     └─ emit result + SHA-256 proof
                            one signed row per submission)
 ```
 
-1. **Submission contract.** A submitter pushes a model artifact (`model.safetensors` / `.rvf` / LoRA adapter) plus a `ruview-arena.toml` manifest declaring: input feature set (which ADR-145 `FeatureSet` it consumes — F0 CSI / F1 CIR / F2 Doppler / F3 BFLD), tensor I/O contract, license, and optional category (pose / presence / tracking / vitals / multi-task).
-2. **Scoring.** The Space runs the **published `wifi-densepose-cli`** in a pinned container against a **private held-out split** of MM-Fi / Wi-Pose (and RuView's own paired-capture set per ADR-079). Output is the existing `RuViewAcceptanceResult` + the ADR-145 scalar set, plus the ADR-011 SHA-256 reproducibility hash.
+1. **Submission contract.** A submitter pushes a model artifact (`model.safetensors` / `.rvf` / LoRA adapter) plus a `echopose-arena.toml` manifest declaring: input feature set (which ADR-145 `FeatureSet` it consumes — F0 CSI / F1 CIR / F2 Doppler / F3 BFLD), tensor I/O contract, license, and optional category (pose / presence / tracking / vitals / multi-task).
+2. **Scoring.** The Space runs the **published `wifi-densepose-cli`** in a pinned container against a **private held-out split** of MM-Fi / Wi-Pose (and EchoPose's own paired-capture set per ADR-079). Output is the existing `EchoPoseAcceptanceResult` + the ADR-145 scalar set, plus the ADR-011 SHA-256 reproducibility hash.
 3. **Ledger.** Each scored submission appends **one signed row** to an append-only HF dataset (`ruvnet/aether-arena-results`, Parquet): `{submitter, model_ref, category, feature_set, tier, pck20, oks, mota, vitals_bpm_err, latency_p50, latency_p95, privacy_leakage, cross_room_deg, proof_sha256, scored_at, harness_version}`. Append-only + signed = no silent edits.
-4. **Presentation.** Gradio leaderboard with category tabs (Pose / Presence / Tracking / Vitals / Edge-latency / **Privacy**), `RuViewTier` badges, and a "privacy-respecting" filter (leakage ≤ threshold) — the differentiator no other WiFi benchmark has.
+4. **Presentation.** Gradio leaderboard with category tabs (Pose / Presence / Tracking / Vitals / Edge-latency / **Privacy**), `EchoPoseTier` badges, and a "privacy-respecting" filter (leakage ≤ threshold) — the differentiator no other WiFi benchmark has.
 
 ### 2.2.1 Submission Lifecycle (quarantine before scoring)
 
@@ -111,14 +111,14 @@ Only `quarantined` → `smoke_scored` → `full_scored` ever runs the model, alw
 
 | Category | Primary metric (existing) | Source |
 |----------|---------------------------|--------|
-| Pose | PCK@20, OKS | `ruview_metrics::evaluate_joint_error` |
-| Tracking | MOTA, ID-switches | `ruview_metrics::evaluate_tracking` |
-| Vitals | breathing/HR BPM error, SNR | `ruview_metrics::evaluate_vital_signs` |
+| Pose | PCK@20, OKS | `echopose_metrics::evaluate_joint_error` |
+| Tracking | MOTA, ID-switches | `echopose_metrics::evaluate_tracking` |
+| Vitals | breathing/HR BPM error, SNR | `echopose_metrics::evaluate_vital_signs` |
 | Presence | accuracy, FP/FN | ADR-145 `ablation.rs` |
 | Edge latency | p50 / p95 / p99 ms | ADR-145 `LatencyProfile` |
 | **Privacy** | leakage score ∈ `[0,1]` (membership-inference) | ADR-145 §10 |
 | Cross-room | degradation ratio | ADR-027 / ADR-145 |
-| Overall | `RuViewTier` Bronze/Silver/Gold + `arena_score` (§2.5) | `determine_tier()` |
+| Overall | `EchoPoseTier` Bronze/Silver/Gold + `arena_score` (§2.5) | `determine_tier()` |
 
 ### 2.3.1 Phased Launch — v0 ships narrow
 
@@ -193,7 +193,7 @@ Confirmed against ADR-015 §dataset-licenses:
 
 **v0 decision:** evaluate on a **private MM-Fi held-out split only** (CC BY-NC, attributed, non-commercial; expose only license-permitted derived features). Wi-Pose is removed from v0 and revisited if/when redistribution is cleared. This keeps the existential "can we even host this" risk at zero for launch.
 
-> **Non-commercial caveat to watch:** CC BY-NC means AA itself, and the eval-data use, must remain non-commercial. Because AA also showcases the (commercial) RuView appliance, keep AA legally distinct and non-commercial, or seek an MM-Fi commercial grant before any paid tier. Flagged for the maintainer.
+> **Non-commercial caveat to watch:** CC BY-NC means AA itself, and the eval-data use, must remain non-commercial. Because AA also showcases the (commercial) EchoPose appliance, keep AA legally distinct and non-commercial, or seek an MM-Fi commercial grant before any paid tier. Flagged for the maintainer.
 
 ### 2.7 Non-Gameability Is a Launch Gate
 
@@ -201,24 +201,24 @@ Per the explicit directive, AA does not launch unless the harness is demonstrabl
 
 ### 2.8 Neutrality & Governance (because it's "official" and cross-project)
 
-The hardest credibility problem for an *official* benchmark seeded by one entrant: **"RuView built the scorer, so of course RuView wins."** If AA is to be the field's standard rather than RuView marketing, neutrality must be structural, not promised:
+The hardest credibility problem for an *official* benchmark seeded by one entrant: **"EchoPose built the scorer, so of course EchoPose wins."** If AA is to be the field's standard rather than EchoPose marketing, neutrality must be structural, not promised:
 
 | Neutrality risk | Control |
 |-----------------|---------|
-| RuView's entry gets special treatment | RuView is submitted through the **same** public pipeline (§2.2.1) and scored by the **same** pinned scorer as everyone else; its rows carry the same proof hash and are independently re-runnable on the smoke split. |
-| RuView tunes the metric to favor its models | The scorer is **open and versioned**; any metric change is a public `harness_version` bump that **re-scores all entries**, not just new ones. Metric changes go through a public changelog. |
-| "Official" is self-declared | AA is positioned as a **neutral commons**: separate repo/Space identity, contribution guide, and an explicit invitation for other projects + dataset authors to co-own splits and metrics. RuView is the *donor of the seed harness*, not the owner of the standard. |
-| Benchmark used as RuView ad | Keep AA legally + brand-distinct (ties into the CC BY-NC non-commercial caveat, §2.6); the README leads with the standard, not the product. |
+| EchoPose's entry gets special treatment | EchoPose is submitted through the **same** public pipeline (§2.2.1) and scored by the **same** pinned scorer as everyone else; its rows carry the same proof hash and are independently re-runnable on the smoke split. |
+| EchoPose tunes the metric to favor its models | The scorer is **open and versioned**; any metric change is a public `harness_version` bump that **re-scores all entries**, not just new ones. Metric changes go through a public changelog. |
+| "Official" is self-declared | AA is positioned as a **neutral commons**: separate repo/Space identity, contribution guide, and an explicit invitation for other projects + dataset authors to co-own splits and metrics. EchoPose is the *donor of the seed harness*, not the owner of the standard. |
+| Benchmark used as EchoPose ad | Keep AA legally + brand-distinct (ties into the CC BY-NC non-commercial caveat, §2.6); the README leads with the standard, not the product. |
 | Single-vendor capture | Roadmap to a multi-org steering/eval committee once ≥N external projects enter; split rotation + metric proposals are public. |
 
-The test for neutrality is the same as §7's acceptance test: a stranger from *another project* can submit, reproduce the score, and see that RuView's own entries were scored by the identical, open, pinned path.
+The test for neutrality is the same as §7's acceptance test: a stranger from *another project* can submit, reproduce the score, and see that EchoPose's own entries were scored by the identical, open, pinned path.
 
 ---
 
 ## 3. Consequences
 
 ### 3.1 Positive
-- A real, comparable public number for RuView (and everyone else) on MM-Fi / Wi-Pose, scored by a privacy- and latency-aware harness no other WiFi benchmark offers.
+- A real, comparable public number for EchoPose (and everyone else) on MM-Fi / Wi-Pose, scored by a privacy- and latency-aware harness no other WiFi benchmark offers.
 - Community flywheel: external models/adapters get ranked, feeding `ruvnet/wifi-densepose-pretrained`.
 - Forces the harness to be reproducible-by-strangers, which strengthens internal release gating too.
 
@@ -234,8 +234,8 @@ The test for neutrality is the same as §7's acceptance test: a stranger from *a
 
 ## 4. Alternatives Considered
 
-1. **Submit RuView to existing venues only (MM-Fi GitHub, Papers-with-Code).** Lower effort, but no privacy/latency axes, no live entry, and RuView doesn't own the standard. *Complementary, not exclusive — we should still post MM-Fi numbers.*
-2. **A static numbers page in the RuView README.** Zero infra, but not multi-entrant and not a leaderboard.
+1. **Submit EchoPose to existing venues only (MM-Fi GitHub, Papers-with-Code).** Lower effort, but no privacy/latency axes, no live entry, and EchoPose doesn't own the standard. *Complementary, not exclusive — we should still post MM-Fi numbers.*
+2. **A static numbers page in the EchoPose README.** Zero infra, but not multi-entrant and not a leaderboard.
 3. **EvalAI / Kaggle competition.** Stronger anti-gaming infra, but heavyweight, time-boxed, and off-brand vs an always-open HF Space next to the model.
 
 ---
@@ -252,17 +252,17 @@ The test for neutrality is the same as §7's acceptance test: a stranger from *a
 
 ## 6. Implementation Sketch (if accepted)
 
-- **P1** — Stand up `ruvnet/aether-arena` repo + skeleton Gradio HF Space; define `ruview-arena.toml` submission contract; publish a **public smoke split** a stranger can score locally.
+- **P1** — Stand up `ruvnet/aether-arena` repo + skeleton Gradio HF Space; define `echopose-arena.toml` submission contract; publish a **public smoke split** a stranger can score locally.
 - **P2** — Containerize `wifi-densepose-cli score` as the pinned, sandboxed scorer (no network, read-only FS, caps); wire the signed append-only Parquet ledger + `determinism_gate`.
-- **P3 — v0 LAUNCH (narrow).** Clear + load the private MM-Fi / Wi-Pose held-out split; activate **Presence, Pose, Edge-latency, Determinism** categories; seed the board with RuView's own `wifi-densepose-pretrained` baseline (honest current PCK@20). Tracking/Vitals optional. Privacy + Cross-room shown as **gated / coming soon**.
+- **P3 — v0 LAUNCH (narrow).** Clear + load the private MM-Fi / Wi-Pose held-out split; activate **Presence, Pose, Edge-latency, Determinism** categories; seed the board with EchoPose's own `wifi-densepose-pretrained` baseline (honest current PCK@20). Tracking/Vitals optional. Privacy + Cross-room shown as **gated / coming soon**.
 - **P4** — *(post-launch, gated)* Implement the ADR-145 §10 privacy-leakage membership-inference attacker; only then activate + rank the **Privacy** category and switch `privacy_factor` on in `arena_score`.
-- **P5** — Assemble the multi-room split → activate **Cross-room**. Submit RuView's MM-Fi number to Papers-with-Code in parallel (alternative #1).
+- **P5** — Assemble the multi-room split → activate **Cross-room**. Submit EchoPose's MM-Fi number to Papers-with-Code in parallel (alternative #1).
 
 ## 7. Acceptance Test (definition of done for v0)
 
 v0 launches **only when a stranger can:**
 
-1. **Submit** a model (artifact + `ruview-arena.toml`) through the Space with no insider help,
+1. **Submit** a model (artifact + `echopose-arena.toml`) through the Space with no insider help,
 2. **Get a deterministic score** back (same model + same harness version → same numbers),
 3. **See the signed row** appended to the public results ledger,
 4. **Rerun the scorer locally** on the public *smoke* split and reproduce the logic, and
@@ -276,9 +276,9 @@ If any of these five fails, v0 is not ready.
 >
 > The problem with this field is not just model quality. It is *measurement* quality. Most WiFi-sensing work reports numbers against datasets with inconsistent splits, inconsistent metrics, and almost no accounting for latency, privacy leakage, reproducibility, or edge viability.
 >
-> AetherArena fixes that. Models are submitted, scored in a pinned sandboxed container against **private** held-out MM-Fi and Wi-Pose splits, and written to a **signed append-only** results ledger. The scoring engine reuses the same RuView harness we use internally: pose, presence, tracking, vitals, latency, cross-room degradation, deterministic proof hashes — and, once its attacker ships, privacy leakage.
+> AetherArena fixes that. Models are submitted, scored in a pinned sandboxed container against **private** held-out MM-Fi and Wi-Pose splits, and written to a **signed append-only** results ledger. The scoring engine reuses the same EchoPose harness we use internally: pose, presence, tracking, vitals, latency, cross-room degradation, deterministic proof hashes — and, once its attacker ships, privacy leakage.
 >
-> The goal is not to make RuView look good. The goal is to make the *category* measurable. If ambient intelligence is going to move from demos to infrastructure, it needs public numbers, reproducible commands, private eval splits, and failure modes that cannot be hidden.
+> The goal is not to make EchoPose look good. The goal is to make the *category* measurable. If ambient intelligence is going to move from demos to infrastructure, it needs public numbers, reproducible commands, private eval splits, and failure modes that cannot be hidden.
 
 ### Strategic note — three layers of the credibility story
 
@@ -286,4 +286,4 @@ If any of these five fails, v0 is not ready.
 |-------|-------|
 | Retrieval credibility | ruflo BEIR harness |
 | Sensing credibility | **AetherArena (this ADR)** |
-| Product credibility | RuView appliance + Arista-style deployments |
+| Product credibility | EchoPose appliance + Arista-style deployments |

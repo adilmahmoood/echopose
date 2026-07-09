@@ -1,6 +1,6 @@
 //! `mdns` — pure builder for the cog's mDNS advertisement record.
 //!
-//! ADR-116 §2.2: the cog must advertise itself as `_ruview-ha._tcp`
+//! ADR-116 §2.2: the cog must advertise itself as `_echopose-ha._tcp`
 //! so HA's discovery integration finds the Seed without manual
 //! `broker host` config. This module produces the typed wire-format
 //! shape — no socket I/O, no responder. The actual mDNS responder
@@ -27,12 +27,12 @@
 //!
 //! | Key | Value | Purpose |
 //! |---|---|---|
-//! | `cog_id` | `"ha-matter"` | Disambiguates from other RuView cogs |
+//! | `cog_id` | `"ha-matter"` | Disambiguates from other EchoPose cogs |
 //! | `cog_version` | `CARGO_PKG_VERSION` | HA Repairs surfaces upgrade nudges |
 //! | `node_id` | identity node id | HA device registry key |
 //! | `mqtt_port` | u16 string | Tells HA where to reach the cog's MQTT broker (embedded or external) |
 //! | `privacy` | `"1"` / `"0"` | If `1`, HA's config flow gates biometric entities by default |
-//! | `proto` | `"ruview-ha/1"` | Protocol version — bumps on breaking auto-discovery changes |
+//! | `proto` | `"echopose-ha/1"` | Protocol version — bumps on breaking auto-discovery changes |
 //!
 //! No biometric data, no node coordinates, no SSID — TXT records
 //! are broadcast in cleartext and harvested by passive scanners, so
@@ -53,7 +53,7 @@ const INSTANCE_TEMPLATE: &str = "Cognitum Seed — {node_id}";
 /// Owned so the responder can move the whole thing into its task.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MdnsService {
-    /// RFC 6763 service type. Locked to `_ruview-ha._tcp` by a named
+    /// RFC 6763 service type. Locked to `_echopose-ha._tcp` by a named
     /// test — drift breaks HA's YAML auto-discovery binding.
     pub service_type: String,
     /// Human-readable instance name shown in HA's discovery UI.
@@ -124,7 +124,7 @@ pub fn build_mdns_service(
             "privacy".to_string(),
             if privacy_mode { "1" } else { "0" }.to_string(),
         ),
-        ("proto".to_string(), "ruview-ha/1".to_string()),
+        ("proto".to_string(), "echopose-ha/1".to_string()),
     ];
     // Deterministic ordering — see field docstring.
     txt_records.sort();
@@ -151,12 +151,12 @@ mod tests {
     }
 
     #[test]
-    fn service_type_locked_to_ruview_ha_tcp() {
+    fn service_type_locked_to_echopose_ha_tcp() {
         // Drift here breaks HA's YAML auto-discovery binding. Lock
         // it so a future rename surfaces a named test instead of a
         // silent broken deployment.
         let svc = build_mdns_service(&id(), 9180, 1883, false);
-        assert_eq!(svc.service_type, "_ruview-ha._tcp");
+        assert_eq!(svc.service_type, "_echopose-ha._tcp");
         assert_eq!(svc.service_type, crate::MDNS_SERVICE_TYPE);
     }
 
@@ -189,7 +189,7 @@ mod tests {
         // Locked so a future breaking-change in the cog ↔ HA YAML
         // contract surfaces here. Bumping it is a deliberate act.
         let svc = build_mdns_service(&id(), 9180, 1883, false);
-        assert_eq!(svc.txt("proto"), Some("ruview-ha/1"));
+        assert_eq!(svc.txt("proto"), Some("echopose-ha/1"));
     }
 
     #[test]
@@ -244,7 +244,7 @@ mod tests {
         // both forms.
         let ty = info.get_type();
         assert!(
-            ty == "_ruview-ha._tcp" || ty == "_ruview-ha._tcp.",
+            ty == "_echopose-ha._tcp" || ty == "_echopose-ha._tcp.",
             "unexpected service type: {ty}"
         );
         assert_eq!(info.get_port(), 9180);
@@ -260,7 +260,7 @@ mod tests {
         assert_eq!(info.get_property_val_str("cog_id"), Some(crate::COG_ID));
         assert_eq!(info.get_property_val_str("mqtt_port"), Some("1883"));
         assert_eq!(info.get_property_val_str("privacy"), Some("1"));
-        assert_eq!(info.get_property_val_str("proto"), Some("ruview-ha/1"));
+        assert_eq!(info.get_property_val_str("proto"), Some("echopose-ha/1"));
         assert!(info.get_property_val_str("node_id").is_some());
         assert!(info.get_property_val_str("cog_version").is_some());
     }

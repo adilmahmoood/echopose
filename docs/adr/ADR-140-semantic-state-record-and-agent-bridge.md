@@ -6,7 +6,7 @@
 | **Date** | 2026-05-28 |
 | **Deciders** | ruv |
 | **Codebase target** | `wifi-densepose-sensing-server/src/semantic/` (`bus.rs`, `common.rs`); `homecore/src/state.rs` + `event.rs`; `homecore-assist` |
-| **Relates to** | ADR-115 (HA Integration / HA-MIND semantic primitives), ADR-127 (HOMECORE State Machine), ADR-129 (HOMECORE Automation Engine), ADR-133 (HOMECORE-ASSIST + Ruflo), ADR-136 (RuView Streaming Engine / FrameMeta), ADR-137 (Fusion Engine Quality Scoring / Evidence Refs), ADR-139 (WorldGraph Digital Twin), ADR-141 (BFLD Privacy Control Plane), ADR-021 (ESP32 Vital Signs), ADR-125 (Apple Home Native HAP Bridge) |
+| **Relates to** | ADR-115 (HA Integration / HA-MIND semantic primitives), ADR-127 (HOMECORE State Machine), ADR-129 (HOMECORE Automation Engine), ADR-133 (HOMECORE-ASSIST + Ruflo), ADR-136 (EchoPose Streaming Engine / FrameMeta), ADR-137 (Fusion Engine Quality Scoring / Evidence Refs), ADR-139 (WorldGraph Digital Twin), ADR-141 (BFLD Privacy Control Plane), ADR-021 (ESP32 Vital Signs), ADR-125 (Apple Home Native HAP Bridge) |
 
 ---
 
@@ -505,7 +505,7 @@ Have `SemanticStateRecord` redact itself (drop `room`, strip biometrics) before 
 
 ### Related ADRs (this series)
 
-- `docs/adr/ADR-136-ruview-streaming-engine-frame-contracts.md` — `FrameMeta` source of `model_version` / `calibration_version`
+- `docs/adr/ADR-136-echopose-streaming-engine-frame-contracts.md` — `FrameMeta` source of `model_version` / `calibration_version`
 - `docs/adr/ADR-137-fusion-engine-quality-scoring-evidence.md` — evidence references and contradiction flags feeding `evidence_refs` + `confidence`
 - `docs/adr/ADR-139-worldgraph-environmental-digital-twin.md` — room/node resolution for `room` and graph `evidence_refs`
 - `docs/adr/ADR-141-bfld-privacy-control-plane-modes-attestation.md` — owns the mode→`PrivacyAction` mapping and attestation

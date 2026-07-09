@@ -1,7 +1,7 @@
-# RuView starter Home Assistant Blueprints
+# EchoPose starter Home Assistant Blueprints
 
 8 ready-to-import HA Blueprints covering the highest-leverage automations
-RuView's HA-MIND semantic primitives unlock. Drop the YAML files into
+EchoPose's HA-MIND semantic primitives unlock. Drop the YAML files into
 `<HA config>/blueprints/automation/ruvnet/` and import from the HA UI
 (**Settings → Automations & Scenes → Blueprints → Import Blueprint**).
 

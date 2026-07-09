@@ -1,4 +1,4 @@
-//! `ruview/<node_id>/bfld/availability` topic helpers. ADR-122 §2.2.
+//! `echopose/<node_id>/bfld/availability` topic helpers. ADR-122 §2.2.
 //!
 //! HA expects each device to publish an availability topic so the UI can grey
 //! out entities when the device is offline. Convention:
@@ -21,11 +21,11 @@ pub const PAYLOAD_AVAILABLE: &str = "online";
 /// Payload string published when the node has disconnected.
 pub const PAYLOAD_NOT_AVAILABLE: &str = "offline";
 
-/// Build the canonical `ruview/<node_id>/bfld/availability` topic string.
+/// Build the canonical `echopose/<node_id>/bfld/availability` topic string.
 #[must_use]
 pub fn availability_topic(node_id: &str) -> String {
     let mut s = String::with_capacity(7 + node_id.len() + 19);
-    s.push_str("ruview/");
+    s.push_str("echopose/");
     s.push_str(node_id);
     s.push_str("/bfld/availability");
     s

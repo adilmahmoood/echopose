@@ -7,7 +7,7 @@
 | **Deciders** | ruv |
 | **Codename** | **HA-COG** — HA + Matter, packaged for the Seed |
 | **Relates to** | [ADR-110](ADR-110-esp32-c6-firmware-extension.md) (C6 firmware substrate), [ADR-115](ADR-115-home-assistant-integration.md) (HA-DISCO + HA-MIND + HA-FABRIC), [ADR-102](ADR-102-edge-module-registry.md) (cog catalog), [ADR-101](ADR-101-pose-estimation-cog.md) (cog packaging precedent) |
-| **Tracking issue** | TBD — file under RuView issue tracker once research dossier lands |
+| **Tracking issue** | TBD — file under EchoPose issue tracker once research dossier lands |
 
 ---
 
@@ -45,7 +45,7 @@ The cog republishes the same 21 entities per node (11 raw + 10 semantic primitiv
 ### 2.2 Seed-native enhancements
 
 - **Self-contained MQTT broker (optional)** — if the user doesn't already run mosquitto, the cog can host an embedded broker on `cognitum-seed.local:1883` and act as the HA endpoint directly.
-- **mDNS service advertisement** — `_ruview-ha._tcp` so HA's discovery integration finds the Seed without manual config.
+- **mDNS service advertisement** — `_echopose-ha._tcp` so HA's discovery integration finds the Seed without manual config.
 - **RuVector-backed semantic-primitive thresholds** — instead of static `semantic-thresholds.yaml`, the cog learns per-home thresholds via a SONA-adapted RuVector model (matches the Seed's local-first AI story).
 - **Ed25519 witness chain** — every state transition logged with a Seed signature so care-home / regulated deployments can audit decisions.
 - **OTA firmware coordination** — the cog manages C6 firmware updates for ESP32-C6 nodes in the mesh (ADR-110 substrate).
@@ -71,10 +71,10 @@ Full dossier: [`docs/research/ADR-116-ha-matter-cog-research.md`](../research/AD
 2. **Thread Border Router** — ESP32-C6 single-chip TBR confirmed working; `CONFIG_OPENTHREAD_BORDER_ROUTER=y` is the only config step. ADR-110's `c6_timesync.c` already initialises 802.15.4 — TBR is a Kconfig flag away. Real value: HA's Improv-style commissioning works without a separate Thread border router box.
 3. **HACS value-add** — config flow (UI setup wizard), Repairs API (structured error cards), re-authentication, diagnostics download, typed service actions (`set_privacy_mode`, `calibrate_zone`), i18n translations. **Bronze is the minimum bar; Gold (repairs + diagnostics + reconfiguration) is the target.** Start from `hacs.integration_blueprint` template.
 4. **CSA certification** — ~$30-42k first year ($22.5k membership + $10-19k ATL lab fees). **Skippable for v1** by publishing as "Works with HA" instead. CSA re-evaluate at v0.9+ after HACS adoption data lands.
-5. **Cog RAM budget** — 128 MB RAM / 15 % CPU on the Seed appliance (Pi 5 + Hailo-10 variant has more headroom). 10 KB INT8 semantic-primitive classifier fits without PSRAM. Long-lived supervised process with capability scopes `network.mqtt + network.matter + api.ruview_vitals`.
+5. **Cog RAM budget** — 128 MB RAM / 15 % CPU on the Seed appliance (Pi 5 + Hailo-10 variant has more headroom). 10 KB INT8 semantic-primitive classifier fits without PSRAM. Long-lived supervised process with capability scopes `network.mqtt + network.matter + api.echopose_vitals`.
 6. **ruvllm + RuVector latency** — `ruvllm-esp32` v0.3.3 confirms SONA self-optimising adaptation under 100 µs per query. 8→10 INT8 classifier ~10 KB quantised. Per-home threshold tuning via HA thumbs-up/thumbs-down feedback as LoRA-style gradient steps — closes the top user complaint (false positives) without cloud round-trips.
 7. **HIPAA / FDA** — FDA January 2026 General Wellness guidance explicitly classifies HR / sleep / activity-anomaly alerts as **wellness devices** (outside FDA jurisdiction) when marketed without diagnostic claims. Frame fall detection as **"activity anomaly notification"** not "fall diagnosis". `--privacy-mode` audit-only tier (no MQTT state messages, only SHA-256 digests on-Seed) creates a technical PHI barrier. `OccupancySensor (0x0107)` device class keeps the product in the same regulatory category as a smart motion sensor.
-8. **Competitor moat** — Aqara FP300 (Nov 2025): 5 entities, no person count, no vitals, no fall detection. TOMMY: zones only, no vitals, closed-source, paywalled. ESPectre: motion only. **RuView's differentiation** — HR/BR + 17-keypoint pose + 10 semantic primitives + witness chain + SONA adaptation — has no competitor equivalent.
+8. **Competitor moat** — Aqara FP300 (Nov 2025): 5 entities, no person count, no vitals, no fall detection. TOMMY: zones only, no vitals, closed-source, paywalled. ESPectre: motion only. **EchoPose's differentiation** — HR/BR + 17-keypoint pose + 10 semantic primitives + witness chain + SONA adaptation — has no competitor equivalent.
 
 ## 4. Recommended v1 scope (from dossier §8)
 
@@ -96,7 +96,7 @@ Ranked by build cost × user impact:
 | **P1** | Research dossier ([`docs/research/ADR-116-ha-matter-cog-research.md`](../research/ADR-116-ha-matter-cog-research.md)) | ✅ **done** — 8 sections, 30+ citations, v1 scope ranked |
 | **P2** | Cog crate scaffold (`v2/crates/cog-ha-matter/`) — Cargo.toml + `src/{lib,main,manifest}.rs`, workspace member, CLI args, `--print-manifest` flag, 2 manifest unit tests | ✅ **done** — `cargo check` + `cargo test` green |
 | **P3** | Wrap existing ADR-115 MQTT publisher as cog entry point | ✅ **wiring done** — `main.rs` boots ADR-115's `publisher::spawn` via `runtime::spawn_publisher` thin wrapper, holds a long-lived `broadcast::Sender<VitalsSnapshot>`, awaits Ctrl-C. Live-handle test green without a broker. Next (P3.5): subscribe to sensing-server `/v1/snapshot` WS and republish into the channel. |
-| **P4** | Seed-native enhancements (mDNS, witness; embedded broker deferred) | ✅ **shipped** — mDNS half: record-builder + ServiceInfo conversion + live responder wired into `main.rs` (HA auto-discovery on `_ruview-ha._tcp` works out of the box, `--no-mdns` flag for restrictive networks). Witness half: hash-chain + JSONL + file persistence + chain-level verify + Ed25519 signing. **Embedded rumqttd broker deferred to v0.7** per dossier §8 ranking — not in the prioritised v1 scope; v1 ships with external-broker only (mosquitto or HA's built-in broker). See §4 v1 scope table. |
+| **P4** | Seed-native enhancements (mDNS, witness; embedded broker deferred) | ✅ **shipped** — mDNS half: record-builder + ServiceInfo conversion + live responder wired into `main.rs` (HA auto-discovery on `_echopose-ha._tcp` works out of the box, `--no-mdns` flag for restrictive networks). Witness half: hash-chain + JSONL + file persistence + chain-level verify + Ed25519 signing. **Embedded rumqttd broker deferred to v0.7** per dossier §8 ranking — not in the prioritised v1 scope; v1 ships with external-broker only (mosquitto or HA's built-in broker). See §4 v1 scope table. |
 | **P5** | RuVector-backed threshold learning (SONA adaptation) | pending |
 | **P6** | Multi-Seed federation (cross-Seed dedup + witness) | pending |
 | **P7** | Matter Bridge mode (depends on matter-rs / esp-matter readiness) | pending |

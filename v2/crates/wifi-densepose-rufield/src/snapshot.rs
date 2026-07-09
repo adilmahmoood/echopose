@@ -1,19 +1,19 @@
 //! Owned, primitive input types for the ADR-262 bridge.
 //!
-//! These deliberately **mirror** the shapes RuView's sensing cycle produces
+//! These deliberately **mirror** the shapes EchoPose's sensing cycle produces
 //! (the `/ws/sensing` `SensingUpdate` build site at
 //! `wifi-densepose-sensing-server/src/main.rs:~5938` and the `TrustedOutput`
 //! trust state surfaced via `EngineBridge` at `main.rs:~5886`) **without
-//! importing** RuView's internal crates. Keeping the bridge an anti-corruption
+//! importing** EchoPose's internal crates. Keeping the bridge an anti-corruption
 //! layer (ADR-262 §5.4) means it takes owned primitives, not `SensingUpdate`
 //! or `TrustedOutput` directly — so this crate never depends on
 //! `wifi-densepose-sensing-server`.
 
 use serde::{Deserialize, Serialize};
 
-/// The CSI feature scalars RuView publishes on every `/ws/sensing` cycle.
+/// The CSI feature scalars EchoPose publishes on every `/ws/sensing` cycle.
 ///
-/// Mirrors `FeatureInfo` (`main.rs:368-377`). All values are in RuView's own
+/// Mirrors `FeatureInfo` (`main.rs:368-377`). All values are in EchoPose's own
 /// units; the bridge normalizes them into `Observation.features` for fusion.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SensingFeatures {
@@ -33,7 +33,7 @@ pub struct SensingFeatures {
     pub spectral_power: f64,
 }
 
-/// The RuView classification block. Mirrors `ClassificationInfo`
+/// The EchoPose classification block. Mirrors `ClassificationInfo`
 /// (`main.rs:379-384`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SensingClass {
@@ -45,7 +45,7 @@ pub struct SensingClass {
     pub confidence: f64,
 }
 
-/// A RuView signal field — a floor-plane grid of field values. Mirrors
+/// A EchoPose signal field — a floor-plane grid of field values. Mirrors
 /// `SignalField` (`main.rs:386-390`). The bridge derives a real position from
 /// the strongest field peak (like `field_localize`) and **never fabricates**
 /// coordinates when this is absent.
@@ -85,7 +85,7 @@ impl SignalField {
     }
 }
 
-/// RuView's effective privacy class (the `effective_class` / privacy byte on
+/// EchoPose's effective privacy class (the `effective_class` / privacy byte on
 /// `TrustedOutput`).
 ///
 /// This **mirrors** `wifi_densepose_bfld::PrivacyClass` (`bfld/lib.rs:103-116`,
@@ -96,7 +96,7 @@ impl SignalField {
 /// (ADR-262 §3.3 — the central correctness item).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum RuViewPrivacyClass {
+pub enum EchoPosePrivacyClass {
     /// Byte `0` — raw CSI amplitude, local-only.
     Raw,
     /// Byte `1` — derived **identity** features (identity_embedding +
@@ -109,17 +109,17 @@ pub enum RuViewPrivacyClass {
     Restricted,
 }
 
-impl RuViewPrivacyClass {
-    /// The raw byte value used by RuView's `#[repr(u8)]` enum
+impl EchoPosePrivacyClass {
+    /// The raw byte value used by EchoPose's `#[repr(u8)]` enum
     /// (`bfld/lib.rs:103`). Exposed only so callers can demonstrate the
     /// non-monotonicity trap in tests; the bridge never maps off this byte.
     #[must_use]
     pub fn raw_byte(self) -> u8 {
         match self {
-            RuViewPrivacyClass::Raw => 0,
-            RuViewPrivacyClass::Derived => 1,
-            RuViewPrivacyClass::Anonymous => 2,
-            RuViewPrivacyClass::Restricted => 3,
+            EchoPosePrivacyClass::Raw => 0,
+            EchoPosePrivacyClass::Derived => 1,
+            EchoPosePrivacyClass::Anonymous => 2,
+            EchoPosePrivacyClass::Restricted => 3,
         }
     }
 }
@@ -138,14 +138,14 @@ pub struct SensingSnapshot {
     pub classification: SensingClass,
     /// Optional signal field for a real position readout.
     pub signal_field: Option<SignalField>,
-    /// RuView's effective privacy class (the source-of-truth, §3.3).
-    pub trust_class: RuViewPrivacyClass,
+    /// EchoPose's effective privacy class (the source-of-truth, §3.3).
+    pub trust_class: EchoPosePrivacyClass,
     /// Whether the governed engine demoted this cycle (`TrustedOutput.demoted`).
     /// When `true` the emitted event must be `>= P2` and raw suppressed
     /// (§3.3 / §4 P2 gate (b)).
     pub demoted: bool,
     /// Whether this cycle's identity surface is bound to an enrolled identity
-    /// (RuView's `identity_bound`). Promotes `Derived` to P5 when set.
+    /// (EchoPose's `identity_bound`). Promotes `Derived` to P5 when set.
     pub identity_bound: bool,
     /// Stable node id (e.g. `"esp32_room_01"`).
     pub node_id: String,

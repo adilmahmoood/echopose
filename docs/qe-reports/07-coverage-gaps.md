@@ -1,6 +1,6 @@
 # QE Coverage Gap Analysis Report
 
-**Project:** wifi-densepose (ruview)
+**Project:** wifi-densepose (echopose)
 **Date:** 2026-04-05
 **Analyst:** QE Coverage Specialist (V3)
 **Scope:** Python v1, Rust workspace (17 crates + ruv-neural), Mobile (React Native), Firmware (ESP32 C)

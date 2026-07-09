@@ -22,7 +22,7 @@
 //!    path.
 //! 4. **TLS on non-localhost.** `MqttConfig::validate` already returns
 //!    `PlaintextOnPublicHost` advisory. This module promotes it to
-//!    fatal when `RUVIEW_MQTT_STRICT_TLS=1` (the planned v0.8.0
+//!    fatal when `ECHOPOSE_MQTT_STRICT_TLS=1` (the planned v0.8.0
 //!    default per ADR §9.5).
 
 use std::path::Path;
@@ -69,7 +69,7 @@ pub fn audit(cfg: &MqttConfig) -> Result<(), MqttConfigError> {
     cfg.validate()?;
 
     // STRICT_TLS override — promotes the §9.5 advisory to fatal.
-    if std::env::var("RUVIEW_MQTT_STRICT_TLS").as_deref() == Ok("1")
+    if std::env::var("ECHOPOSE_MQTT_STRICT_TLS").as_deref() == Ok("1")
         && matches!(cfg.tls, TlsConfig::Off)
         && !cfg.host.eq_ignore_ascii_case("localhost")
         && !cfg.host.starts_with("127.")
@@ -198,7 +198,7 @@ mod tests {
     fn audit_plaintext_public_advisory_when_strict_off() {
         let mut cfg = base_cfg();
         cfg.host = "broker.example.com".into();
-        std::env::remove_var("RUVIEW_MQTT_STRICT_TLS");
+        std::env::remove_var("ECHOPOSE_MQTT_STRICT_TLS");
         let err = audit(&cfg).unwrap_err();
         // Advisory — caller decides whether to abort.
         assert!(!err.is_fatal());
@@ -209,13 +209,13 @@ mod tests {
     fn audit_plaintext_public_fatal_when_strict_on() {
         let mut cfg = base_cfg();
         cfg.host = "broker.example.com".into();
-        std::env::set_var("RUVIEW_MQTT_STRICT_TLS", "1");
+        std::env::set_var("ECHOPOSE_MQTT_STRICT_TLS", "1");
         let err = audit(&cfg).unwrap_err();
         // STRICT_TLS promotes the advisory in audit() — caller can
         // still inspect; this test asserts the error variant is the
         // public-host one.
         assert!(matches!(err, MqttConfigError::PlaintextOnPublicHost { .. }));
-        std::env::remove_var("RUVIEW_MQTT_STRICT_TLS");
+        std::env::remove_var("ECHOPOSE_MQTT_STRICT_TLS");
     }
 
     // ─── Payload size ───────────────────────────────────────────────

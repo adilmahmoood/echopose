@@ -26,7 +26,7 @@ esp_err_t display_task_start(void);
 /**
  * @return true once an AMOLED panel has been detected and the display task
  * is running; false on headless boards (no panel, or built without display
- * support). Used to choose the CSI promiscuous filter (RuView#893): a board
+ * support). Used to choose the CSI promiscuous filter (EchoPose#893): a board
  * with no display has no QSPI/SPI-flash contention, so it can safely capture
  * DATA frames for proper CSI yield instead of starving on MGMT-only.
  */

@@ -1,6 +1,6 @@
 # ADR-041: WASM Module Collection -- Curated Sensing Algorithm Registry
 
-**Status**: Accepted (Phase 1 implemented, hardware-validated on RuView ESP32-S3)
+**Status**: Accepted (Phase 1 implemented, hardware-validated on EchoPose ESP32-S3)
 **Date**: 2026-03-02
 **Deciders**: @ruvnet
 **Supersedes**: None

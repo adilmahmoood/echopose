@@ -1,11 +1,11 @@
-# ADR-054: RuView Desktop Full Implementation
+# ADR-054: EchoPose Desktop Full Implementation
 
 ## Status
 **Accepted** — Implementation in progress
 
 ## Context
 
-RuView Desktop v0.3.0 shipped with a complete React/TypeScript frontend but stub-only Rust backend commands. Users report:
+EchoPose Desktop v0.3.0 shipped with a complete React/TypeScript frontend but stub-only Rust backend commands. Users report:
 - Settings cannot be saved (#206) ✅ Fixed in PR #209
 - Flash firmware does nothing
 - OTA updates are non-functional
@@ -60,14 +60,14 @@ pub async fn discover_nodes(timeout_ms: Option<u64>) -> Result<Vec<DiscoveredNod
     let timeout = Duration::from_millis(timeout_ms.unwrap_or(3000));
     let mut nodes = Vec::new();
 
-    // 1. mDNS discovery (_ruview._tcp.local)
+    // 1. mDNS discovery (_echopose._tcp.local)
     let mdns = ServiceDaemon::new()?;
-    let receiver = mdns.browse("_ruview._tcp.local.")?;
+    let receiver = mdns.browse("_echopose._tcp.local.")?;
 
     // 2. UDP broadcast probe (port 5005)
     let socket = UdpSocket::bind("0.0.0.0:0").await?;
     socket.set_broadcast(true)?;
-    socket.send_to(b"RUVIEW_DISCOVER", "255.255.255.255:5005").await?;
+    socket.send_to(b"ECHOPOSE_DISCOVER", "255.255.255.255:5005").await?;
 
     // 3. Collect responses with timeout
     tokio::select! {

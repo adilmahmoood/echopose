@@ -11,7 +11,7 @@
 
 ## Context
 
-RuView's signal pipeline already produces several **dense float
+EchoPose's signal pipeline already produces several **dense float
 embeddings** at different layers:
 
 - AETHER 128-d re-ID embeddings on each `PoseTrack` (ADR-024)
@@ -46,14 +46,14 @@ sensor.** Used as a sensor, they unlock:
 - cross-node mesh exchange of compressed sketches instead of raw vectors
 - privacy-preserving event logs (sketches, not reconstructable signals)
 
-This ADR formalizes the deployment pattern across the RuView stack and
+This ADR formalizes the deployment pattern across the EchoPose stack and
 commits to `ruvector::quantization::BinaryQuantized` as the canonical
 implementation.
 
 ## Decision
 
 Adopt **RaBitQ-style binary sketches as a first-class, cheap
-similarity sensor** at four points in the RuView pipeline:
+similarity sensor** at four points in the EchoPose pipeline:
 
 1. **CSI / pose embedding hot-cache filter** at the cluster Pi.
 2. **Drift / novelty sensor** between live observation and a
@@ -86,7 +86,7 @@ dense embedding  ──►  RaBitQ sketch  ──►  hamming/popcnt compare
   POPCNT on x86_64). Re-export through a new
   `crates/wifi-densepose-ruvector/src/sketch.rs` module so consumers in
   `signal`, `train`, `mat`, and `sensing-server` see a stable
-  RuView-flavored API and don't bind directly to the vendor crate.
+  EchoPose-flavored API and don't bind directly to the vendor crate.
 
 - **Per-room normal-state bank**: lives at the cluster Pi (ADR-083),
   not on the sensor MCU. Sensor MCUs continue to emit dense embeddings
@@ -189,7 +189,7 @@ Every pass is gated by the acceptance criterion above; if any fail,
 that site rolls back and the rest continue.
 
 1. **`wifi-densepose-ruvector::sketch` module.** Re-export
-   `BinaryQuantized` plus a thin RuView-flavored API
+   `BinaryQuantized` plus a thin EchoPose-flavored API
    (`Sketch::from_embedding`, `Sketch::distance`, `SketchBank::topk`).
    Add `sketch_version: u16` and `embedding_dim: u16` fields to the
    public type. Criterion benches: sketch ↔ float compare-cost ratio.
@@ -321,7 +321,7 @@ code + per-vector side info, not just sign bits — is now implemented and
 ## Open questions
 
 - **Does `BinaryQuantized` need a randomized rotation pre-pass for
-  RuView's embedding distributions?** **ANSWERED (ADR-156 §10):** rotation
+  EchoPose's embedding distributions?** **ANSWERED (ADR-156 §10):** rotation
   is built and measured — it helps (+10pp at strict K) but is not
   sufficient alone for strict-K 90% on the tested anisotropic
   distribution; the over-fetch candidate-set pattern meets the bar.

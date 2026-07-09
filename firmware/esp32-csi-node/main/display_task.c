@@ -12,7 +12,7 @@
 /* Set true once an AMOLED panel is detected and the display task starts.
  * Defined outside the CONFIG_DISPLAY_ENABLE guard so display_is_active()
  * exists on headless builds too (where it stays false → CSI captures DATA
- * frames; see RuView#893). */
+ * frames; see EchoPose#893). */
 static bool s_display_active = false;
 
 bool display_is_active(void) { return s_display_active; }
@@ -120,7 +120,7 @@ esp_err_t display_task_start(void)
      * the Touch-AMOLED board. If touch is absent, the panel "success" was a false-
      * positive on a display-less DevKit: bail to headless so display_is_active() stays
      * false and CSI upgrades to MGMT+DATA capture instead of starving at MGMT-only
-     * (RuView#1000). */
+     * (EchoPose#1000). */
     if (touch_ret != ESP_OK) {
         ESP_LOGW(TAG, "No FT3168 touch readback — SH8601 probe was a false-positive on a "
                       "display-less board; running headless so CSI captures (#1000)");

@@ -13,13 +13,13 @@ pub enum ParseError {
     #[error("Invalid magic: expected {expected:#06x}, got {got:#06x}")]
     InvalidMagic { expected: u32, got: u32 },
 
-    /// A recognized RuView wire packet was received that is *not* an
+    /// A recognized EchoPose wire packet was received that is *not* an
     /// ADR-018 raw CSI frame (e.g. ADR-039 vitals, ADR-081 feature state,
     /// ADR-095 temporal classification). The firmware multiplexes several
     /// packet types onto the same UDP port, so a CSI parser will see these
     /// interleaved with CSI frames — that is expected, not a corruption.
     /// Consumers should route the packet to the matching decoder or skip it.
-    #[error("Non-CSI RuView packet on CSI socket: {kind} (magic {magic:#010x})")]
+    #[error("Non-CSI EchoPose packet on CSI socket: {kind} (magic {magic:#010x})")]
     NonCsiPacket { magic: u32, kind: &'static str },
 
     /// The frame indicates more subcarriers than physically possible.
@@ -37,6 +37,10 @@ pub enum ParseError {
     /// Invalid antenna count (must be 1-4 for ESP32).
     #[error("Invalid antenna count: {count} (expected 1-4)")]
     InvalidAntennaCount { count: u8 },
+
+    /// Cryptographic signature verification failed (ADR-032).
+    #[error("Frame verification failed: invalid SipHash tag")]
+    VerificationFailed,
 
     /// Generic byte-level parse error.
     #[error("Parse error at offset {offset}: {message}")]

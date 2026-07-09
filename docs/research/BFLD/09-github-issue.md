@@ -59,7 +59,7 @@ Three structural invariants (not configurable, not policy):
 3. Cross-site identity matching is cryptographically impossible via per-site BLAKE3
    keyed hash with daily rotation.
 
-Output events published on `ruview/<node_id>/bfld/{presence,motion,person_count,...}/state`.
+Output events published on `echopose/<node_id>/bfld/{presence,motion,person_count,...}/state`.
 
 Matter and HA expose only: presence, motion, person_count. Identity fields are rejected
 at both boundaries.
@@ -70,7 +70,7 @@ at both boundaries.
   2×2 through 4×4 MIMO.
 - [ ] **AC2**: Presence detection latency ≤ 1s p95 from first non-empty BFI frame in
   a new occupancy event.
-- [ ] **AC3**: Motion score published at ≥ 1 Hz on `ruview/<node_id>/bfld/motion/state`
+- [ ] **AC3**: Motion score published at ≥ 1 Hz on `echopose/<node_id>/bfld/motion/state`
   during sustained occupancy.
 - [ ] **AC4**: Raw BFI bytes (Phi/Psi angle matrices) are never present in any
   serialized output at any `privacy_class` value.

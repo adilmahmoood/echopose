@@ -39,7 +39,7 @@ unchanged).
 | NVSIM-NAN-01 | MEDIUM (silent corruption) | funnel `digitiser.rs::adc_quantise` (root: near-field clamp bypass in `source.rs`) | A non-finite scene param (NaN/Inf dipole position, Inf moment, NaN loop radius) **bypasses the near-field clamp** (`NaN < R_MIN_M == false` → the `1/r³` path runs → NaN field), and at the ADC `NaN as i32 == 0` (Rust saturating cast) emits a frame `b_pt=[0,0,0]` with **`ADC_SATURATED` CLEAR** — indistinguishable from a legitimate zero-field reading. MEASURED: `b=[NaN,NaN,NaN] sat=false` → `b_pt=[0,0,0] flags=0b0000`. | `adc_quantise`: any non-finite input → code `0` **with the saturation flag raised**; the pipeline's existing `adc_sat` OR-reduction propagates `ADC_SATURATED` onto the frame, making the corruption visible downstream. |
 
 This is the same **NaN-fail-open / NaN-poisoning** family seen across
-calibration/vitals/geo and ruview-swarm — non-finite input defeating a guard —
+calibration/vitals/geo and echopose-swarm — non-finite input defeating a guard —
 but bounded here to a single frame (no cross-timestep accumulator).
 
 ### Dimensions confirmed clean (with evidence)
@@ -88,5 +88,5 @@ but bounded here to a single frame (no cross-timestep accumulator).
 
 ## Links
 - ADR-089 — `nvsim` NV-diamond magnetometer simulator
-- ADR-176 — `ruview-swarm` (sibling NaN-fail-open review)
+- ADR-176 — `echopose-swarm` (sibling NaN-fail-open review)
 - ADR-172 — core/cli (where the NaN-bug-class root was settled NO)

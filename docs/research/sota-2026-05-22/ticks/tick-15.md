@@ -22,7 +22,7 @@ Recommended (per Moments Accountant, δ=1e-5):
 | Profile | σ | Rounds | Total ε | Use |
 |---|---:|---:|---:|---|
 | Conservative (medical-grade) | 1.5 | 50 | **2.0** | HIPAA-aligned |
-| Standard (typical RuView) | 1.0 | 100 | **5.0** | Most cogs |
+| Standard (typical EchoPose) | 1.0 | 100 | **5.0** | Most cogs |
 | Lenient | 0.5 | 100 | 8.0 | Below ε=10 community soft-bound |
 
 ## On-device-only primitive list (R15-binding)

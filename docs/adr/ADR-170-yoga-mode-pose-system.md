@@ -292,7 +292,7 @@ The `#yoga-panel` surfaces a `torso_not_visible` warning ("Move back — full bo
 - The `#yoga-panel` is expanded to a larger centre-screen layout with a bigger score ring (r=44) and larger pose name text (24px).
 - The sequence strip is rendered larger (100px slot width).
 - The `#helpers` panel shows only the yoga-related toggles (yoga-mode, adam-mode, mute bell).
-- The titlecard text reads "RuView · Yoga Mode".
+- The titlecard text reads "EchoPose · Yoga Mode".
 
 This file is created from a copy of demo 05 with the CSI and tomography sections stripped. It shares the `YogaMode` object and pose templates verbatim — no logic is duplicated.
 
@@ -300,18 +300,18 @@ The decision to introduce a sixth demo file rather than making demo 05's yoga fe
 
 ### 2.9 Persistence
 
-User settings are persisted in `localStorage` under the `ruview.yoga.*` namespace:
+User settings are persisted in `localStorage` under the `echopose.yoga.*` namespace:
 
 | Key | Type | Value shape | Default |
 |---|---|---|---|
-| `ruview.yoga.enabled` | boolean string | `"true"` or `"false"` | `"false"` |
-| `ruview.yoga.muted` | boolean string | `"true"` or `"false"` | `"true"` |
-| `ruview.yoga.tolerance_scale` | float string | `"0.5"` to `"2.0"` | `"1.0"` |
-| `ruview.yoga.sequence` | JSON string | `["tadasana","urdhva_hastasana",…]` | full 8-pose sequence |
+| `echopose.yoga.enabled` | boolean string | `"true"` or `"false"` | `"false"` |
+| `echopose.yoga.muted` | boolean string | `"true"` or `"false"` | `"true"` |
+| `echopose.yoga.tolerance_scale` | float string | `"0.5"` to `"2.0"` | `"1.0"` |
+| `echopose.yoga.sequence` | JSON string | `["tadasana","urdhva_hastasana",…]` | full 8-pose sequence |
 
 `tolerance_scale` is a global multiplier applied to every `tolerance_deg` value in every template. A scale of 0.5 makes the classifier strict (tight bands); a scale of 2.0 makes it forgiving (wide bands). The HUD exposes this as a simple "Difficulty" slider: Easy (2.0×), Normal (1.0×), Strict (0.5×). The default is Normal.
 
-`ruview.yoga.sequence` allows an operator to load a custom subset or reordering of the 8 poses, or to load additional poses added via `YogaMode.addPose()`. The array contains pose `id` strings. On load, yoga-mode resolves each ID against the registered template map; unknown IDs are skipped with a console warning.
+`echopose.yoga.sequence` allows an operator to load a custom subset or reordering of the 8 poses, or to load additional poses added via `YogaMode.addPose()`. The array contains pose `id` strings. On load, yoga-mode resolves each ID against the registered template map; unknown IDs are skipped with a console warning.
 
 All `localStorage` accesses are wrapped in try/catch to handle privacy-restricted origins.
 
@@ -567,7 +567,7 @@ The fixture set is 8 entries (one per pose). Each entry is a hard-coded `landmar
 - Two HTML files to maintain (`05` and `06`) where previously there was one. Mitigated by the fact that yoga-mode logic is identical between them — demo 06 is a layout variant, not a code fork.
 - Chaturanga Dandasana classification is inherently degraded from a front-facing camera (the body is horizontal; the depth axis is ambiguous). The classifier can detect the pose if the user faces the camera sideways (profile view), but the existing camera setup on ruvzen is front-facing. This is a known limitation, documented in the instruction text ("face the camera from the side for best Chaturanga detection").
 - The inline base64 bell WAV adds ~12 KB to the HTML file size. Negligible at the scale of the demo but noted.
-- `localStorage` namespace `ruview.yoga.*` adds four keys per origin. No conflict with `ruview.theme` from adam-mode.
+- `localStorage` namespace `echopose.yoga.*` adds four keys per origin. No conflict with `echopose.theme` from adam-mode.
 
 ### 3.3 Risks
 

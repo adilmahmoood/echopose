@@ -15,8 +15,8 @@ use rufield_provenance::{sha256_hex, Signer};
 use std::collections::BTreeMap;
 
 /// Model id stamped on emitted events (ADR-262 — derived features come from
-/// RuView's `/ws/sensing` pipeline, not a trained encoder).
-const MODEL_ID: &str = "ruview_sensing_server_v1";
+/// EchoPose's `/ws/sensing` pipeline, not a trained encoder).
+const MODEL_ID: &str = "echopose_sensing_server_v1";
 
 /// Firmware hash placeholder until the real ESP32 firmware image hash is wired
 /// through (ADR-262 §8 open question 3 — the BLAKE3 engine witness slot). A
@@ -79,13 +79,13 @@ fn derive_position(
 /// the same snapshot always yields the same id (required for the determinism
 /// gate).
 fn event_id(snap: &SensingSnapshot) -> String {
-    format!("ruview-{}-{}", snap.node_id, snap.timestamp_ns)
+    format!("echopose-{}-{}", snap.node_id, snap.timestamp_ns)
 }
 
 /// Convert a [`SensingSnapshot`] to a **signed** [`FieldEvent`] (ADR-262 P1).
 ///
 /// 1. Builds a `FieldTensor` (`Modality::WifiCsi`, axis `[Frequency]`) whose
-///    values are the RuView feature scalars, with the real `timestamp_ns`.
+///    values are the EchoPose feature scalars, with the real `timestamp_ns`.
 /// 2. Builds an `Observation` — `motion_vector`/`range_m`/`space_cell` derived
 ///    from the signal-field peak when present (else `None`; coordinates are
 ///    never fabricated), `confidence` from the classification, labels from
@@ -117,7 +117,7 @@ pub fn snapshot_to_field_event(snap: &SensingSnapshot, signer: &Signer) -> Field
     ];
     let confidence = (snap.classification.confidence as f32).clamp(0.0, 1.0);
     let noise_floor = f.variance.max(0.0) as f32;
-    let calibration_id = format!("ruview_node_{}", snap.node_id);
+    let calibration_id = format!("echopose_node_{}", snap.node_id);
 
     // `FieldTensor::new` only errors on a shape/axis mismatch; our shape
     // exactly matches `values.len()` and one axis, so this is infallible here.

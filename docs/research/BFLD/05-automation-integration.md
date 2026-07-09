@@ -26,15 +26,15 @@ enabled. This matches the operator opt-in posture for class-1 fields.
 {
   "name": "BFLD Presence",
   "unique_id": "bfld_presence_<node_id_hash>",
-  "state_topic": "ruview/<node_id>/bfld/presence/state",
+  "state_topic": "echopose/<node_id>/bfld/presence/state",
   "device_class": "occupancy",
   "payload_on": "true",
   "payload_off": "false",
   "device": {
-    "identifiers": ["ruview_<node_id_hash>"],
-    "name": "RuView BFLD Node",
+    "identifiers": ["echopose_<node_id_hash>"],
+    "name": "EchoPose BFLD Node",
     "model": "wifi-densepose-bfld",
-    "manufacturer": "RuView"
+    "manufacturer": "EchoPose"
   }
 }
 ```
@@ -121,7 +121,7 @@ Endpoint 1: BFLD Occupancy
 ### 3.1 Topic Tree
 
 ```
-ruview/<node_id>/bfld/
+echopose/<node_id>/bfld/
     presence/state          # "true" | "false" — class 2
     motion/state            # "0.42" — class 2
     person_count/state      # "1" — class 1
@@ -139,19 +139,19 @@ ruview/<node_id>/bfld/
 
 # BFLD node publishes to its own subtree
 user bfld_node_<node_id>
-topic write ruview/<node_id>/bfld/#
+topic write echopose/<node_id>/bfld/#
 
 # Home Assistant reads presence, motion, count, zone, confidence
 user homeassistant
-topic read ruview/+/bfld/presence/state
-topic read ruview/+/bfld/motion/state
-topic read ruview/+/bfld/person_count/state
-topic read ruview/+/bfld/zone_activity/state
-topic read ruview/+/bfld/confidence/state
-topic read ruview/+/bfld/events/bfld_update
+topic read echopose/+/bfld/presence/state
+topic read echopose/+/bfld/motion/state
+topic read echopose/+/bfld/person_count/state
+topic read echopose/+/bfld/zone_activity/state
+topic read echopose/+/bfld/confidence/state
+topic read echopose/+/bfld/events/bfld_update
 
 # HA diagnostic access (operator opt-in required to add this rule):
-# topic read ruview/+/bfld/identity_risk/state
+# topic read echopose/+/bfld/identity_risk/state
 
 # DENY all wildcard subscriptions for anonymous clients:
 # (mosquitto default: anonymous clients get no access)
@@ -178,7 +178,7 @@ or OpenHAB plugin is required; standard MQTT input/output nodes work directly.
 ```json
 [
   {"id": "bfld-in", "type": "mqtt in",
-   "topic": "ruview/+/bfld/presence/state", "qos": "1"},
+   "topic": "echopose/+/bfld/presence/state", "qos": "1"},
   {"id": "filter", "type": "switch",
    "property": "payload", "rules": [{"t": "eq", "v": "true"}]},
   {"id": "notify", "type": "http request",
@@ -189,15 +189,15 @@ or OpenHAB plugin is required; standard MQTT input/output nodes work directly.
 **OpenHAB MQTT binding** (items file):
 
 ```
-Switch BfldPresence "BFLD Presence" {mqtt="<[broker:ruview/node1/bfld/presence/state:state:default]"}
-Number BfldMotion  "BFLD Motion"   {mqtt="<[broker:ruview/node1/bfld/motion/state:state:default]"}
+Switch BfldPresence "BFLD Presence" {mqtt="<[broker:echopose/node1/bfld/presence/state:state:default]"}
+Number BfldMotion  "BFLD Motion"   {mqtt="<[broker:echopose/node1/bfld/motion/state:state:default]"}
 ```
 
 ---
 
 ## 5. cognitum-v0 Federation
 
-The cognitum-v0 appliance (Pi 5, running ruview-mcp-brain on port 9876,
+The cognitum-v0 appliance (Pi 5, running echopose-mcp-brain on port 9876,
 cognitum-rvf-agent on port 9004, ruvector-hailo-worker on port 50051 — see
 CLAUDE.local.md) is the fleet coordinator for multi-room correlation.
 
@@ -211,19 +211,19 @@ it contains only class-2 (anonymous) or class-3 (restricted) fields.
 
 ```
 # Node-local (not federated):
-ruview/<node_id>/bfld/identity_risk/state
-ruview/<node_id>/bfld/raw/state
+echopose/<node_id>/bfld/identity_risk/state
+echopose/<node_id>/bfld/raw/state
 
 # Federated (forwarded to cognitum-v0 broker):
-ruview/<node_id>/bfld/presence/state
-ruview/<node_id>/bfld/motion/state
-ruview/<node_id>/bfld/person_count/state
-ruview/<node_id>/bfld/events/bfld_update
+echopose/<node_id>/bfld/presence/state
+echopose/<node_id>/bfld/motion/state
+echopose/<node_id>/bfld/person_count/state
+echopose/<node_id>/bfld/events/bfld_update
 ```
 
 ### 5.2 cognitum-rvf-agent Role
 
-The `cognitum-rvf-agent` (port 9004) handles cross-node RVF (RuView Frame) container
+The `cognitum-rvf-agent` (port 9004) handles cross-node RVF (EchoPose Frame) container
 events. For BFLD, it receives federated presence/motion/count events and can correlate
 them for multi-room occupancy (e.g., "person moved from living room node to kitchen
 node"). It does not receive or need identity information to perform this correlation —

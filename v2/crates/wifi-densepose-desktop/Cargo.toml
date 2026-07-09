@@ -2,7 +2,7 @@
 name = "wifi-densepose-desktop"
 version.workspace = true
 edition.workspace = true
-description = "Tauri v2 desktop frontend for RuView WiFi DensePose"
+description = "Tauri v2 desktop frontend for EchoPose WiFi DensePose"
 license.workspace = true
 authors.workspace = true
 

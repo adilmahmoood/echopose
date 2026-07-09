@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ruvultra → browser CSI bridge.
 
-Reads adaptive_ctrl tick lines from the ESP32-S3 RuView firmware on
+Reads adaptive_ctrl tick lines from the ESP32-S3 EchoPose firmware on
 /dev/ttyACM0 and forwards normalized per-node metrics over a WebSocket
 that the helpers-skinned-realtime demo can subscribe to via Tailscale.
 

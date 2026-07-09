@@ -6,7 +6,7 @@
 | **Date** | 2026-05-25 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-CORE** |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-028](ADR-028-esp32-capability-audit.md) (witness chain), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (RUVIEW-POLICY) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-028](ADR-028-esp32-capability-audit.md) (witness chain), [ADR-124](ADR-124-rvagent-mcp-ruvector-npm-integration.md) (ECHOPOSE-POLICY) |
 | **Tracking issue** | TBD |
 
 ---
@@ -33,7 +33,7 @@ Python HA's `core.py` is a single-process Python 3.12 module that:
 
 For HOMECORE the same semantic requirements apply, but the implementation must support:
 - **Concurrent reads** from dozens of integration WASM sandboxes polling current state
-- **High-frequency writes** from the RuView sensing stack (CSI at 100 Hz; state updates at up to 20 Hz per entity)
+- **High-frequency writes** from the EchoPose sensing stack (CSI at 100 Hz; state updates at up to 20 Hz per entity)
 - **Ordered delivery** of state_changed events to automation triggers (ADR-129) and recorder (ADR-132) subscribers
 - **Zero-copy reads** where possible for the REST API (ADR-130) path
 
@@ -189,7 +189,7 @@ The entity registry is a `RwLock<HashMap<EntityId, EntityEntry>>` backed by an a
 ### This repo
 
 - `v2/crates/wifi-densepose-sensing-server/src/main.rs` — Axum + Tokio architecture pattern used throughout the existing server stack
-- `docs/adr/ADR-126-ruview-native-ha-port-master.md` — HOMECORE master; §5.5 crate naming; §6 compatibility contract; §5.1 RUVIEW-POLICY
+- `docs/adr/ADR-126-echopose-native-ha-port-master.md` — HOMECORE master; §5.5 crate naming; §6 compatibility contract; §5.1 ECHOPOSE-POLICY
 
 ---
 

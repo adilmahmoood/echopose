@@ -13,7 +13,7 @@
 
 ## 1. Context
 
-The BFLD pipeline (ADR-118) emits an over-the-wire `BfldFrame` consumed by the RuView aggregator, HA bridge, and witness bundle. The frame must be:
+The BFLD pipeline (ADR-118) emits an over-the-wire `BfldFrame` consumed by the EchoPose aggregator, HA bridge, and witness bundle. The frame must be:
 
 1. **Deterministic** — identical input ⇒ bit-identical output, so witness hashes survive verification (ADR-028 pattern).
 2. **Self-describing** — magic + version so future BFLD revisions don't silently corrupt aggregator state.
@@ -118,7 +118,7 @@ The witness test in `tests/determinism.rs` captures a 200-frame BFI fixture, ser
 
 ### Neutral
 
-- The vendor-extension section allows downstream RuView cogs (e.g., `cog-pose-estimation`) to attach metadata without a header change, at the cost of CRC scope creep. Vendor sections are explicitly outside the witness hash.
+- The vendor-extension section allows downstream EchoPose cogs (e.g., `cog-pose-estimation`) to attach metadata without a header change, at the cost of CRC scope creep. Vendor sections are explicitly outside the witness hash.
 
 ---
 
@@ -134,7 +134,7 @@ Rejected: deterministic CBOR (RFC 8949 §4.2) is achievable but the parser surfa
 
 ### Alt 3: Variable-width magic / no magic
 
-Rejected: receivers must distinguish BFLD frames from rvCSI `CsiFrame` and other RuView payloads on shared transports.
+Rejected: receivers must distinguish BFLD frames from rvCSI `CsiFrame` and other EchoPose payloads on shared transports.
 
 ### Alt 4: Move CRC32 to header
 

@@ -1,4 +1,4 @@
-# ADR-151: RuView Per-Room Calibration & Specialized Model Training System
+# ADR-151: EchoPose Per-Room Calibration & Specialized Model Training System
 
 | Field | Value |
 |-------|-------|
@@ -14,14 +14,14 @@
 
 ### 1.1 The thesis — teach the room before you teach the model
 
-RuView's deployment frontier is not a better generic model. ADR-150 documents the wall directly: an MM-Fi pose head scores **81.63% torso-PCK@20 in-domain but ~11.6% leakage-free cross-subject**, and bigger capacity *hurts* cross-subject (transformer 24.8% < conv 27.3%). A single oversized model that "understands the world" overfits the rooms and bodies it has seen. The lever is the opposite of scale: **a small model that understands *one* room and *one* person**, calibrated in minutes, run locally, and specialised per biological signal.
+EchoPose's deployment frontier is not a better generic model. ADR-150 documents the wall directly: an MM-Fi pose head scores **81.63% torso-PCK@20 in-domain but ~11.6% leakage-free cross-subject**, and bigger capacity *hurts* cross-subject (transformer 24.8% < conv 27.3%). A single oversized model that "understands the world" overfits the rooms and bodies it has seen. The lever is the opposite of scale: **a small model that understands *one* room and *one* person**, calibrated in minutes, run locally, and specialised per biological signal.
 
-This positions RuView between the two incumbents in ambient sensing:
+This positions EchoPose between the two incumbents in ambient sensing:
 
 - **Wearables** — high fidelity, but people forget to wear them, and they only measure the wearer.
 - **Cameras** — powerful, but invasive, store identifiable video, and fail in the dark / under covers.
 
-RuView sits in the middle: it learns the *space*, learns the *person*, and tracks biological rhythm (breathing, heartbeat, restlessness, posture, presence) without seeing skin or storing video. Heartbeat and breathing are not visual problems — they are tiny, repeating disturbances in the RF field. Capturing them well is a *calibration* problem, not a *model-size* problem.
+EchoPose sits in the middle: it learns the *space*, learns the *person*, and tracks biological rhythm (breathing, heartbeat, restlessness, posture, presence) without seeing skin or storing video. Heartbeat and breathing are not visual problems — they are tiny, repeating disturbances in the RF field. Capturing them well is a *calibration* problem, not a *model-size* problem.
 
 ### 1.2 What already exists (and what is missing)
 
@@ -52,7 +52,7 @@ The system is deliberately presented to operators as four plain steps. Each maps
 
 ## 2. Decision
 
-**Build the RuView Per-Room Calibration & Specialized Model Training System: a four-stage, local-first pipeline (`baseline → enroll → extract → train`) that produces a versioned *bank of small specialised ruVector models* scoped to one `room_id`, each a lightweight head distilled/adapted from the frozen, Hugging-Face-published RF Foundation Encoder (ADR-150).** Big model understands the world; small ruVector models understand *your room*.
+**Build the EchoPose Per-Room Calibration & Specialized Model Training System: a four-stage, local-first pipeline (`baseline → enroll → extract → train`) that produces a versioned *bank of small specialised ruVector models* scoped to one `room_id`, each a lightweight head distilled/adapted from the frozen, Hugging-Face-published RF Foundation Encoder (ADR-150).** Big model understands the world; small ruVector models understand *your room*.
 
 Two invariants govern every design choice below:
 

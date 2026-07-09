@@ -4,7 +4,7 @@
 **Status**: SOTA Survey + Design Proposal
 **Scope**: Contrastive self-supervised learning methods adapted for WiFi CSI
 coherence detection, boundary identification, and cross-environment transfer
-within the RuView/wifi-densepose Rust codebase.
+within the EchoPose/wifi-densepose Rust codebase.
 
 ---
 
@@ -420,7 +420,7 @@ where A and B are the two clusters separated by boundary b. High sharpness
 indicates a well-detected boundary; low sharpness indicates the boundary
 is ambiguous or the model is under-trained.
 
-In the RuView codebase, this metric connects to the existing
+In the EchoPose codebase, this metric connects to the existing
 `coherence_gate.rs` module, which makes Accept/PredictOnly/Reject/Recalibrate
 decisions based on coherence quality. The sharpness metric provides a
 complementary signal: even if individual link coherence is high, low
@@ -707,7 +707,7 @@ final representations. The curriculum stage is determined automatically
 by the delta detector: low-delta periods are easy, high-delta periods
 are hard.
 
-### 5.7 Integration with RuView Codebase
+### 5.7 Integration with EchoPose Codebase
 
 Pre-training integrates with the existing training pipeline in
 `wifi-densepose-train`:
@@ -1222,6 +1222,6 @@ This research motivates a new Architecture Decision Record:
 
 ---
 
-*Document prepared for the RuView/wifi-densepose project. This research
+*Document prepared for the EchoPose/wifi-densepose project. This research
 informs the design of contrastive learning pipelines for RF field coherence
 detection within the ESP32 mesh sensing architecture.*

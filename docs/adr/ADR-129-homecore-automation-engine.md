@@ -6,7 +6,7 @@
 | **Date** | 2026-05-25 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-AUTO** |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-129 implicit](ADR-129-homecore-automation-engine.md), [ADR-133](ADR-133-homecore-assist-ruflo.md) (HOMECORE-ASSIST) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-129 implicit](ADR-129-homecore-automation-engine.md), [ADR-133](ADR-133-homecore-assist-ruflo.md) (HOMECORE-ASSIST) |
 | **Tracking issue** | TBD |
 
 ---
@@ -161,7 +161,7 @@ This is the same Wasmtime host already used for integration plugins (ADR-128) �
 ### P4 — Blueprint system + ruflo agent condition (1 week)
 
 - [ ] Blueprint YAML parser + input variable substitution.
-- [ ] Optional ruflo agent condition: `condition: ruflo_agent` with `query: "..."` routes to ruflo LLM (ADR-133 §3.3); gated by RUVIEW-POLICY.
+- [ ] Optional ruflo agent condition: `condition: ruflo_agent` with `query: "..."` routes to ruflo LLM (ADR-133 §3.3); gated by ECHOPOSE-POLICY.
 - [ ] `automation.reload` service.
 - [ ] Performance benchmark: 100 automations loaded; 100 state changes/s; verify trigger evaluation stays < 5 ms per state change.
 

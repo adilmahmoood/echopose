@@ -1,4 +1,4 @@
-"""Self-contained regression test for the RuView calibration service.
+"""Self-contained regression test for the EchoPose calibration service.
 
 Exercises the committed CLI end-to-end on synthetic data (CPU, no GPU, no real checkpoint):
   build a base -> calibrate.py fits an adapter -> infer.py runs base+adapter -> assert the

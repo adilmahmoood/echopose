@@ -6,7 +6,7 @@
 | **Date** | 2026-05-25 |
 | **Deciders** | ruv |
 | **Codename** | **HOMECORE-PLUGINS** |
-| **Relates to** | [ADR-126](ADR-126-ruview-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-102](ADR-102-edge-module-registry.md) (cog registry), [ADR-100](ADR-100-cog-packaging-specification.md) (cog packaging spec) |
+| **Relates to** | [ADR-126](ADR-126-echopose-native-ha-port-master.md) (HOMECORE master), [ADR-127](ADR-127-homecore-state-machine-rust.md) (HOMECORE-CORE), [ADR-102](ADR-102-edge-module-registry.md) (cog registry), [ADR-100](ADR-100-cog-packaging-specification.md) (cog packaging spec) |
 | **Tracking issue** | TBD |
 
 ---
@@ -97,7 +97,7 @@ HOMECORE's manifest is a superset of HA's `manifest.json`. Fields not present in
 - `publisher_key` — Ed25519 public key of the publisher
 - `min_homecore_version` — minimum HOMECORE version required
 - `host_imports_required` — subset of host functions the module needs (security auditable)
-- `homecore_permissions` — coarse-grained permission claims (glob patterns); future: enforcement via RUVIEW-POLICY layer (ADR-124 §4.1a)
+- `homecore_permissions` — coarse-grained permission claims (glob patterns); future: enforcement via ECHOPOSE-POLICY layer (ADR-124 §4.1a)
 - `cog_id` — Seed app registry ID for the cog distribution
 
 ---
@@ -235,7 +235,7 @@ Each WASM module instance runs in its own Wasmtime `Store`. The host calls WASM 
 | **ADR-127 state machine not stable** — plugin ABI calls into the state machine; if the API changes, all plugins break | High (early phase) | High | Freeze the `hc_state_get`/`hc_state_set` ABI in P1; never change pointer/length convention; version the host ABI in the manifest `min_homecore_version` | ADR-127 must freeze public API before ADR-128 P2 begins |
 | **Wasmtime binary size** — adding Wasmtime to HOMECORE adds ~15 MB to the binary on Pi 5 | Medium | Medium | Use Cranelift JIT only; skip LLVM optimizer. Alternative: `wasm3` feature flag (~50 kB) for constrained hardware | ADR-126: binary size target < 50 MB idle RAM; Wasmtime itself uses ~5 MB RAM at runtime |
 | **ABI memory overhead** — every state read/write from a plugin must JSON-encode/decode through shared memory | Medium | Medium | Cap state value size at 64 kB; use a pool allocator for ABI buffers; profile on Pi 5 at 10 state writes/s per plugin | ADR-130: REST API reads state from DashMap directly, bypassing plugin ABI — no overhead there |
-| **Community plugin trust** — WASM sandbox prevents crashes but cannot prevent malicious plugins from calling `hc_service_call` to turn off all lights | Medium | High | `homecore_permissions` permission claims (P5); future: RUVIEW-POLICY enforcement (ADR-124 §4.1a) for biometric data access | ADR-124 RUVIEW-POLICY must be made aware of HOMECORE as a policy principal |
+| **Community plugin trust** — WASM sandbox prevents crashes but cannot prevent malicious plugins from calling `hc_service_call` to turn off all lights | Medium | High | `homecore_permissions` permission claims (P5); future: ECHOPOSE-POLICY enforcement (ADR-124 §4.1a) for biometric data access | ADR-124 ECHOPOSE-POLICY must be made aware of HOMECORE as a policy principal |
 
 ---
 
@@ -267,4 +267,4 @@ Each WASM module instance runs in its own Wasmtime `Store`. The host calls WASM 
 - `docs/adr/ADR-100-cog-packaging-specification.md` — cog packaging spec; Ed25519 signing
 - `docs/adr/ADR-101-pose-estimation-cog.md` — cog lifecycle precedent
 - `docs/adr/ADR-127-homecore-state-machine-rust.md` — state machine ABI that plugins call
-- `docs/adr/ADR-126-ruview-native-ha-port-master.md` — §5.7 "do not port" list (legacy Python integrations)
+- `docs/adr/ADR-126-echopose-native-ha-port-master.md` — §5.7 "do not port" list (legacy Python integrations)

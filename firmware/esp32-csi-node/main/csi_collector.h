@@ -14,11 +14,17 @@
 /** ADR-018 magic number. */
 #define CSI_MAGIC 0xC5110001
 
+/** ADR-032 authenticated magic number. */
+#define CSI_AUTHENTICATED_MAGIC 0xC5110008
+
 /** ADR-018 header size in bytes. */
 #define CSI_HEADER_SIZE 20
 
+/** ADR-032 authenticated header size in bytes. */
+#define CSI_AUTHENTICATED_HEADER_SIZE 28
+
 /** Maximum frame buffer size (header + 4 antennas * 256 subcarriers * 2 bytes). */
-#define CSI_MAX_FRAME_SIZE (CSI_HEADER_SIZE + 4 * 256 * 2)
+#define CSI_MAX_FRAME_SIZE (CSI_AUTHENTICATED_HEADER_SIZE + 4 * 256 * 2)
 
 /** Maximum number of channels in the hop table (ADR-029). */
 #define CSI_HOP_CHANNELS_MAX 6
@@ -92,7 +98,7 @@ void csi_collector_start_hop_timer(void);
 
 /**
  * Upgrade the promiscuous filter to capture DATA frames in addition to MGMT
- * (RuView#893/#521).
+ * (EchoPose#893/#521).
  *
  * Called on display-less boards: the MGMT-only filter (the #396 display-crash
  * workaround set in csi_collector_init) only fires the CSI callback on sparse
@@ -135,5 +141,21 @@ uint16_t csi_collector_get_pkt_yield_per_sec(void);
  *         CSI callback path.
  */
 uint16_t csi_collector_get_send_fail_count(void);
+
+/**
+ * Configure the NDP injection rate limiter from NVS (ADR-032 §2.3).
+ *
+ * Reads ndp_max_tokens and ndp_refill_hz from the global NVS config.
+ * Must be called after nvs_config_load() and before any NDP injection.
+ */
+void csi_collector_configure_ndp_rate_limiter(void);
+
+/**
+ * Initialize security parameters (ADR-032 §2.8).
+ *
+ * Initializes PSA Cryptography and derives the SipHash-2-4 key
+ * from the pre-shared mesh key if valid.
+ */
+void csi_collector_init_security(void);
 
 #endif /* CSI_COLLECTOR_H */

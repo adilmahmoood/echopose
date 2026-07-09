@@ -19,7 +19,7 @@
 //! **conjectural** with defensible defaults. We re-state that here in code:
 //! the table is the best public-domain estimate at DC–10 kHz, but no
 //! systematic measurement of residential-wall magnetic-field penetration
-//! loss at RuView geometry has been published. Reinforced concrete carries
+//! loss at EchoPose geometry has been published. Reinforced concrete carries
 //! a warning flag so consumers know to escalate.
 
 use crate::scene::Vec3;

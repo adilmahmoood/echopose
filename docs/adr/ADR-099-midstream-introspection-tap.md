@@ -1,4 +1,4 @@
-# ADR-099: Adopt midstream as RuView's real-time introspection + low-latency tap
+# ADR-099: Adopt midstream as EchoPose's real-time introspection + low-latency tap
 
 | Field | Value |
 |-------|-------|
@@ -6,20 +6,20 @@
 | **Date** | 2026-05-13 |
 | **Deciders** | ruv |
 | **Codename** | **midstream-introspection** |
-| **Relates to** | ADR-097 (rvCSI adoption — provides the validated `CsiFrame` stream this ADR taps), ADR-098 (Rejected midstream as a *replacement* for RuView's existing seams — this ADR is the *parallel-addition* answer that complements it), ADR-095/096 (rvCSI platform + FFI), ADR-014 (SOTA signal processing in `wifi-densepose-signal`) |
+| **Relates to** | ADR-097 (rvCSI adoption — provides the validated `CsiFrame` stream this ADR taps), ADR-098 (Rejected midstream as a *replacement* for EchoPose's existing seams — this ADR is the *parallel-addition* answer that complements it), ADR-095/096 (rvCSI platform + FFI), ADR-014 (SOTA signal processing in `wifi-densepose-signal`) |
 | **midstream repo** | [github.com/ruvnet/midstream](https://github.com/ruvnet/midstream) (vendored at `vendor/midstream`); 5 crates on crates.io at `0.2.1` |
 
 ---
 
 ## 1. Context
 
-[ADR-098](ADR-098-evaluate-midstream-fit.md) rejected midstream as a **replacement** for RuView's existing seams — the four candidate substitutions (WS fan-out, the `wifi-densepose-signal` DSP pipeline, ESP32 mesh TDM coordination, `tokio::sync::broadcast` backpressure) all checked out as "current solution fits, midstream is the wrong tool". That verdict stands.
+[ADR-098](ADR-098-evaluate-midstream-fit.md) rejected midstream as a **replacement** for EchoPose's existing seams — the four candidate substitutions (WS fan-out, the `wifi-densepose-signal` DSP pipeline, ESP32 mesh TDM coordination, `tokio::sync::broadcast` backpressure) all checked out as "current solution fits, midstream is the wrong tool". That verdict stands.
 
-This ADR is the **other half** of that conversation. Two of midstream's primitives — `temporal-compare` (DTW) and `temporal-attractor-studio` (Lyapunov + regime classification) — were carved out under ADR-098 D5 as "re-evaluate if a second use case appears". The use case is now named: **real-time introspection of the CSI stream + low-latency detection of motion-shape events**, running as a parallel tap *alongside* RuView's existing event pipeline rather than replacing it.
+This ADR is the **other half** of that conversation. Two of midstream's primitives — `temporal-compare` (DTW) and `temporal-attractor-studio` (Lyapunov + regime classification) — were carved out under ADR-098 D5 as "re-evaluate if a second use case appears". The use case is now named: **real-time introspection of the CSI stream + low-latency detection of motion-shape events**, running as a parallel tap *alongside* EchoPose's existing event pipeline rather than replacing it.
 
 ### 1.1 The latency floor today, by construction
 
-[`vendor/rvcsi/crates/rvcsi-events/src/window_buffer.rs:20`](../../vendor/rvcsi/crates/rvcsi-events/src/window_buffer.rs#L20) defines `WindowBuffer::new(max_frames: usize, max_duration_ns: u64)`. The events pipeline emits *only at window close*. At RuView's ~30 Hz CSI rate with the default 16-frame / 1-second windows, the soonest `MotionDetected` or `PresenceStarted` can fire is roughly **500–1000 ms after the actual RF perturbation**. That's an architectural floor, not an implementation accident — `WindowBuffer` is the integration tier, and integration takes time.
+[`vendor/rvcsi/crates/rvcsi-events/src/window_buffer.rs:20`](../../vendor/rvcsi/crates/rvcsi-events/src/window_buffer.rs#L20) defines `WindowBuffer::new(max_frames: usize, max_duration_ns: u64)`. The events pipeline emits *only at window close*. At EchoPose's ~30 Hz CSI rate with the default 16-frame / 1-second windows, the soonest `MotionDetected` or `PresenceStarted` can fire is roughly **500–1000 ms after the actual RF perturbation**. That's an architectural floor, not an implementation accident — `WindowBuffer` is the integration tier, and integration takes time.
 
 For high-touch UI (the live dashboard) and for downstream consumers that need to react to motion *as it starts*, that floor matters. The `wifi-densepose-sensing-server` already maintains continuous per-frame state (`AppStateInner::{frame_history, rssi_history, smoothed_motion, baseline_motion, last_novelty_score}` at [`main.rs:307–423`](../../v2/crates/wifi-densepose-sensing-server/src/main.rs#L307)), but exposes them only as endpoint-poll scalars — there's no streaming-tap surface for "what's happening *inside* the pipeline right now". A consumer that wants reflex-level reaction has to invent it.
 
@@ -35,13 +35,13 @@ Ground-truth grep across `vendor/midstream/crates/`:
 | `DTW` | 540 | `temporal-compare` |
 | `phase-space` | 23 | `temporal-attractor-studio` |
 
-`temporal-compare/src/lib.rs:5` advertises *"Dynamic Time Warping (DTW), Longest Common Subsequence (LCS), Edit Distance (Levenshtein), Pattern matching and detection, Efficient caching"* — and the bench prose (in midstream's `README.md`) puts a cached pattern match at **~12 µs**. `temporal-attractor-studio/src/lib.rs:6` advertises *"Attractor classification (point, limit cycle, strange), Lyapunov exponent calculation, Phase space analysis, Stability detection"*. At RuView's ~30 Hz tick budget (33 ms), the per-frame cost of either is well under 1 % of the budget.
+`temporal-compare/src/lib.rs:5` advertises *"Dynamic Time Warping (DTW), Longest Common Subsequence (LCS), Edit Distance (Levenshtein), Pattern matching and detection, Efficient caching"* — and the bench prose (in midstream's `README.md`) puts a cached pattern match at **~12 µs**. `temporal-attractor-studio/src/lib.rs:6` advertises *"Attractor classification (point, limit cycle, strange), Lyapunov exponent calculation, Phase space analysis, Stability detection"*. At EchoPose's ~30 Hz tick budget (33 ms), the per-frame cost of either is well under 1 % of the budget.
 
 ### 1.3 Why this isn't ADR-214
 
 ADR-214 (the V0 / Cognitum cluster correlator decision, owned in a separate repo) takes a much larger commitment: all five midstream crates, a full new `cognitum-rvcsi-correlator` crate, a `WireRecord` adapter layer, multi-Pi cadence alignment via `nanosecond-scheduler`. That's the right shape for V0 because V0 is filling a "no Rust correlator binary exists yet" gap (ADR-209 §C.1) — *replacing* a Python prototype.
 
-RuView's case is different and smaller. The Rust pipeline already exists and works. This ADR adds two midstream crates and one tap — same primitives, much narrower scope, no replacement.
+EchoPose's case is different and smaller. The Rust pipeline already exists and works. This ADR adds two midstream crates and one tap — same primitives, much narrower scope, no replacement.
 
 ---
 
@@ -53,7 +53,7 @@ RuView's case is different and smaller. The Rust pipeline already exists and wor
 
 `midstreamer-temporal-compare = "0.2"` and `midstreamer-attractor = "0.2"` enter as dependencies of `wifi-densepose-sensing-server`. The other three midstream crates are explicitly **not** in scope:
 
-* `midstreamer-scheduler` — sub-µs host-side scheduling has no fit in RuView; the per-Pi / per-ESP32 timing-sensitive work happens in firmware (ADR-073 channel hopping, the ESP32 TDM) where it belongs.
+* `midstreamer-scheduler` — sub-µs host-side scheduling has no fit in EchoPose; the per-Pi / per-ESP32 timing-sensitive work happens in firmware (ADR-073 channel hopping, the ESP32 TDM) where it belongs.
 * `midstreamer-neural-solver` (LTL) — relevant for the MAT (Mass Casualty Assessment Tool) audit-trail use case, *not* for real-time introspection. Tracked as a follow-up ADR.
 * `midstreamer-strange-loop` — long-horizon meta-learning for `adaptive_classifier` confidence; out of scope of "real-time".
 
@@ -218,7 +218,7 @@ P0 is the commitment. P1–P3 are sequential per-PR follow-ups. P4 is research-s
 | **Write the DTW + attractor math from scratch in `wifi-densepose-signal`.** | This is what midstream's crates *are*. ~640 hits for DTW and 1252 for Attractor across midstream's existing source — re-implementing would be 1–2k LOC of math we'd own and maintain forever. Not free. |
 | **Use the heuristic `smoothed_motion` / `baseline_motion` as the introspection signal.** | They already exist (`main.rs:310,377`), they're already broadcast on the dashboard's continuous-summary path. But they're a single scalar derived from EWMA — they don't classify regime, don't match shapes, don't give phase-space stability. Worth keeping as the "always-on lite indicator"; not a substitute for D3's snapshot. |
 | **All five midstream crates at once.** | The other three (`scheduler`, `neural-solver`, `strange-loop`) don't fit the "real-time introspection" framing — they fit "host-side hard scheduling", "audit-grade proofs", "long-horizon meta-learning". Mixing them in would balloon the surface and dilute the latency-win measurement. D1 keeps it to two. |
-| **Defer until ADR-214's V0 correlator ships and copy its design.** | V0's correlator is the *replacement* shape (Python prototype → Rust). RuView's case is the *addition* shape. The designs share crates but not topologies; deferring would leave RuView's latency floor in place for months while V0 lands. |
+| **Defer until ADR-214's V0 correlator ships and copy its design.** | V0's correlator is the *replacement* shape (Python prototype → Rust). EchoPose's case is the *addition* shape. The designs share crates but not topologies; deferring would leave EchoPose's latency floor in place for months while V0 lands. |
 
 ---
 
@@ -232,8 +232,8 @@ P0 is the commitment. P1–P3 are sequential per-PR follow-ups. P4 is research-s
 
 ## 8. References
 
-* [ADR-097 — Adopt rvCSI as RuView's primary CSI runtime](ADR-097-adopt-rvcsi-as-ruview-csi-runtime.md) — provides the validated `CsiFrame` stream this tap reads.
-* [ADR-098 — Evaluate `ruvnet/midstream` for RuView's CSI / WebSocket / mesh pipeline (Rejected)](ADR-098-evaluate-midstream-fit.md) — Rejected midstream as a *replacement* for existing seams. This ADR is the *addition* answer; D5/D6 of ADR-098 explicitly carved out `temporal-compare` and the attractor crate for this case.
+* [ADR-097 — Adopt rvCSI as EchoPose's primary CSI runtime](ADR-097-adopt-rvcsi-as-echopose-csi-runtime.md) — provides the validated `CsiFrame` stream this tap reads.
+* [ADR-098 — Evaluate `ruvnet/midstream` for EchoPose's CSI / WebSocket / mesh pipeline (Rejected)](ADR-098-evaluate-midstream-fit.md) — Rejected midstream as a *replacement* for existing seams. This ADR is the *addition* answer; D5/D6 of ADR-098 explicitly carved out `temporal-compare` and the attractor crate for this case.
 * [ADR-095 — rvCSI Edge RF Sensing Platform](ADR-095-rvcsi-edge-rf-sensing-platform.md), [ADR-096 — rvCSI Crate Topology](ADR-096-rvcsi-ffi-crate-layout.md) — the upstream platform.
 * [`midstreamer-temporal-compare` 0.2.1](https://crates.io/crates/midstreamer-temporal-compare), [`midstreamer-attractor` 0.2.1](https://crates.io/crates/midstreamer-attractor) — the two crates this ADR adopts.
 * [`vendor/midstream/crates/temporal-compare/src/lib.rs:5`](../../vendor/midstream/crates/temporal-compare/src/lib.rs#L5) — DTW / LCS / edit-distance pattern matching, public API.

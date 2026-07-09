@@ -69,7 +69,7 @@ impl CurrentLoop {
 /// A ferrous (high-χ) object that picks up a linearly-induced moment from the
 /// ambient field and re-radiates as a dipole. Linear approximation —
 /// `m_induced = χ · V · H_ambient` — valid in low-field, unsaturated regime
-/// (Cullity & Graham 2e §2). For RuView geometry this is the dominant
+/// (Cullity & Graham 2e §2). For EchoPose geometry this is the dominant
 /// "metallic-object detection" signal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FerrousObject {

@@ -1,6 +1,6 @@
 # Domain Models
 
-This folder contains Domain-Driven Design (DDD) specifications for each major subsystem in RuView.
+This folder contains Domain-Driven Design (DDD) specifications for each major subsystem in EchoPose.
 
 DDD organizes the codebase around the problem being solved — not around technical layers. Each *bounded context* owns its own data, rules, and language. Contexts communicate through domain events, not by sharing mutable state. This makes the system easier to reason about, test, and extend — whether you're a person or an AI agent.
 

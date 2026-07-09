@@ -5,7 +5,7 @@
 | **Status** | Accepted |
 | **Date** | 2026-03-01 |
 | **Deciders** | ruv |
-| **Relates to** | ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-031 (RuView Sensing-First RF), ADR-018 (ESP32 Implementation), ADR-012 (ESP32 Mesh) |
+| **Relates to** | ADR-029 (RuvSense Multistatic), ADR-030 (Persistent Field Model), ADR-031 (EchoPose Sensing-First RF), ADR-018 (ESP32 Implementation), ADR-012 (ESP32 Mesh) |
 
 ---
 
@@ -486,7 +486,7 @@ The QUIC transport layer is additive, not a replacement:
 |-----|-------------|
 | ADR-029 (RuvSense Multistatic) | **Hardened**: TDM beacon and CSI frame authentication, NDP rate limiting, QUIC transport |
 | ADR-030 (Persistent Field Model) | **Protected**: Coherence gate timeout; transition log bounded; gesture DTW enhanced (midstreamer-temporal-compare); drift detection enhanced (midstreamer-attractor) |
-| ADR-031 (RuView RF Mode) | **Hardened**: Authenticated beacons protect cross-viewpoint synchronization via QUIC streams |
+| ADR-031 (EchoPose RF Mode) | **Hardened**: Authenticated beacons protect cross-viewpoint synchronization via QUIC streams |
 | ADR-018 (ESP32 Implementation) | **Extended**: CSI frame header bumped to v2 with SipHash tag; backward-compatible magic check |
 | ADR-012 (ESP32 Mesh) | **Hardened**: Mesh key management, NVS credential zeroing, atomic firmware state, QUIC connection migration |
 

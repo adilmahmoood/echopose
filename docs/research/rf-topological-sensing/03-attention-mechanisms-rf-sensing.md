@@ -1,6 +1,6 @@
 # Attention Mechanisms for RF Topological Sensing
 
-## A Comprehensive Survey for WiFi-DensePose / RuView
+## A Comprehensive Survey for WiFi-DensePose / EchoPose
 
 **Document**: 03-attention-mechanisms-rf-sensing
 **Date**: 2026-03-08
@@ -1024,11 +1024,11 @@ This fits within a Raspberry Pi 4 (1 GB RAM, 4-core ARM Cortex-A72) for
 real-time inference at 10 Hz. For ESP32 deployment, the efficient variants
 from Section 8 reduce this by 10-50x.
 
-### 9.4 Relation to RuView Codebase
+### 9.4 Relation to EchoPose Codebase
 
-The unified architecture maps directly to existing RuView modules:
+The unified architecture maps directly to existing EchoPose modules:
 
-| Architecture Layer | RuView Module | File |
+| Architecture Layer | EchoPose Module | File |
 |---|---|---|
 | Antenna Attention | ruvector-attn-mincut | `model.rs` (apply_antenna_attention) |
 | Temporal Self-Attention | ruvsense | `gesture.rs`, `intention.rs` |
@@ -1107,4 +1107,4 @@ The unified architecture maps directly to existing RuView modules:
 ---
 
 *End of document. This research reference supports the attention mechanism
-design choices in the RuView/WiFi-DensePose RF topological sensing system.*
+design choices in the EchoPose/WiFi-DensePose RF topological sensing system.*

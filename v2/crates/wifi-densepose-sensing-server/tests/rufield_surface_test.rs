@@ -24,7 +24,7 @@ use tower::ServiceExt; // `oneshot`
 
 use wifi_densepose_rufield::{is_fusable, verify_event, FieldEvent, Modality, PrivacyClass};
 use wifi_densepose_sensing_server::rufield_surface::{
-    self, FieldState, FieldSurface, RuViewPrivacyClass, SensingClass, SensingFeatures, SignalField,
+    self, FieldState, FieldSurface, EchoPosePrivacyClass, SensingClass, SensingFeatures, SignalField,
 };
 
 /// A fixed dev seed for deterministic, signed events under test.
@@ -68,7 +68,7 @@ fn surface_router() -> (FieldState, axum::Router) {
 
 /// Drive one cycle into the surface (the in-process equivalent of the live
 /// sensing loop calling `emit()` per cycle).
-async fn inject(state: &FieldState, trust: RuViewPrivacyClass, presence: bool, identity_bound: bool) {
+async fn inject(state: &FieldState, trust: EchoPosePrivacyClass, presence: bool, identity_bound: bool) {
     let snap = rufield_surface::build_snapshot(
         1_791_986_400_000_000_000,
         "esp32_node_7".into(),
@@ -104,7 +104,7 @@ async fn get_field_events(app: &axum::Router) -> Vec<FieldEvent> {
 #[tokio::test]
 async fn gate_anonymous_cycle_surfaces_wellformed_signed_event() {
     let (state, app) = surface_router();
-    inject(&state, RuViewPrivacyClass::Anonymous, true, false).await;
+    inject(&state, EchoPosePrivacyClass::Anonymous, true, false).await;
 
     let events = get_field_events(&app).await;
     assert_eq!(events.len(), 1, "one occupancy cycle ⇒ exactly one surfaced event");
@@ -132,7 +132,7 @@ async fn gate_anonymous_cycle_surfaces_wellformed_signed_event() {
 async fn gate_empty_cycle_produces_no_phantom_event() {
     let (state, app) = surface_router();
     // A no-presence cycle: nothing to describe.
-    inject(&state, RuViewPrivacyClass::Anonymous, false, false).await;
+    inject(&state, EchoPosePrivacyClass::Anonymous, false, false).await;
 
     let events = get_field_events(&app).await;
     assert!(
@@ -148,7 +148,7 @@ async fn gate_derived_trust_never_surfaces_low_privacy() {
     // network surface, and certainly never as a low-privacy (P1/P2) event.
     for identity_bound in [false, true] {
         let (state, app) = surface_router();
-        inject(&state, RuViewPrivacyClass::Derived, true, identity_bound).await;
+        inject(&state, EchoPosePrivacyClass::Derived, true, identity_bound).await;
 
         let events = get_field_events(&app).await;
         assert!(
@@ -164,10 +164,10 @@ async fn gate_mixed_stream_surfaces_only_egress_safe_events() {
     // interleaved Derived cycles are dropped — the surface only ever carries
     // egress-safe (P1/P2) events.
     let (state, app) = surface_router();
-    inject(&state, RuViewPrivacyClass::Anonymous, true, false).await; // P2 → surfaced
-    inject(&state, RuViewPrivacyClass::Derived, true, false).await; // P4 → dropped
-    inject(&state, RuViewPrivacyClass::Anonymous, true, false).await; // P2 → surfaced
-    inject(&state, RuViewPrivacyClass::Derived, true, true).await; // P5 → dropped
+    inject(&state, EchoPosePrivacyClass::Anonymous, true, false).await; // P2 → surfaced
+    inject(&state, EchoPosePrivacyClass::Derived, true, false).await; // P4 → dropped
+    inject(&state, EchoPosePrivacyClass::Anonymous, true, false).await; // P2 → surfaced
+    inject(&state, EchoPosePrivacyClass::Derived, true, true).await; // P5 → dropped
 
     let events = get_field_events(&app).await;
     assert_eq!(events.len(), 2, "only the two Anonymous cycles surface");

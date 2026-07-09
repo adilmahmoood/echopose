@@ -119,7 +119,7 @@ impl OwnedDiscoveryBuilder {
     }
 
     /// Derive a per-node builder from this base (issue #898). Each physical
-    /// RuView node must surface as its own Home-Assistant device — the base
+    /// EchoPose node must surface as its own Home-Assistant device — the base
     /// builder's `node_id` (the MQTT client id) is replaced with the actual
     /// node id, giving a distinct `wifi_densepose_<node>` device identifier
     /// and a per-node friendly name, instead of collapsing every node into a
@@ -128,7 +128,7 @@ impl OwnedDiscoveryBuilder {
         OwnedDiscoveryBuilder {
             discovery_prefix: self.discovery_prefix.clone(),
             node_id: node_id.to_string(),
-            node_friendly_name: Some(format!("RuView node {node_id}")),
+            node_friendly_name: Some(format!("EchoPose node {node_id}")),
             sw_version: self.sw_version.clone(),
             model: self.model.clone(),
             via_device: self.via_device.clone(),
@@ -350,7 +350,7 @@ mod per_node_device_tests {
         OwnedDiscoveryBuilder {
             discovery_prefix: "homeassistant".into(),
             node_id: "wifi-densepose-1".into(),
-            node_friendly_name: Some("RuView".into()),
+            node_friendly_name: Some("EchoPose".into()),
             sw_version: "0.0.0".into(),
             model: "test".into(),
             via_device: None,
@@ -365,7 +365,7 @@ mod per_node_device_tests {
     fn for_node_overrides_node_id_and_friendly_name() {
         let n = base().for_node("node-A");
         assert_eq!(n.node_id, "node-A");
-        assert_eq!(n.node_friendly_name.as_deref(), Some("RuView node node-A"));
+        assert_eq!(n.node_friendly_name.as_deref(), Some("EchoPose node node-A"));
     }
 
     #[test]

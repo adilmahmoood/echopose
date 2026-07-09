@@ -756,38 +756,38 @@ The following patterns were checked and found to be well-implemented:
 ## Appendix A: File Paths Analyzed
 
 ### Rust Signal Processing
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/mod.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/tomography.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/multistatic.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/pose_tracker.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/field_model.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/gesture.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/coherence.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/coherence_gate.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/multiband.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/phase_align.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/adversarial.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/intention.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/longitudinal.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/cross_room.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/temporal_gesture.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-signal/src/ruvsense/attractor_drift.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/mod.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/tomography.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/multistatic.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/pose_tracker.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/field_model.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/gesture.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/coherence.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/coherence_gate.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/multiband.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/phase_align.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/adversarial.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/intention.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/longitudinal.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/cross_room.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/temporal_gesture.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-signal/src/ruvsense/attractor_drift.rs`
 
 ### Rust Neural Network
-- `/workspaces/ruview/v2/crates/wifi-densepose-nn/src/inference.rs`
-- `/workspaces/ruview/v2/crates/wifi-densepose-nn/src/tensor.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-nn/src/inference.rs`
+- `/workspaces/echopose/v2/crates/wifi-densepose-nn/src/tensor.rs`
 
 ### Python Pipeline
-- `/workspaces/ruview/v1/src/core/csi_processor.py`
-- `/workspaces/ruview/v1/src/services/pose_service.py`
-- `/workspaces/ruview/v1/src/api/websocket/connection_manager.py`
-- `/workspaces/ruview/v1/src/api/websocket/pose_stream.py`
-- `/workspaces/ruview/v1/src/sensing/feature_extractor.py`
+- `/workspaces/echopose/v1/src/core/csi_processor.py`
+- `/workspaces/echopose/v1/src/services/pose_service.py`
+- `/workspaces/echopose/v1/src/api/websocket/connection_manager.py`
+- `/workspaces/echopose/v1/src/api/websocket/pose_stream.py`
+- `/workspaces/echopose/v1/src/sensing/feature_extractor.py`
 
 ### ESP32 Firmware
-- `/workspaces/ruview/firmware/esp32-csi-node/main/csi_collector.c`
-- `/workspaces/ruview/firmware/esp32-csi-node/main/edge_processing.c`
-- `/workspaces/ruview/firmware/esp32-csi-node/main/edge_processing.h`
+- `/workspaces/echopose/firmware/esp32-csi-node/main/csi_collector.c`
+- `/workspaces/echopose/firmware/esp32-csi-node/main/edge_processing.c`
+- `/workspaces/echopose/firmware/esp32-csi-node/main/edge_processing.h`
 
 ---
 

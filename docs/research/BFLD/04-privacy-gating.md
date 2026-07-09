@@ -262,7 +262,7 @@ strings bfld_audit.pcap | grep -v "presence\|motion\|person_count" | wc -l
 ### 6.2 Node self-check command
 
 ```bash
-# RuView CLI (planned for P3):
+# EchoPose CLI (planned for P3):
 wifi-densepose bfld audit --duration 60s
 # Output: "60 frames processed. 0 frames with raw_bfi in payload.
 #          0 frames with identity_embedding in payload.

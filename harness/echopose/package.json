@@ -1,0 +1,64 @@
+{
+  "name": "@ruvnet/echopose",
+  "version": "0.2.0",
+  "description": "EchoPose WiFi-sensing operator agent harness — onboard, calibrate, train, and verify camera-free WiFi-CSI sensing, with the project's MEASURED-vs-CLAIMED honesty guardrail enforced. Minted via metaharness (ADR-182).",
+  "type": "module",
+  "bin": {
+    "echopose": "bin/cli.js"
+  },
+  "exports": {
+    ".": "./src/tools.js",
+    "./guardrails": "./src/guardrails.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "skills/",
+    ".claude/",
+    ".harness/",
+    "CLAUDE.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "doctor": "node ./bin/cli.js doctor",
+    "mcp": "node ./bin/cli.js mcp start",
+    "sync-skills": "node ./scripts/sync-skills.mjs",
+    "prepack": "node ./scripts/sync-skills.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "wifi-sensing",
+    "wifi-densepose",
+    "echopose",
+    "csi",
+    "channel-state-information",
+    "pose-estimation",
+    "presence-detection",
+    "esp32",
+    "agent-harness",
+    "metaharness",
+    "mcp",
+    "mcp-server",
+    "claude-code",
+    "ambient-intelligence"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT",
+  "author": "ruvnet",
+  "homepage": "https://github.com/ruvnet/EchoPose#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruvnet/EchoPose.git",
+    "directory": "harness/echopose"
+  },
+  "bugs": {
+    "url": "https://github.com/ruvnet/EchoPose/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
